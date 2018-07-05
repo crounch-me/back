@@ -10,7 +10,7 @@ export class HealthController extends Controller {
   @Get("")
   public handleHealthCheck(): Promise<any> {
     this.setStatus(200)
-    return Promise.resolve({status: "ok"})
+    return Promise.resolve({status: 'ok'})
   }
 
 }
