@@ -9,6 +9,7 @@ class Server {
     const app = express()
     app.use(bodyParser.urlencoded({extended: true}))
     app.use(bodyParser.json())
+
     app.use(Logger.logMiddleware)
 
     const port = process.env.PORT || 3000;

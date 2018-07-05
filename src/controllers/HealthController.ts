@@ -1,5 +1,4 @@
 import { Controller, Get, Route } from "tsoa"
-import Logger from '../Logger'
 
 @Route("_health")
 export class HealthController extends Controller {
