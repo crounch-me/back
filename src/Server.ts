@@ -1,6 +1,7 @@
 import * as bodyParser from "body-parser"
 import * as express from "express"
 import { HealthController } from './controllers/HealthController'
+import Logger from './Logger'
 import { RegisterRoutes } from './routes'
 
 class Server {
@@ -9,8 +10,13 @@ class Server {
     app.use(bodyParser.urlencoded({extended: true}))
     app.use(bodyParser.json())
 
+    app.use(Logger.logMiddleware)
+
+    const port = process.env.PORT || 3000;
+    Logger.debug('Application listening on port ' + port)
+
     RegisterRoutes(app)
-    app.listen(3000)
+    app.listen(port)
   }
 }
 
