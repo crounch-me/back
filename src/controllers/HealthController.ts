@@ -13,4 +13,10 @@ export class HealthController extends Controller {
     return Promise.resolve({status: 'ok'})
   }
 
+  @Get("private")
+  public handlePrivateHealtchCheck(): Promise<any> {
+    this.setStatus(200)
+    return Promise.resolve({status: 'ok'})
+  }
+
 }

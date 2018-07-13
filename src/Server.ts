@@ -1,6 +1,6 @@
 import * as bodyParser from "body-parser"
 import * as express from "express"
-import { HealthController } from './controllers/HealthController'
+import * as Crawler from './Crawler'
 import Logger from './Logger'
 import { RegisterRoutes } from './routes'
 
