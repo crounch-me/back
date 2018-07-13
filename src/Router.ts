@@ -1,7 +1,14 @@
+import * as dotenv from 'dotenv'
 import * as express from "express"
 import * as jwt from 'express-jwt'
 import * as jwksRsa from 'jwks-rsa'
 import { HealthController } from "./controllers/HealthController";
+
+dotenv.config()
+
+if (!process.env.AUTH0_DOMAIN || !process.env.AUTH0_AUDIENCE) {
+  throw new Error('Make sure you have AUTH0_DOMAIN, and AUTH0_AUDIENCE in your .env file');
+}
 
 const checkJwt = jwt({
   // Validate the audience and the issuer.
