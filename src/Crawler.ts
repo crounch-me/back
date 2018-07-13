@@ -1,1 +1,0 @@
-import { HealthController } from './controllers/HealthController'

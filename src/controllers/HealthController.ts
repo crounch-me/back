@@ -1,21 +1,12 @@
-import { Controller, Get, Route } from "tsoa"
+import * as express from 'express'
 
-@Route("_health")
-export class HealthController extends Controller {
+export class HealthController {
   
-  constructor() {
-    super()
+  public handleHealthCheck(req: express.Request, res: express.Response) {
+    res.json({status: 'ok'})
   }
 
-  @Get("")
-  public handleHealthCheck(): Promise<any> {
-    this.setStatus(200)
-    return Promise.resolve({status: 'ok'})
-  }
-
-  @Get("private")
   public handlePrivateHealtchCheck(): Promise<any> {
-    this.setStatus(200)
     return Promise.resolve({status: 'ok'})
   }
 
