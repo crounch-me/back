@@ -1,4 +1,5 @@
 import * as bodyParser from "body-parser"
+import * as cors from 'cors'
 import * as express from "express"
 import Logger from './Logger'
 import { configureRouter } from "./Router";
@@ -7,9 +8,11 @@ class Server {
   constructor() {
     const app = express()
     const router = express.Router()
-    app.use(bodyParser.urlencoded({extended: true}))
+    app.use(bodyParser.urlencoded({ extended: true }))
     app.use(bodyParser.json())
-    
+
+    app.use(cors())
+
     app.use(configureRouter(router))
     app.use(Logger.logMiddleware)
 
