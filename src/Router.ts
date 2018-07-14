@@ -3,6 +3,7 @@ import * as express from "express"
 import * as jwt from 'express-jwt'
 import * as jwksRsa from 'jwks-rsa'
 import { HealthController } from "./controllers/HealthController";
+import Logger from './Logger';
 
 dotenv.config()
 
@@ -23,14 +24,11 @@ const checkJwt = jwt({
     jwksUri: `https://${process.env.AUTH0_DOMAIN}/.well-known/jwks.json`,
     rateLimit: true
   })
-
 });
 
 export function configureRouter(router: express.Router): express.Router {
-  const healthController =  new HealthController()
-  
-  router.get('/_health', healthController.handleHealthCheck)
-  router.get('/_health/private', checkJwt, healthController.handlePrivateHealtchCheck)
+  const healthController = new HealthController()
+  router.use(healthController.basePath, healthController.getRoutes(checkJwt))
 
   return router
 }
