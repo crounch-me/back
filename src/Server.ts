@@ -1,21 +1,24 @@
 import * as bodyParser from "body-parser"
+import * as cors from 'cors'
 import * as express from "express"
-import { HealthController } from './controllers/HealthController'
 import Logger from './Logger'
-import { RegisterRoutes } from './routes'
+import { configureRouter } from "./Router";
 
 class Server {
   constructor() {
     const app = express()
-    app.use(bodyParser.urlencoded({extended: true}))
+    const router = express.Router()
+    app.use(bodyParser.urlencoded({ extended: true }))
     app.use(bodyParser.json())
 
+    app.use(cors())
+
+    app.use(configureRouter(router))
     app.use(Logger.logMiddleware)
 
     const port = process.env.PORT || 3000;
     Logger.debug('Application listening on port ' + port)
 
-    RegisterRoutes(app)
     app.listen(port)
   }
 }
