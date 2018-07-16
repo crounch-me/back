@@ -7,7 +7,7 @@ import Logger from '../Logger';
 export class UserRepository implements UserRecords {
 
   public findOne(email: string): Promise<User> {
-    Logger.debug('Hello there')
+    Logger.debug(`find user with email: ${email}`)
     return new Promise((resolve, reject) => {
       const session = getSession()
       return session
@@ -16,7 +16,7 @@ export class UserRepository implements UserRecords {
           if (result.records.length) {
             resolve(new User(email))
           } else {
-            reject(new NotFoundError)
+            reject(new NotFoundError())
           }
           session.close()
         })
@@ -25,15 +25,16 @@ export class UserRepository implements UserRecords {
   }
 
   public create(user: User): Promise<User> {
+    Logger.debug(`create user ${JSON.stringify(user)}`)
     return new Promise((resolve, reject) => {
       const session = getSession()
       return session
-      .run(`CREATE (n:USER {email: {emailParam}}) RETURN n`, {emailParam: user.email})
-      .then(result => {
-        resolve(user)
-        session.close()
-      })
-      .catch(reject)
+        .run(`MERGE (n:USER {email: {emailParam}})`, { emailParam: user.email })
+        .then(() => {
+          resolve(user)
+          session.close()
+        })
+        .catch(reject)
     })
   }
 

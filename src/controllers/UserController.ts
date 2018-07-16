@@ -25,20 +25,17 @@ export class UserController extends Controller {
   public getUser(req: express.Request, res: express.Response) {
     this.userManagement
       .findOne(req.params.email)
-      .then(user => {
-        res.json(user)
+      .then(res.json)
+      .catch(err => {
+        res.json(err)
       })
   }
 
   public handleConnection(req: express.Request, res: express.Response) {
     this.userManagement
       .create(new User(req.user.email))
-      .then(user => {
-        res.json(user)
-      })
-      .catch(err => {
-        res.json(err)
-      })
+      .then(res.json)
+      .catch(res.json)
   }
 
 }
