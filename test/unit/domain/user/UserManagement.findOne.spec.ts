@@ -26,4 +26,8 @@ describe('UserManagement.findOne', () => {
       })
       .catch(done)
   })
+
+  afterEach(() => {
+    sinonSandbox.restore()
+  })
 })

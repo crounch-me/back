@@ -28,8 +28,6 @@ describe('UserManagement.create', () => {
     userManagement
       .create(defaultUser)
       .then(() => {
-        validateStub.restore()
-        createStub.restore()
         expect(validateStub.calledOnce).to.equals(true)
         done()
       })
@@ -43,11 +41,13 @@ describe('UserManagement.create', () => {
       .create(defaultUser)
       .then(() => {
         expect(createStub.calledOnce).to.equals(true)
-        createStub.restore()
-        validateStub.restore()
         done()
       })
       .catch(done)
+  })
+
+  afterEach(() => {
+    sinonSandbox.restore()
   })
 
 })
