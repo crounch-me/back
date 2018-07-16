@@ -36,6 +36,9 @@ export class UserController extends Controller {
       .then(user => {
         res.json(user)
       })
+      .catch(err => {
+        res.json(err)
+      })
   }
 
 }

@@ -1,3 +1,4 @@
+import { isEmail }  from 'validator'
 
 export class User {
   public constructor(
@@ -7,6 +8,10 @@ export class User {
   }
 
   public validate(): Promise<User> {
-    return Promise.resolve(this)
+    if (isEmail(this.email)) {
+      return Promise.resolve(this)
+    } else {
+      return Promise.reject(`${this.email} is not an email`)
+    }
   }
 }
