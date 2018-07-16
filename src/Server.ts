@@ -1,6 +1,7 @@
 import * as bodyParser from "body-parser"
 import * as cors from 'cors'
 import * as express from "express"
+import { launchDriver } from "./Database";
 import Logger from './Logger'
 import { configureRouter } from "./Router";
 
@@ -18,6 +19,7 @@ class Server {
 
     const port = process.env.PORT || 3000;
     Logger.debug('Application listening on port ' + port)
+    launchDriver()
 
     app.listen(port)
   }

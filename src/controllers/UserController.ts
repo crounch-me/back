@@ -24,7 +24,7 @@ export class UserController extends Controller {
 
   public getUser(req: express.Request, res: express.Response) {
     this.userManagement
-      .getOne(req.params.email)
+      .findOne(req.params.email)
       .then(user => {
         res.json(user)
       })
