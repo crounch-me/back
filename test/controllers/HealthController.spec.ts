@@ -11,6 +11,7 @@ describe('HealthController', () => {
       .get('/_health')
       .then(res => {
         expect(res.status).to.equals(200)
+        expect(res.body).to.deep.equals({status: "ok"})
         done()
       })
       .catch(done)
@@ -21,6 +22,7 @@ describe('HealthController', () => {
       .get('/_health/private')
       .then(res => {
         expect(res.status).to.equals(200)
+        expect(res.body).to.deep.equals({status: "ok private"})
         done()
       })
       .catch(done)
