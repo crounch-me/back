@@ -15,4 +15,14 @@ describe('HealthController', () => {
       })
       .catch(done)
   })
+
+  it('should return ok private status', done => {
+    chai.request(server.app)
+      .get('/_health/private')
+      .then(res => {
+        expect(res.status).to.equals(200)
+        done()
+      })
+      .catch(done)
+  })
 })

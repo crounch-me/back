@@ -1,6 +1,6 @@
 
 export class HealthStatus {
-  public constructor (
+  public constructor(
     public status: string
   ) {
 

@@ -5,7 +5,7 @@ import Logger from './Logger'
 import { configureRouter } from "./Router";
 
 class Server {
-  
+
   public app: express.Express = express()
 
   constructor() {
