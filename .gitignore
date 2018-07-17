@@ -65,3 +65,5 @@ dist
 routes.ts
 package-lock.json
 .env
+
+.DS_Store

@@ -1,5 +1,5 @@
 import * as express from 'express'
-import * as jwt from 'express-jwt'
+import { Auth } from '../Auth';
 import { getOK, getPrivateOK } from '../domain/health/HealthStatus';
 import { Controller } from './Controller';
 
@@ -7,10 +7,11 @@ export class HealthController extends Controller {
 
   public basePath: string = '/_health'
 
-  public getRoutes(checkJwt: jwt.RequestHandler): express.Router {
+  public getRoutes(): express.Router {
+    const jwtCheck = Auth.getInstance().getJwtCheck()
     const router = express.Router()
     router.get('/', this.handleHealthCheck)
-    router.get('/private', checkJwt, this.handlePrivateHealtchCheck)
+    router.get('/private', jwtCheck, this.handlePrivateHealtchCheck)
     return router
   }
 
