@@ -1,8 +1,7 @@
-import * as express from 'express'
+import { Request, Response, Router } from 'express';
 import * as jwt from 'express-jwt'
 import { User } from '../domain/user/User';
 import { UserManagement } from '../domain/user/UserManagement';
-import Logger from '../Logger';
 import { Controller } from './Controller';
 
 export class UserController extends Controller {
@@ -15,14 +14,14 @@ export class UserController extends Controller {
     super()
   }
 
-  public getRoutes(checkJwt: jwt.RequestHandler): express.Router {
-    const router = express.Router()
+  public getRoutes(checkJwt: jwt.RequestHandler): Router {
+    const router = Router()
     router.post('/', checkJwt, this.handleConnection.bind(this))
     router.get('/:email', this.getUser.bind(this))
     return router
   }
 
-  public getUser(req: express.Request, res: express.Response) {
+  public getUser(req: Request, res: Response) {
     this.userManagement
       .findOne(req.params.email)
       .then(res.json)
@@ -31,7 +30,7 @@ export class UserController extends Controller {
       })
   }
 
-  public handleConnection(req: express.Request, res: express.Response) {
+  public handleConnection(req: Request, res: Response) {
     this.userManagement
       .create(new User(req.user.email))
       .then(res.json)

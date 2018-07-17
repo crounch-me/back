@@ -1,12 +1,11 @@
 import * as dotenv from 'dotenv'
-import * as express from "express"
+import { Router } from "express"
 import * as jwt from 'express-jwt'
 import * as jwksRsa from 'jwks-rsa'
 import { HealthController } from "./controllers/HealthController";
 import { UserController } from './controllers/UserController';
 import { UserManagement } from './domain/user/UserManagement';
 import { UserRepository } from './infra/UserRepository';
-import Logger from './Logger';
 
 dotenv.config()
 
@@ -29,7 +28,8 @@ const checkJwt = jwt({
   })
 });
 
-export function configureRouter(router: express.Router): express.Router {
+export function configureRouter(): Router {
+  const router = Router()
   const healthController = new HealthController()
   router.use(healthController.basePath, healthController.getRoutes(checkJwt))
 
