@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { User } from "../../src/domain/user/User";
+import { User } from "../../../src/domain/user/User";
 
 describe('User.validate', () => {
   it('should return user if all is correct', done => {

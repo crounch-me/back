@@ -1,8 +1,8 @@
 import { expect } from 'chai'
 import * as sinon from 'sinon'
-import { User } from "../../src/domain/user/User";
-import { UserManagement } from "../../src/domain/user/UserManagement";
-import { UserRepository } from "../../src/infra/UserRepository";
+import { User } from "../../../src/domain/user/User";
+import { UserManagement } from "../../../src/domain/user/UserManagement";
+import { UserRepository } from "../../../src/infra/UserRepository";
 
 const userRepository: UserRepository = new UserRepository()
 const userManagement: UserManagement = new UserManagement(userRepository)
