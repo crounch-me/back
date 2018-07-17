@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "coverage": "nyc --include=\"src/**/*.ts\" --report-dir=coverage --reporter=text --reporter=html --reporter=lcov mocha --require ts-node/register --recursive \"test/**/*.spec.ts\"",
+    "coveralls": "nyc npm test && nyc report --reporter=text-lcov | coveralls",
     "build": "rimraf dist && tsc",
     "lint": "tslint './src/**/*.ts' './test/**/*.ts'",
     "start": "node dist/src/Server.js",
@@ -24,6 +25,7 @@
     "@types/winston": "^2.3.9",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
+    "coveralls": "^3.0.2",
     "mocha": "^5.2.0",
     "nyc": "^12.0.2",
     "rimraf": "^2.6.2",
