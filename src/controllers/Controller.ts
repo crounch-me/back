@@ -1,7 +1,6 @@
-import { Router } from 'express'
-import * as jwt from 'express-jwt'
+import * as express from 'express'
 
 export abstract class Controller {
   public abstract basePath: string
-  public abstract getRoutes(checkJwt: jwt.RequestHandler): Router;
+  public abstract getRoutes(): express.Router;
 }

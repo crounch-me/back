@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { getOK, getPrivateOK } from '../../../../src/domain/health/HealthStatus';
+import { getOK, getPrivateOK } from '../../src/domain/health/HealthStatus';
 
 describe('HealthStatus', () => {
   describe('getOK', () => {

@@ -6,23 +6,26 @@ import Logger from './Logger'
 import { configureRouter } from "./Router";
 
 class Server {
+
+  public app: express.Express = express()
+
   constructor() {
-    const app = express()
-    app.use(bodyParser.urlencoded({ extended: true }))
-    app.use(bodyParser.json())
+    const router = express.Router()
+    this.app.use(bodyParser.urlencoded({ extended: true }))
+    this.app.use(bodyParser.json())
 
-    app.use(cors())
-    app.use(Logger.logMiddleware)
+    this.app.use(cors())
 
-    app.use(configureRouter())
+    this.app.use(configureRouter(router))
+    this.app.use(Logger.logMiddleware)
 
     const port = process.env.PORT || 3000;
     Logger.debug('Application listening on port ' + port)
     launchDriver()
 
-    app.listen(port)
+    this.app.listen(port)
   }
 }
 
 // tslint:disable:no-unused-expression
-new Server()
+export const server = new Server()

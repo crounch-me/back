@@ -1,5 +1,5 @@
 import { Request, Response, Router } from 'express';
-import * as jwt from 'express-jwt'
+import { Auth } from '../Auth';
 import { User } from '../domain/user/User';
 import { UserManagement } from '../domain/user/UserManagement';
 import { Controller } from './Controller';
@@ -14,9 +14,10 @@ export class UserController extends Controller {
     super()
   }
 
-  public getRoutes(checkJwt: jwt.RequestHandler): Router {
+  public getRoutes(): Router {
+    const jwtCheck = Auth.getInstance().getJwtCheck()
     const router = Router()
-    router.post('/', checkJwt, this.handleConnection.bind(this))
+    router.post('/', jwtCheck, this.handleConnection.bind(this))
     router.get('/:email', this.getUser.bind(this))
     return router
   }

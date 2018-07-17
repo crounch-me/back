@@ -2,7 +2,7 @@ import { Request, Response } from 'express'
 import { Logger as WinstonLogger, LoggerInstance, transports } from 'winston'
 
 export default class Logger {
-  
+
   public static debug(text: string) {
     Logger.winstonLogger.debug(text);
   }

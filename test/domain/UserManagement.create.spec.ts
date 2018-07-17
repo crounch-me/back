@@ -1,12 +1,12 @@
 import { expect } from 'chai'
-import * as sinon from 'ts-sinon'
-import { User } from "../../../../src/domain/user/User";
-import { UserManagement } from "../../../../src/domain/user/UserManagement";
-import { UserRepository } from "../../../../src/infra/UserRepository";
+import * as sinon from 'sinon'
+import { User } from "../../src/domain/user/User";
+import { UserManagement } from "../../src/domain/user/UserManagement";
+import { UserRepository } from "../../src/infra/UserRepository";
 
 const userRepository: UserRepository = new UserRepository()
 const userManagement: UserManagement = new UserManagement(userRepository)
-const sinonSandbox = sinon.default.sandbox.create()
+const sinonSandbox = sinon.createSandbox()
 const defaultUser = new User("test@test.com")
 
 describe('UserManagement.create', () => {
