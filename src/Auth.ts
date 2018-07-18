@@ -10,10 +10,10 @@ if (!process.env.AUTH0_DOMAIN || !process.env.AUTH0_AUDIENCE) {
 
 export class Auth {
   public static getInstance(): Auth {
-    return this.authInstance
+    return this.authInstance || (this.authInstance = new Auth())
   }
   
-  private static authInstance = new Auth()
+  private static authInstance: Auth
 
   public getJwtCheck(): jwt.RequestHandler {
     return jwt({

@@ -11,15 +11,18 @@ if (!process.env.DB_HOST || !process.env.DB_USER || !process.env.DB_PASSWORD) {
 
 let driver: Driver
 
-export function launchDriver() {
-  driver = neo4j.default.driver(`bolt://${process.env.DB_HOST}`, neo4j.default.auth.basic(`${process.env.DB_USER}`, `${process.env.DB_PASSWORD}`))
-  driver.onError = (error: Neo4jError) => {
-    throw error
-  }
-  
-  driver.onCompleted = () => {
-    Logger.debug('Driver connected')
-  }
+export function launchDriver(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    driver = neo4j.default.driver(`bolt://${process.env.DB_HOST}`, neo4j.default.auth.basic(`${process.env.DB_USER}`, `${process.env.DB_PASSWORD}`))
+    driver.onError = (error: Neo4jError) => {
+      reject(error)
+    }
+
+    driver.onCompleted = () => {
+      Logger.debug('Driver connected')
+      resolve()
+    }
+  })
 }
 
 export function getSession(): Session {

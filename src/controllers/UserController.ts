@@ -2,6 +2,7 @@ import { Request, Response, Router } from 'express';
 import { Auth } from '../Auth';
 import { User } from '../domain/user/User';
 import { UserManagement } from '../domain/user/UserManagement';
+import Logger from '../Logger';
 import { Controller } from './Controller';
 
 export class UserController extends Controller {
@@ -17,15 +18,17 @@ export class UserController extends Controller {
   public getRoutes(): Router {
     const jwtCheck = Auth.getInstance().getJwtCheck()
     const router = Router()
+    router.get('/:email', this.get.bind(this))
     router.post('/', jwtCheck, this.handleConnection.bind(this))
-    router.get('/:email', this.getUser.bind(this))
     return router
   }
 
-  public getUser(req: Request, res: Response) {
+  public get(req: Request, res: Response) {
     this.userManagement
       .findOne(req.params.email)
-      .then(res.json)
+      .then(result => {
+        res.json(result)
+      })
       .catch(err => {
         res.json(err)
       })
@@ -34,8 +37,12 @@ export class UserController extends Controller {
   public handleConnection(req: Request, res: Response) {
     this.userManagement
       .create(new User(req.user.email))
-      .then(res.json)
-      .catch(res.json)
+      .then(result => {
+        res.json(result)
+      })
+      .catch(err => {
+        res.json(err)
+      })
   }
 
 }
