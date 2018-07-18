@@ -4,9 +4,9 @@ WORKDIR /usr/src/app
 
 COPY package*.json ./
 
-RUN npm install --production
+RUN npm i --production
 
-COPY ./dist/src .
+COPY ./dist/src ./
 
 EXPOSE 3000
 
