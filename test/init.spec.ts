@@ -6,11 +6,13 @@ sinon.stub(Auth.getInstance(), "getJwtCheck").returns((req: Request, res: Respon
   next()
 })
 import { server } from '../src/Server'
+import { emptyDatabase } from './util';
 
 describe('Launch server', () => {
   it('should launch server', done => {
     server
       .launch()
+      .then(() => emptyDatabase())
       .then(() => done())
   })
 })

@@ -9,7 +9,7 @@
     "build": "rimraf dist && tsc",
     "lint": "tslint './src/**/*.ts' './test/**/*.ts'",
     "start": "node dist/src/index.js",
-    "test": "mocha --file test/index.spec.ts --require ts-node/register --recursive \"test/**/*.spec.ts\" --exit"
+    "test": "mocha --file test/init.spec.ts --require ts-node/register --recursive \"test/**/*.spec.ts\" --exit"
   },
   "author": "Sehsyha",
   "license": "MIT",
