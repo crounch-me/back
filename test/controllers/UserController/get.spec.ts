@@ -8,9 +8,9 @@ chai.use(chaiHttp)
 const expect = chai.expect
 
 describe('UserController', () => {
-  before(() => {
+  before(done => {
     const userRepository = new UserRepository()
-    userRepository.create(new User("test@test.com"))
+    userRepository.create(new User("test@test.com")).then(() => done())
   })
 
   describe('get', () => {
