@@ -5,3 +5,4 @@ script:
   - npm run coveralls
   - npm run build
   - docker build -t sehsyha/crounch-back .
+  - docker push sehsyha/crounch-back
