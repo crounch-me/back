@@ -5,6 +5,6 @@ script:
   - npm run coveralls
   - npm run build
   - docker build -t crounch-back .
-  - docker tag crounch-back DOCKER_USER/crounch-back
-  - docker login -u DOCKER_USER -p DOCKER_PASSWORD
+  - docker tag crounch-back $DOCKER_USER/crounch-back
+  - docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
   - docker push sehsyha/crounch-back
