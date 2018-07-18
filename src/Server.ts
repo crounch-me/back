@@ -11,6 +11,7 @@ class Server {
 
   constructor() {
     const router = express.Router()
+    
     this.app.use(bodyParser.urlencoded({ extended: true }))
     this.app.use(bodyParser.json())
 
