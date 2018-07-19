@@ -4,7 +4,7 @@ WORKDIR /usr/src/app
 
 COPY package*.json ./
 
-RUN npm i --production
+RUN npm i --production --silent
 
 COPY ./dist/src ./
 
