@@ -13,7 +13,7 @@ before_deploy:
 deploy:
   provider: script
   script: 
-    - docker tag crounch-back $DOCKER_USER/crounch-back
+    - docker tag crounch-back $DOCKER_USER/crounch-back:$(awk '/version/{gsub(/("|",)/,"",$2);print $2};' package.json)
     - docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
     - docker push sehsyha/crounch-back
     - ssh -oStrictHostKeyChecking=no -p $DEPLOY_PORT $DEPLOY_USER@$DEPLOY_HOST $DEPLOY_PATH/back.sh
