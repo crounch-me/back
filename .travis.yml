@@ -2,9 +2,7 @@ language: node_js
 node_js:
 - '7'
 addons:
-  apt:
-    packages:
-    - sshpass
+  ssh_known_hosts: $DEPLOY_HOST
 script:
 - npm run coveralls
 - npm run build
@@ -12,9 +10,15 @@ script:
 - docker tag crounch-back $DOCKER_USER/crounch-back
 - docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
 - docker push sehsyha/crounch-back
+before_deploy:
+- openssl aes-256-cbc -K $encrypted_55334bb6dd75_key -iv $encrypted_55334bb6dd75_iv   -in deploy_rsa.enc -out deploy_rsa -d
+- eval "$(ssh-agent -s)"
+- chmod 600 /tmp/deploy_rsa
+- ssh-add /tmp/deploy_rsa
+deploy:
+- ssh -p $DEPLOY_PORT $DEPLOY_USER@$DEPLOY_HOST $DEPLOY_PATH/back.sh
 after_success:
-- export SSHPASS=$DEPLOY_PASS
-- sshpass -e ssh -p $DEPLOY_PORT $DEPLOY_USER@$DEPLOY_HOST $DEPLOY_PATH/back.sh
+- echo "Deployed"
 env:
   global:
   - secure: aMysjxzaYXWiOsukwK7r8Dck34of5cE52B/YaZLH29gpXas5UsKJ4zguM9wLmM+/gFianVCzpo+LLcE3XSjzg45tJ7BJJmsrQphOkBUfV1W9oQ3PBTOIsn4K7o94XZL5TGzfZ4fJXYDAI7Vaz9Wr9gto9kCDJ9PaaprZ00cIpb5pnOl2Ftc6n3RbQ2YlGnObNK6JpP01lwcoax7EIPC+QSB4Ygm6u/EsiNohisRSmngFWs4yNWl1q9/3uGJ1kSl3NuAGVObUAgt74ChIBIMAR0JYWPBwb5x+tUxbOqfunRE8Fvwf5N6DFaR7y8qsW0H8Po6fI7+eu6B8+qLHVU09a1yWth79hP2REOkRX5ai6INlOh5P5hmYxFg7E6aWg6vfYuFD5gmz+q/wWUEzqEuxgiGtnNBbTA8x9qxvky/0ozO9eElrdma4bBASaonjxzU5j4NeEzXyU+67JlFS6n6pAQwuZk28UWG+IHDlUnnGrmAwsfcm91WJB1vFxJ170dD5draA0G+3+D9bhP0Ca5G1HtT8HMBMQycBpyGQ5L39ve+bSmbyqXslohgWkuCsOpAYR5mAa29WHrSU8rTSfkps5UaO5fzR1z0puynMAPrSodPjNIgeXjS/UbaGINPkuFLOvAnqKxLEVxxK9vbaSD6uLdPX1j8OBRfVyQ/7u2k87EA=
