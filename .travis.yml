@@ -18,7 +18,8 @@ before_deploy:
 deploy:
   provider: script
   script: ssh -p $DEPLOY_PORT $DEPLOY_USER@$DEPLOY_HOST $DEPLOY_PATH/back.sh
-  all_branches: true
+  on:
+    all_branches: true
 after_success:
 - echo "Deployed"
 env:
