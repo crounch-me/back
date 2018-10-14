@@ -3,6 +3,7 @@ node_js:
   - '7'
 script:
   - docker run -d --publish=7474:7474 --publish=7687:7687 --volume=$HOME/neo4j/data:/data --env NEO4J_AUTH=none neo4j
+  - sleep 10
   - npm run coveralls
   - npm run build
   - export VERSION_NUMBER=$(awk '/version/{gsub(/("|",)/,"",$2);print $2};' package.json)

@@ -20,7 +20,10 @@ export class UserRepository implements UserRecords {
           }
           session.close()
         })
-        .catch(reject)
+        .catch(err => {
+          session.close()
+          reject(err)
+        })
     })
   }
 
@@ -34,7 +37,10 @@ export class UserRepository implements UserRecords {
           resolve(user)
           session.close()
         })
-        .catch(reject)
+        .catch(err => {
+          session.close()
+          reject(err)
+        })
     })
   }
 
