@@ -9,6 +9,7 @@
     "build": "rimraf dist && tsc",
     "lint": "tslint './src/**/*.ts' './test/**/*.ts'",
     "start": "node dist/src/Server.js",
+    "start:prod": "node ./Server.js",
     "test": "mocha --file test/index.spec.ts --require ts-node/register test/**/*.spec.ts --exit"
   },
   "author": "Sehsyha",
