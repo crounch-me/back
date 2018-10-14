@@ -1,6 +1,6 @@
 {
-  "name": "grocery-back",
-  "version": "0.0.1",
+  "name": "crounch-back",
+  "version": "0.1.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -8,8 +8,9 @@
     "coveralls": "nyc npm test && nyc report --reporter=text-lcov | coveralls",
     "build": "rimraf dist && tsc",
     "lint": "tslint './src/**/*.ts' './test/**/*.ts'",
-    "start": "node dist/src/index.js",
-    "test": "mocha --timeout 5000 --file test/init.spec.ts --require ts-node/register --recursive \"test/**/*.spec.ts\" --exit"
+    "start": "node dist/src/Server.js",
+    "start:prod": "node ./Server.js",
+    "test": "mocha --timeout 10000 --file test/init.spec.ts --require ts-node/register --recursive \"test/**/*.spec.ts\" --exit"
   },
   "author": "Sehsyha",
   "license": "MIT",
