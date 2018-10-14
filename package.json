@@ -8,8 +8,8 @@
     "coveralls": "nyc npm test && nyc report --reporter=text-lcov | coveralls",
     "build": "rimraf dist && tsc",
     "lint": "tslint './src/**/*.ts' './test/**/*.ts'",
-    "start": "node dist/src/Server.js",
-    "start:prod": "node ./Server.js",
+    "start": "node dist/src/index.js",
+    "start:prod": "node ./index.js",
     "test": "mocha --timeout 10000 --file test/init.spec.ts --require ts-node/register --recursive \"test/**/*.spec.ts\" --exit"
   },
   "author": "Sehsyha",
