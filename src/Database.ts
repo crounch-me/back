@@ -14,8 +14,9 @@ let driver: Driver
 export function launchDriver(): Promise<void> {
   return new Promise((resolve, reject) => {
     driver = neo4j.default.driver(`bolt://${process.env.DB_HOST}`, neo4j.default.auth.basic(`${process.env.DB_USER}`, `${process.env.DB_PASSWORD}`))
-    driver.onError = (error: Neo4jError) => {
-      reject(error)
+    driver.onError = (err: Neo4jError) => {
+      Logger.error(`Error occured while connecting to database: ${err}`)
+      reject(err)
     }
 
     driver.onCompleted = () => {
