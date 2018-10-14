@@ -1,12 +1,19 @@
+import * as dotenv from 'dotenv'
 import * as jwt from 'express-jwt'
 import * as jwksRsa from 'jwks-rsa'
 
+dotenv.config()
+
+if (!process.env.AUTH0_DOMAIN || !process.env.AUTH0_AUDIENCE) {
+  throw new Error('Make sure you have AUTH0_DOMAIN, and AUTH0_AUDIENCE in your .env file');
+}
+
 export class Auth {
   public static getInstance(): Auth {
-    return this.authInstance
+    return this.authInstance || (this.authInstance = new Auth())
   }
   
-  private static authInstance = new Auth()
+  private static authInstance: Auth
 
   public getJwtCheck(): jwt.RequestHandler {
     return jwt({
