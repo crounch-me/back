@@ -3,7 +3,6 @@ import { BAD_REQUEST } from 'http-status-codes'
 import { Auth } from '../Auth';
 import { User } from '../domain/user/User';
 import { UserManagement } from '../domain/user/UserManagement';
-import Logger from '../Logger';
 import { Controller } from './Controller';
 
 export class UserController extends Controller {
