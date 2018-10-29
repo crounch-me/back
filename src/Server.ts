@@ -32,7 +32,7 @@ class Server {
         .then(() => {
           const port = process.env.PORT || 3000;
           this.app.listen(port, () => {
-            Logger.debug('Application listening on port ' + port)
+            Logger.debug('application listening on port ' + port)
             resolve()
           })
         })

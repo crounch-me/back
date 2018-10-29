@@ -1,4 +1,6 @@
+import { validate } from 'class-validator'
 import { Request, Response, Router } from 'express';
+import { BAD_REQUEST } from 'http-status-codes'
 import { Auth } from '../Auth';
 import { User } from '../domain/user/User';
 import { UserManagement } from '../domain/user/UserManagement';
@@ -35,13 +37,12 @@ export class UserController extends Controller {
   }
 
   public handleConnection(req: Request, res: Response) {
-    this.userManagement
-      .create(new User(req.user.email))
+    this.userManagement.create(new User(req.user.email))
       .then(result => {
         res.json(result)
       })
-      .catch(err => {
-        res.json(err)
+      .catch(errors => {
+        res.status(BAD_REQUEST).json(errors)
       })
   }
 

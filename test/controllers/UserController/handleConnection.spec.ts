@@ -7,7 +7,7 @@ const expect = chai.expect
 
 describe('UserController', () => {
   describe('handleConnection', () => {
-    it('should handleConnection and create a new user', done => {
+    it('should create a new user', done => {
       chai.request(server.app)
         .post('/users')
         .then(result => {
