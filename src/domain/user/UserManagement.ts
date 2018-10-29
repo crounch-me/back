@@ -1,5 +1,7 @@
-import { User } from "./User";
-import { UserRecords } from "./UserRecords";
+import { validate } from 'class-validator';
+import Logger from '../../Logger';
+import { User } from './User';
+import { UserRecords } from './UserRecords';
 
 export class UserManagement {
 
@@ -13,9 +15,16 @@ export class UserManagement {
   }
 
   public create(user: User): Promise<User> {
-    return user
-      .validate()
-      .then(validatedUser => this.userRecords.create(validatedUser))
+    Logger.debug(`validate user ${JSON.stringify(user)}`)
+
+    return validate(user, { validationError: { target: false } })
+      .then(err => {
+        if (err.length > 0) {
+          Logger.debug(`validation errors ${JSON.stringify(err)}`)
+          return Promise.reject(err)
+        }
+        return this.userRecords.create(user)
+      })
   }
 
 }

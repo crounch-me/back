@@ -1,16 +1,13 @@
-import { isEmail }  from 'validator'
+import { IsEmail } from 'class-validator'
 
 export class User {
-  public constructor(
-    public email: string
-  ) {
-  }
 
-  public validate(): Promise<User> {
-    if (isEmail(this.email)) {
-      return Promise.resolve(this)
-    } else {
-      return Promise.reject(`${this.email} is not an email`)
-    }
+  @IsEmail()
+  public email: string
+
+  public constructor(
+    email:string
+  ) {
+    this.email = email
   }
 }
