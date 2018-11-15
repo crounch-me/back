@@ -15,7 +15,7 @@ describe('Launch server', () => {
     server
       .launch()
       .then(() => emptyDatabase())
-      .then(() => done())
+      .then(done)
       .catch(done)
-  })
+  }) 
 })

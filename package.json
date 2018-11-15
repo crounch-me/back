@@ -1,10 +1,11 @@
 {
   "name": "crounch-back",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "build": "rimraf dist && tsc",
+    "clean": "rimraf dist && rimraf node_modules",
     "coverage": "nyc --include=\"src/**/*.ts\" --report-dir=coverage --reporter=text --reporter=html --reporter=lcov mocha --require ts-node/register --recursive \"test/**/*.spec.ts\"",
     "coveralls": "nyc npm test && nyc report --reporter=text-lcov | coveralls",
     "database": "docker run -d --publish=7474:7474 --publish=7687:7687 --volume=$HOME/neo4j/data:/data --env NEO4J_AUTH=none neo4j",
