@@ -12,7 +12,7 @@ describe('HealthController', () => {
         .get('/_health/private')
         .then(res => {
           expect(res.status).to.equals(200)
-          expect(res.body).to.deep.equals({ status: "ok private" })
+          expect(res.body).to.deep.equals({ status: "ok private", version: process.env.npm_package_version })
           done()
         })
         .catch(done)

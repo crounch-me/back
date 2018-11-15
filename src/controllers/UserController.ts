@@ -1,4 +1,3 @@
-import { validate } from 'class-validator'
 import { Request, Response, Router } from 'express';
 import { BAD_REQUEST } from 'http-status-codes'
 import { Auth } from '../Auth';
