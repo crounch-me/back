@@ -12,4 +12,4 @@ run:
 
 .PHONY: test
 test:
-	go test -v ./handler
+	go test -v ./ ./handler ./model ./handler
