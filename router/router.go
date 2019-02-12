@@ -10,7 +10,8 @@ import (
 const (
 	healthPath = "/health"
 
-	userPath = "/users"
+	userPath  = "/users"
+	loginPath = "/users/login"
 )
 
 func Start() {
@@ -35,4 +36,5 @@ func configureRoutes(r *gin.Engine, hc *handler.Context) {
 
 	// User routes
 	r.POST(userPath, hc.Signup)
+	r.POST(loginPath, hc.Login)
 }

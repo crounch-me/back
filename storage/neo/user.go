@@ -1,7 +1,9 @@
 package neo
 
 import (
+	"errors"
 	"fmt"
+	"math/rand"
 
 	"golang.org/x/crypto/bcrypt"
 
@@ -37,7 +39,7 @@ func NewNeoStorage() storage.Storage {
 }
 
 func (ns *NeoStorage) CreateUser(u *model.User) error {
-	log.Info("Creating user")
+	log.WithField("email", u.Email).Info("Creating user")
 	session, err := ns.driver.Session(neo4j.AccessModeWrite)
 	if err != nil {
 		return err
@@ -69,4 +71,84 @@ func (ns *NeoStorage) CreateUser(u *model.User) error {
 	}
 
 	return nil
+}
+
+func (ns *NeoStorage) CreateAuthorization(u *model.User) (*model.Authorization, error) {
+	log.WithField("email", u.Email).Info("Creating authorization for user")
+
+	session, err := ns.driver.Session(neo4j.AccessModeWrite)
+	if err != nil {
+		return nil, err
+	}
+
+	query := `
+		MATCH (u: USER {email: $email})
+		RETURN u.password, u.id
+	`
+
+	result, err := session.Run(query, map[string]interface{}{
+		"email": u.Email,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	isResult := result.Next()
+	if err := result.Err(); err != nil {
+		return nil, err
+	}
+
+	if !isResult {
+		return nil, errors.New("user not found")
+	}
+
+	hashedPassword := result.Record().GetByIndex(0).(string)
+	u.ID = result.Record().GetByIndex(1).(string)
+	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(u.Password))
+	if err != nil {
+		return nil, errors.New("wrong password")
+	}
+
+	query = `
+		MATCH (u: USER {id: $id})
+		CREATE (a: AUTHORIZATION {token: $token})
+		CREATE (u)-[:IS_AUTHORIZED_BY]->(a)
+		RETURN ID(a)
+	`
+
+	token := generateToken(42)
+
+	result, err = session.Run(query, map[string]interface{}{
+		"id":    u.ID,
+		"token": token,
+	})
+
+	isResult = result.Next()
+	if err := result.Err(); err != nil {
+		return nil, err
+	}
+
+	if !isResult {
+		return nil, errors.New("error occured while creating authorization")
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	authorization := &model.Authorization{
+		AccessToken: token,
+	}
+
+	return authorization, nil
+}
+
+const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+func generateToken(size int) string {
+	b := make([]byte, size)
+	for i := range b {
+		b[i] = letterBytes[rand.Intn(len(letterBytes))]
+	}
+	return string(b)
 }

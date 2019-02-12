@@ -19,12 +19,30 @@ func (hc *Context) Signup(c *gin.Context) {
 
 	err := hc.Storage.CreateUser(u)
 	if err != nil {
-		log.Fatal(err)
+		log.Error(err)
 		c.AbortWithStatus(500)
 		return
 	}
 
 	c.JSON(http.StatusCreated, u)
+}
+
+func (hc *Context) Login(c *gin.Context) {
+	u := &model.User{}
+
+	if UnmarshalPayload(c, u) {
+		return
+	}
+
+	authorization, err := hc.Storage.CreateAuthorization(u)
+
+	if err != nil {
+		log.Error(err)
+		c.AbortWithStatus(500)
+		return
+	}
+
+	c.JSON(http.StatusCreated, authorization)
 }
 
 func UnmarshalPayload(c *gin.Context, i interface{}) bool {

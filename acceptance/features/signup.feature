@@ -9,4 +9,5 @@ Feature: Sign up
         }
       """
     When I send a "POST" request on "/users"
-    Then "$.email" has string value "test@test.com"
+    Then the status code is 201
+    And "$.email" has string value "test@test.com"
