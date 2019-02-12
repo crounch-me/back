@@ -11,7 +11,6 @@ import (
 
 type healthTestCases struct {
 	description        string
-	requestHTTPMethod  string
 	expectedStatusCode int
 }
 
@@ -19,7 +18,6 @@ func TestHealth(t *testing.T) {
 	testCases := []healthTestCases{
 		{
 			description:        "Test GET should succeed",
-			requestHTTPMethod:  http.MethodGet,
 			expectedStatusCode: http.StatusOK,
 		},
 	}
@@ -27,7 +25,7 @@ func TestHealth(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
 			w := httptest.NewRecorder()
-			req, _ := http.NewRequest(tc.requestHTTPMethod, "/health", nil)
+			req, _ := http.NewRequest(http.MethodGet, "/health", nil)
 
 			hc := NewContext()
 			gin.SetMode(gin.TestMode)

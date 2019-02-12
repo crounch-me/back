@@ -2,6 +2,18 @@
 
 
 [[projects]]
+  digest = "1:142cf0c63cd0fc3cc0fdd26854cb028bb33d569f1b80de05f353cd45850e688b"
+  name = "github.com/DATA-DOG/godog"
+  packages = [
+    ".",
+    "colors",
+    "gherkin",
+  ]
+  pruneopts = "UT"
+  revision = "75562b12d67aa758aba65b0072c763bccf7e9b00"
+  version = "v0.7.9"
+
+[[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
@@ -79,12 +91,44 @@
   version = "1.0.1"
 
 [[projects]]
+  digest = "1:60f1099877ce4970e71f6a7334f1c453fd95102902895c119a8189b88e25bf54"
+  name = "github.com/neo4j-drivers/gobolt"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "385098f4a22c282e51f0d83a63a1f97256ef897d"
+  version = "v1.7.2"
+
+[[projects]]
+  digest = "1:f58514978026f31b98c85b1028e5ab2c8da27515f0dfbb0493582a9d23def1b5"
+  name = "github.com/neo4j/neo4j-go-driver"
+  packages = ["neo4j"]
+  pruneopts = "UT"
+  revision = "c0db4cd4bff6cf34d5cfc592618034fa79996827"
+  version = "v1.7.2"
+
+[[projects]]
+  branch = "master"
+  digest = "1:4f971e961cc101712d18dbbd532813bbcd08c9984acceb55dff3fb86ed62ed5f"
+  name = "github.com/oliveagle/jsonpath"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "2e52cf6e685269ed8aefec6390f3cac3ef74e730"
+
+[[projects]]
   digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
   name = "github.com/pmezard/go-difflib"
   packages = ["difflib"]
   pruneopts = "UT"
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
   version = "v1.0.0"
+
+[[projects]]
+  digest = "1:274f67cb6fed9588ea2521ecdac05a6d62a8c51c074c1fccc6a49a40ba80e925"
+  name = "github.com/satori/go.uuid"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "f58768cc1a7a7e77a3bd49e98cdd21419399b6a3"
+  version = "v1.2.0"
 
 [[projects]]
   digest = "1:87c2e02fb01c27060ccc5ba7c5a407cc91147726f8f40b70cceeedbc52b1f3a8"
@@ -95,9 +139,20 @@
   version = "v1.3.0"
 
 [[projects]]
-  digest = "1:972c2427413d41a1e06ca4897e8528e5a1622894050e2f527b38ddf0f343f759"
+  digest = "1:ac83cf90d08b63ad5f7e020ef480d319ae890c208f8524622a2f3136e2686b02"
+  name = "github.com/stretchr/objx"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "477a77ecc69700c7cdeb1fa9e129548e1c1c393c"
+  version = "v0.1.1"
+
+[[projects]]
+  digest = "1:0bcc464dabcfad5393daf87c3f8142911d0f6c52569b837e91a1c15e890265f3"
   name = "github.com/stretchr/testify"
-  packages = ["assert"]
+  packages = [
+    "assert",
+    "mock",
+  ]
   pruneopts = "UT"
   revision = "ffdc059bfe9ce6a4e144ba849dbedead332c6053"
   version = "v1.3.0"
@@ -149,9 +204,15 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/DATA-DOG/godog",
+    "github.com/DATA-DOG/godog/gherkin",
     "github.com/gin-gonic/gin",
+    "github.com/neo4j/neo4j-go-driver/neo4j",
+    "github.com/oliveagle/jsonpath",
+    "github.com/satori/go.uuid",
     "github.com/sirupsen/logrus",
     "github.com/stretchr/testify/assert",
+    "github.com/stretchr/testify/mock",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

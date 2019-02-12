@@ -9,6 +9,8 @@ import (
 
 const (
 	healthPath = "/health"
+
+	userPath = "/users"
 )
 
 func Start() {
@@ -21,7 +23,7 @@ func Start() {
 	configureRoutes(r, hc)
 
 	log.Info("Launching awesome server")
-	err := r.Run()
+	err := r.Run(":3000")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -32,4 +34,5 @@ func configureRoutes(r *gin.Engine, hc *handler.Context) {
 	r.GET(healthPath, hc.Health)
 
 	// User routes
+	r.POST(userPath, hc.Signup)
 }

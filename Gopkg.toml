@@ -40,3 +40,15 @@
 [[constraint]]
   name = "github.com/sirupsen/logrus"
   version = "1.3.0"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/oliveagle/jsonpath"
+
+[[constraint]]
+  name = "github.com/DATA-DOG/godog"
+  version = "0.7.9"
+
+[[constraint]]
+  name = "github.com/neo4j/neo4j-go-driver"
+  version = "1.7.2"
