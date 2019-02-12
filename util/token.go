@@ -6,13 +6,17 @@ import (
 
 const (
 	tokenLength = 42
-	letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	charset     = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 )
 
 func GenerateToken() string {
+	return RandStringRunes(tokenLength)
+}
+
+func RandStringRunes(length int) string {
 	b := make([]byte, tokenLength)
 	for i := range b {
-		b[i] = letterBytes[rand.Intn(len(letterBytes))]
+		b[i] = charset[rand.Intn(len(charset))]
 	}
 	return string(b)
 }

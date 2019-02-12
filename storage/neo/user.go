@@ -8,7 +8,6 @@ import (
 
 	uuid "github.com/satori/go.uuid"
 
-	"github.com/Sehsyha/crounch-back/errorcode"
 	"github.com/Sehsyha/crounch-back/model"
 	"github.com/Sehsyha/crounch-back/storage"
 	"github.com/Sehsyha/crounch-back/util"
@@ -57,6 +56,7 @@ func (ns *NeoStorage) CreateUser(u *model.User) error {
 
 	query := `
 		CREATE (u: USER {email: $email, id: $id, password: $password})
+		RETURN u.id
 	`
 
 	result, err := session.Run(query, map[string]interface{}{
@@ -66,6 +66,15 @@ func (ns *NeoStorage) CreateUser(u *model.User) error {
 	})
 	if err != nil {
 		return err
+	}
+
+	isResult := result.Next()
+	if err = result.Err(); err != nil {
+		return err
+	}
+
+	if !isResult {
+		return model.NewDatabaseError(model.ErrCreation, nil)
 	}
 
 	for result.Next() {
@@ -101,7 +110,7 @@ func (ns *NeoStorage) GetUserByEmail(email string) (*model.User, error) {
 	}
 
 	if !isResult {
-		return nil, errors.New(string(errorcode.NotFound))
+		return nil, model.NewDatabaseError(model.ErrNotFound, nil)
 	}
 
 	u := &model.User{
@@ -129,7 +138,7 @@ func (ns *NeoStorage) CreateAuthorization(u *model.User) (*model.Authorization, 
 
 	err = bcrypt.CompareHashAndPassword([]byte(foundUser.Password), []byte(u.Password))
 	if err != nil {
-		return nil, errors.New("wrong password")
+		return nil, model.NewDatabaseError(model.ErrWrongPassword, nil)
 	}
 
 	query := `

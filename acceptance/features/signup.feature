@@ -4,19 +4,19 @@ Feature: Sign up
     Given I use this body
       """
         {
-          "email": "test@test.com",
+          "email": "signup@test.com",
           "password": "test"
         }
       """
     When I send a "POST" request on "/users"
     Then the status code is 201
-    And "$.email" has string value "test@test.com"
+    And "$.email" has string value "signup@test.com"
 
   Scenario: KO - Duplicated user
     Given I use this body
       """
         {
-          "email": "test@test.com",
+          "email": "duplicated@test.com",
           "password": "test"
         }
       """

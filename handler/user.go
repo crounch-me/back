@@ -5,8 +5,6 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/Sehsyha/crounch-back/errorcode"
-
 	"github.com/Sehsyha/crounch-back/model"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -20,14 +18,29 @@ func (hc *Context) Signup(c *gin.Context) {
 	}
 
 	_, err := hc.Storage.GetUserByEmail(u.Email)
-	if err != nil && err.Error() != string(errorcode.NotFound) {
-		log.Error(err)
-		c.AbortWithStatus(500)
-		return
+	if err != nil {
+		if databaseError, ok := err.(*model.DatabaseError); ok {
+			switch databaseError.Type {
+			case model.ErrNotFound:
+				break
+			default:
+				log.Error(err)
+				c.AbortWithStatus(500)
+				return
+			}
+		} else {
+			log.Error(err)
+			c.AbortWithStatus(500)
+			return
+		}
 	}
 
 	if err == nil {
-		c.AbortWithStatus(409)
+		userError := &model.Error{
+			Code:        "duplicate",
+			Description: "User with this email already exists",
+		}
+		c.AbortWithStatusJSON(409, userError)
 		return
 	}
 

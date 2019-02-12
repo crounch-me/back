@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/Sehsyha/crounch-back/model"
 	storagemock "github.com/Sehsyha/crounch-back/storage/mock"
 
 	"github.com/gin-gonic/gin"
@@ -16,18 +17,24 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-type userSignupTestCases struct {
-	createUserStorageMock createUserStorageMock
-	description           string
-	expectedStatusCode    int
-	requestBody           string
-	expectedBody          string
-	expectedError         string
-}
-
 type createUserStorageMock struct {
 	isCalled bool
 	err      error
+}
+
+type getUserStorageMock struct {
+	result *model.User
+	err    error
+}
+
+type userSignupTestCases struct {
+	createUserStorageMock createUserStorageMock
+	getUserStorageMock    *getUserStorageMock
+	description           string
+	expectedStatusCode    int
+	requestBody           string
+	expectedBody          []Body
+	expectedError         string
 }
 
 func TestSignup(t *testing.T) {
@@ -40,14 +47,16 @@ func TestSignup(t *testing.T) {
 	testCases := []userSignupTestCases{
 		{
 			createUserStorageMock: createUserStorageMock{isCalled: true, err: nil},
+			getUserStorageMock:    &getUserStorageMock{result: nil, err: model.NewDatabaseError(model.ErrNotFound, nil)},
 			description:           "OK - Should create user",
 			expectedStatusCode:    http.StatusCreated,
 			requestBody:           validBody,
-			expectedBody: `
+			expectedBody: []Body{
 				{
-					"email": "test@test.com"
-				}
-			`,
+					Path: "$.email",
+					Data: "test@test.com",
+				},
+			},
 		},
 		{
 			createUserStorageMock: createUserStorageMock{isCalled: false, err: nil},
@@ -72,6 +81,9 @@ func TestSignup(t *testing.T) {
 			storageMock := &storagemock.StorageMock{}
 
 			storageMock.On("CreateUser", mock.Anything).Return(tc.createUserStorageMock.err)
+			if tc.getUserStorageMock != nil {
+				storageMock.On("GetUserByEmail", mock.Anything).Return(tc.getUserStorageMock.result, tc.getUserStorageMock.err)
+			}
 
 			hc.Storage = storageMock
 
@@ -85,34 +97,29 @@ func TestSignup(t *testing.T) {
 
 			assert.Equal(t, tc.expectedStatusCode, w.Code)
 
-			if tc.expectedError != "" {
-
-				fmt.Println(string(w.Body.Bytes()))
-
-				pattern, err := jsonpath.Compile("$.error")
-				assert.NoError(t, err)
-
-				var actualData interface{}
-				json.Unmarshal([]byte(w.Body.Bytes()), &actualData)
-				actualError, _ := pattern.Lookup(actualData)
-
-				assert.Equal(t, tc.expectedError, actualError)
-			} else {
-				pattern, err := jsonpath.Compile("$.email")
-				assert.NoError(t, err)
-
-				var expectedData interface{}
-				json.Unmarshal([]byte(tc.expectedBody), &expectedData)
-				expectedEmail, _ := pattern.Lookup(expectedData)
-
-				var actualData interface{}
-				json.Unmarshal([]byte(w.Body.Bytes()), &actualData)
-				actualEmail, _ := pattern.Lookup(actualData)
-
-				assert.Equal(t, expectedEmail, actualEmail)
-			}
+			verify(t, tc.expectedBody, tc.expectedError, string(w.Body.Bytes()))
 		})
 	}
+}
+
+type createAuthorizationStorageMock struct {
+	isCalled bool
+	result   *model.Authorization
+	err      error
+}
+
+type userLoginTestCases struct {
+	createAuthorizationStorageMock createAuthorizationStorageMock
+	description                    string
+	expectedStatusCode             int
+	requestBody                    string
+	expectedBody                   []Body
+	expectedError                  string
+}
+
+type Body struct {
+	Path string
+	Data string
 }
 
 func TestLogin(t *testing.T) {
@@ -122,31 +129,27 @@ func TestLogin(t *testing.T) {
 			"pasword": "test"
 		}
 	`
-	testCases := []userSignupTestCases{
+	testCases := []userLoginTestCases{
 		{
-			createUserStorageMock: createUserStorageMock{isCalled: true, err: nil},
-			description:           "OK - Should create user",
-			expectedStatusCode:    http.StatusCreated,
-			requestBody:           validBody,
-			expectedBody: `
+			createAuthorizationStorageMock: createAuthorizationStorageMock{isCalled: true, err: nil, result: &model.Authorization{
+				AccessToken: "Hello",
+			}},
+			description:        "OK - Should create authorization",
+			expectedStatusCode: http.StatusCreated,
+			requestBody:        validBody,
+			expectedBody: []Body{
 				{
-					"email": "test@test.com"
-				}
-			`,
-		},
-		{
-			createUserStorageMock: createUserStorageMock{isCalled: false, err: nil},
-			description:           "KO - unmarshall error",
-			expectedStatusCode:    http.StatusBadRequest,
-			requestBody:           "",
-			expectedError:         "unmarshall error",
+					Path: "$.accessToken",
+					Data: "Hello",
+				},
+			},
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
 			w := httptest.NewRecorder()
-			req, _ := http.NewRequest(http.MethodPost, "/signup", bytes.NewBuffer([]byte(tc.requestBody)))
+			req, _ := http.NewRequest(http.MethodPost, "/login", bytes.NewBuffer([]byte(tc.requestBody)))
 
 			hc := NewContext()
 			gin.SetMode(gin.TestMode)
@@ -156,46 +159,47 @@ func TestLogin(t *testing.T) {
 
 			storageMock := &storagemock.StorageMock{}
 
-			storageMock.On("CreateUser", mock.Anything).Return(tc.createUserStorageMock.err)
+			storageMock.On("CreateAuthorization", mock.Anything).Return(tc.createAuthorizationStorageMock.result, tc.createAuthorizationStorageMock.err)
 
 			hc.Storage = storageMock
 
-			hc.Signup(contextTest)
+			hc.Login(contextTest)
 
-			if tc.createUserStorageMock.isCalled {
-				storageMock.AssertCalled(t, "CreateUser", mock.Anything)
+			if tc.createAuthorizationStorageMock.isCalled {
+				storageMock.AssertCalled(t, "CreateAuthorization", mock.Anything)
 			} else {
-				storageMock.AssertNotCalled(t, "CreateUser", mock.Anything)
+				storageMock.AssertNotCalled(t, "CreateAuthorization", mock.Anything)
 			}
 
 			assert.Equal(t, tc.expectedStatusCode, w.Code)
 
-			if tc.expectedError != "" {
-
-				fmt.Println(string(w.Body.Bytes()))
-
-				pattern, err := jsonpath.Compile("$.error")
-				assert.NoError(t, err)
-
-				var actualData interface{}
-				json.Unmarshal([]byte(w.Body.Bytes()), &actualData)
-				actualError, _ := pattern.Lookup(actualData)
-
-				assert.Equal(t, tc.expectedError, actualError)
-			} else {
-				pattern, err := jsonpath.Compile("$.email")
-				assert.NoError(t, err)
-
-				var expectedData interface{}
-				json.Unmarshal([]byte(tc.expectedBody), &expectedData)
-				expectedEmail, _ := pattern.Lookup(expectedData)
-
-				var actualData interface{}
-				json.Unmarshal([]byte(w.Body.Bytes()), &actualData)
-				actualEmail, _ := pattern.Lookup(actualData)
-
-				assert.Equal(t, expectedEmail, actualEmail)
-			}
+			verify(t, tc.expectedBody, tc.expectedError, string(w.Body.Bytes()))
 		})
+	}
+}
+
+func verify(t *testing.T, expectedBody []Body, expectedError, actualBody string) {
+	fmt.Println(actualBody)
+
+	if expectedError != "" {
+		path, err := jsonpath.Compile("$.error")
+		assert.NoError(t, err)
+
+		var actualData interface{}
+		json.Unmarshal([]byte(actualBody), &actualData)
+		actualError, _ := path.Lookup(actualData)
+
+		assert.Equal(t, expectedError, actualError)
+	} else {
+		for _, eb := range expectedBody {
+			pattern, err := jsonpath.Compile(eb.Path)
+			assert.NoError(t, err)
+
+			var actualData interface{}
+			json.Unmarshal([]byte(actualBody), &actualData)
+			actualDataExtracted, _ := pattern.Lookup(actualData)
+
+			assert.Equal(t, eb.Data, actualDataExtracted)
+		}
 	}
 }
