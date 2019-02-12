@@ -104,7 +104,7 @@ func (te *TestExecutor) iCreateTheseUsers(userDataTable *gherkin.DataTable) erro
 
 func (te *TestExecutor) theStatusCodeIs(code int) error {
 	if te.Response.StatusCode != code {
-		return fmt.Errorf("status code are not the same: actual %d expected %d", te.Response.StatusCode, code)
+		return fmt.Errorf("status codes are not the same: actual %d expected %d", te.Response.StatusCode, code)
 	}
 	return nil
 }

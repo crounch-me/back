@@ -23,6 +23,7 @@ func Start() {
 	hc := handler.NewContext()
 	configureRoutes(r, hc)
 
+	log.SetLevel(log.DebugLevel)
 	log.Info("Launching awesome server")
 	err := r.Run(":3000")
 	if err != nil {

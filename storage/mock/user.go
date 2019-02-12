@@ -19,6 +19,11 @@ func (sm *StorageMock) CreateUser(u *model.User) error {
 	return args.Error(0)
 }
 
+func (sm *StorageMock) GetUserByEmail(email string) (*model.User, error) {
+	args := sm.Called(email)
+	return args.Get(0).(*model.User), args.Error(1)
+}
+
 func (sm *StorageMock) CreateAuthorization(u *model.User) (*model.Authorization, error) {
 	args := sm.Called(u)
 	return args.Get(0).(*model.Authorization), args.Error(1)

@@ -3,14 +3,15 @@ package neo
 import (
 	"errors"
 	"fmt"
-	"math/rand"
 
 	"golang.org/x/crypto/bcrypt"
 
 	uuid "github.com/satori/go.uuid"
 
+	"github.com/Sehsyha/crounch-back/errorcode"
 	"github.com/Sehsyha/crounch-back/model"
 	"github.com/Sehsyha/crounch-back/storage"
+	"github.com/Sehsyha/crounch-back/util"
 	"github.com/neo4j/neo4j-go-driver/neo4j"
 	log "github.com/sirupsen/logrus"
 )
@@ -39,11 +40,12 @@ func NewNeoStorage() storage.Storage {
 }
 
 func (ns *NeoStorage) CreateUser(u *model.User) error {
-	log.WithField("email", u.Email).Info("Creating user")
+	log.WithField("email", u.Email).Debug("Creating user")
 	session, err := ns.driver.Session(neo4j.AccessModeWrite)
 	if err != nil {
 		return err
 	}
+	defer session.Close()
 
 	u.ID = uuid.NewV4().String()
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
@@ -73,21 +75,21 @@ func (ns *NeoStorage) CreateUser(u *model.User) error {
 	return nil
 }
 
-func (ns *NeoStorage) CreateAuthorization(u *model.User) (*model.Authorization, error) {
-	log.WithField("email", u.Email).Info("Creating authorization for user")
+func (ns *NeoStorage) GetUserByEmail(email string) (*model.User, error) {
+	log.WithField("email", email).Debug("Getting user by email")
 
-	session, err := ns.driver.Session(neo4j.AccessModeWrite)
+	session, err := ns.driver.Session(neo4j.AccessModeRead)
 	if err != nil {
 		return nil, err
 	}
 
 	query := `
 		MATCH (u: USER {email: $email})
-		RETURN u.password, u.id
+		RETURN u.id, u.password
 	`
 
 	result, err := session.Run(query, map[string]interface{}{
-		"email": u.Email,
+		"email": email,
 	})
 	if err != nil {
 		return nil, err
@@ -99,31 +101,52 @@ func (ns *NeoStorage) CreateAuthorization(u *model.User) (*model.Authorization, 
 	}
 
 	if !isResult {
-		return nil, errors.New("user not found")
+		return nil, errors.New(string(errorcode.NotFound))
 	}
 
-	hashedPassword := result.Record().GetByIndex(0).(string)
-	u.ID = result.Record().GetByIndex(1).(string)
-	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(u.Password))
+	u := &model.User{
+		ID:       result.Record().GetByIndex(0).(string),
+		Email:    email,
+		Password: result.Record().GetByIndex(1).(string),
+	}
+
+	return u, nil
+}
+
+func (ns *NeoStorage) CreateAuthorization(u *model.User) (*model.Authorization, error) {
+	log.WithField("email", u.Email).Debug("Creating authorization for user")
+
+	session, err := ns.driver.Session(neo4j.AccessModeWrite)
+	if err != nil {
+		return nil, err
+	}
+	defer session.Close()
+
+	foundUser, err := ns.GetUserByEmail(u.Email)
+	if err != nil {
+		return nil, err
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(foundUser.Password), []byte(u.Password))
 	if err != nil {
 		return nil, errors.New("wrong password")
 	}
 
-	query = `
+	query := `
 		MATCH (u: USER {id: $id})
 		CREATE (a: AUTHORIZATION {token: $token})
 		CREATE (u)-[:IS_AUTHORIZED_BY]->(a)
 		RETURN ID(a)
 	`
 
-	token := generateToken(42)
+	token := util.GenerateToken()
 
-	result, err = session.Run(query, map[string]interface{}{
-		"id":    u.ID,
+	result, err := session.Run(query, map[string]interface{}{
+		"id":    foundUser.ID,
 		"token": token,
 	})
 
-	isResult = result.Next()
+	isResult := result.Next()
 	if err := result.Err(); err != nil {
 		return nil, err
 	}
@@ -141,14 +164,4 @@ func (ns *NeoStorage) CreateAuthorization(u *model.User) (*model.Authorization, 
 	}
 
 	return authorization, nil
-}
-
-const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-
-func generateToken(size int) string {
-	b := make([]byte, size)
-	for i := range b {
-		b[i] = letterBytes[rand.Intn(len(letterBytes))]
-	}
-	return string(b)
 }
