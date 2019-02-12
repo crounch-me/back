@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/Sehsyha/crounch-back/config"
 	"github.com/Sehsyha/crounch-back/model"
 	storagemock "github.com/Sehsyha/crounch-back/storage/mock"
 
@@ -72,7 +73,10 @@ func TestSignup(t *testing.T) {
 			w := httptest.NewRecorder()
 			req, _ := http.NewRequest(http.MethodPost, "/signup", bytes.NewBuffer([]byte(tc.requestBody)))
 
-			hc := NewContext()
+			config := &config.Config{
+				Mock: true,
+			}
+			hc := NewContext(config)
 			gin.SetMode(gin.TestMode)
 
 			contextTest, _ := gin.CreateTestContext(w)
@@ -151,7 +155,10 @@ func TestLogin(t *testing.T) {
 			w := httptest.NewRecorder()
 			req, _ := http.NewRequest(http.MethodPost, "/login", bytes.NewBuffer([]byte(tc.requestBody)))
 
-			hc := NewContext()
+			config := &config.Config{
+				Mock: true,
+			}
+			hc := NewContext(config)
 			gin.SetMode(gin.TestMode)
 
 			contextTest, _ := gin.CreateTestContext(w)

@@ -1,6 +1,7 @@
 package router
 
 import (
+	"github.com/Sehsyha/crounch-back/config"
 	"github.com/Sehsyha/crounch-back/handler"
 
 	"github.com/gin-gonic/gin"
@@ -20,7 +21,10 @@ func Start() {
 	r := gin.New()
 	r.HandleMethodNotAllowed = true
 
-	hc := handler.NewContext()
+	config := &config.Config{
+		Mock: false,
+	}
+	hc := handler.NewContext(config)
 	configureRoutes(r, hc)
 
 	log.SetLevel(log.DebugLevel)

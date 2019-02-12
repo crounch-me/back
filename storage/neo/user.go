@@ -20,7 +20,7 @@ type NeoStorage struct {
 }
 
 func NewNeoStorage() storage.Storage {
-	driver, err := neo4j.NewDriver("bolt://localhost:7687", neo4j.BasicAuth("test", "test", ""))
+	driver, err := neo4j.NewDriver("bolt://database:7687", neo4j.BasicAuth("test", "test", ""))
 	if err != nil {
 		log.Fatal(err)
 	}
