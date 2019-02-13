@@ -57,12 +57,7 @@ typings/
 # dotenv environment variables file
 .env
 
-# next.js build output
-.next
-
-# Application specific
-dist
-routes.ts
-.env
-
 .DS_Store
+vendor
+
+profile.cov

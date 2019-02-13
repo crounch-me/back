@@ -1,0 +1,41 @@
+version: "2.1"
+
+services:
+  wait:
+    image: alpine
+    depends_on:
+      app:
+        condition: service_healthy
+  app:
+    image: ${APP_NAME}
+    build:
+      context: ..
+      dockerfile: ./containers/Dockerfile
+      args:
+        - BUILDER_IMAGE=${BUILDER_IMAGE_NAME}
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -q -O /dev/null http://localhost:3000/health || exit 1",
+        ]
+      interval: 10s
+      timeout: 30s
+      retries: 6
+    depends_on:
+      database:
+        condition: service_healthy
+  database:
+    image: neo4j:3.0
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      - NEO4J_AUTH=none
+    healthcheck:
+      test: curl -i http://127.0.0.1:7474 2>&1 | grep -c -e '200 OK'
+      interval: 5s
+      timeout: 30s
+      retries: 3
