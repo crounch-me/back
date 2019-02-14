@@ -15,6 +15,8 @@ const (
 	loginPath = "/users/login"
 )
 
+var Version string
+
 func Start(config *configuration.Config) {
 	gin.SetMode(gin.ReleaseMode)
 
@@ -25,6 +27,7 @@ func Start(config *configuration.Config) {
 	configureRoutes(r, hc)
 
 	log.SetLevel(log.DebugLevel)
+
 	log.Info("Launching awesome server")
 	err := r.Run(":3000")
 	if err != nil {

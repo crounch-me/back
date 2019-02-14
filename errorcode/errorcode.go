@@ -1,5 +1,12 @@
 package errorcode
 
 const (
-	NotFound = iota
+	Duplicate = "duplicate"
+	NotFound  = "not-found"
+
+	DatabaseCode        = "database"
+	DatabaseDescription = "An error occured while accessing the database"
+
+	UnmarshalCode        = "unmarshal"
+	UnmarshalDescription = "An error occured while reading request body"
 )

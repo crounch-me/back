@@ -11,7 +11,6 @@ DOCKER_USER := sehsyha
 .PHONY: bump-version
 bump-version:
 	@echo "+ $@"
-	git checkout master
 	git fetch --tags
 	echo '{"version": "$(VERSION)"}' > ./package.json
 	npm i -g standard-version@4.2.0
@@ -21,10 +20,10 @@ bump-version:
 		git add CHANGELOG.md; \
 		git add VERSION; \
 		git commit -m "build: bump to version $$NEW_VERSION [skip ci]"; \
+		git push origin master; \
 		git tag $$NEW_VERSION; \
-		git remote rm origin; \
-		git remote add origin https://$(DOCKER_USER):$(GH_TOKEN)@github.com/Sehsyha/crounch-back.git; \
-		git push origin master
+		git push --tags origin master; \
+		rm package.json
 
 .PHONY: build
 build:
