@@ -3,6 +3,7 @@ package handler
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -47,9 +48,9 @@ func TestSignup(t *testing.T) {
 	`
 	testCases := []userSignupTestCases{
 		{
+			description:           "OK - Should create user",
 			createUserStorageMock: createUserStorageMock{isCalled: true, err: nil},
 			getUserStorageMock:    &getUserStorageMock{result: nil, err: model.NewDatabaseError(model.ErrNotFound, nil)},
-			description:           "OK - Should create user",
 			expectedStatusCode:    http.StatusCreated,
 			requestBody:           validBody,
 			expectedBody: []Body{
@@ -60,11 +61,19 @@ func TestSignup(t *testing.T) {
 			},
 		},
 		{
-			createUserStorageMock: createUserStorageMock{isCalled: false, err: nil},
 			description:           "KO - unmarshall error",
+			createUserStorageMock: createUserStorageMock{isCalled: false, err: nil},
 			expectedStatusCode:    http.StatusBadRequest,
 			requestBody:           "",
-			expectedError:         "unmarshall error",
+			expectedError:         "unmarshall-error",
+		},
+		{
+			description:           "KO - unknown database error",
+			createUserStorageMock: createUserStorageMock{isCalled: true, err: errors.New("unknown database error")},
+			getUserStorageMock:    &getUserStorageMock{result: nil, err: model.NewDatabaseError(model.ErrNotFound, nil)},
+			requestBody:           validBody,
+			expectedStatusCode:    http.StatusInternalServerError,
+			expectedError:         "database-error",
 		},
 	}
 

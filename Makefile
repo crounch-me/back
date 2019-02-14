@@ -20,9 +20,9 @@ bump-version:
 		git add CHANGELOG.md; \
 		git add VERSION; \
 		git commit -m "build: bump to version $$NEW_VERSION [skip ci]"; \
+		git push origin master; \
 		git tag $$NEW_VERSION; \
 		rm package.json; \
-		git push origin master; \
 		git push --tags origin master
 
 .PHONY: build
