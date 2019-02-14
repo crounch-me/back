@@ -2,8 +2,8 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
-	"net/http"
 
 	"github.com/Sehsyha/crounch-back/configuration"
 	"github.com/Sehsyha/crounch-back/errorcode"
@@ -14,11 +14,13 @@ import (
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+	validator "gopkg.in/go-playground/validator.v9"
 )
 
 type Context struct {
-	Storage storage.Storage
-	Config  *configuration.Config
+	Storage  storage.Storage
+	Config   *configuration.Config
+	Validate *validator.Validate
 }
 
 func NewContext(config *configuration.Config) *Context {
@@ -31,9 +33,16 @@ func NewContext(config *configuration.Config) *Context {
 	}
 
 	return &Context{
-		Storage: storage,
-		Config:  config,
+		Storage:  storage,
+		Config:   config,
+		Validate: validator.New(),
 	}
+}
+
+func (hc *Context) GetValidationErrorDescription(err error) string {
+	validationErrors := err.(validator.ValidationErrors)
+	firstError := validationErrors[0]
+	return fmt.Sprintf(errorcode.InvalidDescription, firstError.Field(), firstError.Tag())
 }
 
 func (hc *Context) LogAndSendError(c *gin.Context, causeError error /*, title*/, code, description string, status int) {
@@ -49,17 +58,15 @@ func (hc *Context) LogAndSendError(c *gin.Context, causeError error /*, title*/,
 	c.AbortWithStatusJSON(status, err)
 }
 
-func (hc *Context) UnmarshalPayload(c *gin.Context, i interface{}) bool {
+func (hc *Context) UnmarshalPayload(c *gin.Context, i interface{}) error {
 	body, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
-		hc.LogAndSendError(c, err, errorcode.UnmarshalCode, errorcode.UnmarshalDescription, http.StatusBadRequest)
-		return true
+		return err
 	}
 
 	err = json.Unmarshal([]byte(body), i)
 	if err != nil {
-		hc.LogAndSendError(c, err, errorcode.UnmarshalCode, errorcode.UnmarshalDescription, http.StatusBadRequest)
-		return true
+		return err
 	}
-	return false
+	return nil
 }

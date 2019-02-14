@@ -22,8 +22,8 @@ bump-version:
 		git commit -m "build: bump to version $$NEW_VERSION [skip ci]"; \
 		git push origin master; \
 		git tag $$NEW_VERSION; \
-		rm package.json; \
-		git push --tags origin master
+		git push --tags origin master; \
+		rm package.json
 
 .PHONY: build
 build:
@@ -88,7 +88,6 @@ cover-ci:
 .PHONY: test-ci
 test-ci: build-builder-image
 	@echo "+ $@"
-	docker rm $(APP_NAME)-test || true
 	docker run --name $(APP_NAME)-test $(BUILDER_IMAGE_NAME) /bin/sh -c 'make cover-ci'
 	WORKDIR=$(shell docker inspect --format "{{.Config.WorkingDir}}" $(BUILDER_IMAGE_NAME)); \
 		docker cp $(APP_NAME)-test:$$WORKDIR/profile.cov profile.cov
