@@ -12,11 +12,19 @@ import (
 func (hc *Context) Signup(c *gin.Context) {
 	u := &model.User{}
 
-	if hc.UnmarshalPayload(c, u) {
+	err := hc.UnmarshalPayload(c, u)
+	if err != nil {
+		hc.LogAndSendError(c, err, errorcode.UnmarshalCode, errorcode.UnmarshalDescription, http.StatusBadRequest)
 		return
 	}
 
-	_, err := hc.Storage.GetUserByEmail(u.Email)
+	err = hc.Validate.Struct(u)
+	if err != nil {
+		hc.LogAndSendError(c, err, errorcode.InvalidCode, hc.GetValidationErrorDescription(err), http.StatusBadRequest)
+		return
+	}
+
+	_, err = hc.Storage.GetUserByEmail(u.Email)
 	if err != nil {
 		if databaseError, ok := err.(*model.DatabaseError); ok {
 			switch databaseError.Type {
@@ -33,7 +41,7 @@ func (hc *Context) Signup(c *gin.Context) {
 	}
 
 	if err == nil {
-		hc.LogAndSendError(c, err, errorcode.Duplicate, "User with this email already exists", http.StatusConflict)
+		hc.LogAndSendError(c, err, errorcode.Duplicate, errorcode.DuplicateDescription, http.StatusConflict)
 		return
 	}
 
@@ -49,13 +57,31 @@ func (hc *Context) Signup(c *gin.Context) {
 func (hc *Context) Login(c *gin.Context) {
 	u := &model.User{}
 
-	if hc.UnmarshalPayload(c, u) {
+	err := hc.UnmarshalPayload(c, u)
+	if err != nil {
+		hc.LogAndSendError(c, err, errorcode.UnmarshalCode, errorcode.UnmarshalDescription, http.StatusBadRequest)
+		return
+	}
+
+	err = hc.Validate.Struct(u)
+	if err != nil {
+		hc.LogAndSendError(c, err, errorcode.InvalidCode, hc.GetValidationErrorDescription(err), http.StatusBadRequest)
 		return
 	}
 
 	authorization, err := hc.Storage.CreateAuthorization(u)
 
 	if err != nil {
+		if databaseError, ok := err.(*model.DatabaseError); ok {
+			switch databaseError.Type {
+			case model.ErrWrongPassword:
+				hc.LogAndSendError(c, err, errorcode.WrongPasswordCode, errorcode.WrongPasswordDescription, http.StatusBadRequest)
+				return
+			default:
+				hc.LogAndSendError(c, err, errorcode.DatabaseCode, errorcode.DatabaseDescription, http.StatusInternalServerError)
+				return
+			}
+		}
 		hc.LogAndSendError(c, err, errorcode.DatabaseCode, errorcode.DatabaseDescription, http.StatusInternalServerError)
 		return
 	}
