@@ -8,4 +8,4 @@ FROM alpine
 COPY --from=builder /go/bin/crounch-back /go/bin/crounch-back 
 
 EXPOSE 3000
-ENTRYPOINT [ "/go/bin/crounch-back" ]
+ENTRYPOINT [ "/go/bin/crounch-back" , "serve" ]
