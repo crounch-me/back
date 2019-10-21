@@ -1,8 +1,8 @@
 language: go
 go:
   - 1.11.x
-before_install:
-  - go get github.com/mattn/goveralls
+# before_install:
+#   - go get github.com/mattn/goveralls
 script:
   # - make test-ci
   # - $GOPATH/bin/goveralls -coverprofile=profile.cov -service=travis-ci
