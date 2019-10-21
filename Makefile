@@ -11,7 +11,7 @@ DOCKER_USER := sehsyha
 .PHONY: bump-version
 bump-version:
 	@echo "+ $@"
-	# git fetch --tags
+	git fetch --tags
 	echo '{"version": "$(VERSION)"}' > ./package.json
 	npm i -g standard-version@4.2.0
 	standard-version --skip.commit true --skip.tag true
@@ -21,9 +21,13 @@ bump-version:
 		git add VERSION; \
 		git commit -m "build: bump to version $$NEW_VERSION [skip ci]"; \
 		git tag $$NEW_VERSION
-	git log
+	git branch tmp
+	git checkout master
+	git merge tmp
+	git branch -D tmp
 	rm package.json
-	# git push origin fix/bump-version
+	# git push origin master
+	# git push --tags origin master
 
 .PHONY: build
 build:
