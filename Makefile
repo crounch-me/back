@@ -24,7 +24,7 @@ bump-version:
 		git add VERSION; \
 		git commit -m "build: bump to version $$NEW_VERSION [skip ci]"; \
 		git tag $$NEW_VERSION
-	git branch tmp
+	git checkout -b tmp
 	git checkout master
 	git merge tmp
 	git branch -D tmp
