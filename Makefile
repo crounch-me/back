@@ -21,6 +21,7 @@ bump-version:
 		git add VERSION; \
 		git commit -m "build: bump to version $$NEW_VERSION [skip ci]"; \
 		git tag $$NEW_VERSION
+	git log
 	rm package.json
 	git push origin fix/bump-version
 
