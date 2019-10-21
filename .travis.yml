@@ -1,14 +1,12 @@
 language: go
 go:
   - 1.11.x
-# before_install:
-#   - go get github.com/mattn/goveralls
+before_install:
+  - go get github.com/mattn/goveralls
 script:
-  # - make test-ci
-  # - $GOPATH/bin/goveralls -coverprofile=profile.cov -service=travis-ci
-  # - make acceptance-test-ci
-  - git remote set-url origin https://Sehsyha:$GITHUB_API_KEY@github.com/Sehsyha/crounch-back.git
-  - make bump-version
+  - make test-ci
+  - $GOPATH/bin/goveralls -coverprofile=profile.cov -service=travis-ci
+  - make acceptance-test-ci
 before_deploy:
   - openssl aes-256-cbc -K $encrypted_55334bb6dd75_key -iv $encrypted_55334bb6dd75_iv -in deploy_rsa.enc -out /tmp/deploy_rsa -d
   - eval "$(ssh-agent -s)"
