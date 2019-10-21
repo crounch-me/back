@@ -15,6 +15,7 @@ bump-version:
 	echo '{"version": "$(VERSION)"}' > ./package.json
 	npm i -g standard-version@4.2.0
 	standard-version --skip.commit true --skip.tag true
+	git status
 	NEW_VERSION=`jq -r ".version" package.json`; \
 		echo $$NEW_VERSION > VERSION; \
 		git add CHANGELOG.md; \
@@ -25,6 +26,7 @@ bump-version:
 	git checkout master
 	git merge tmp
 	git branch -D tmp
+	git status
 	rm package.json
 	# git push origin master
 	# git push --tags origin master
