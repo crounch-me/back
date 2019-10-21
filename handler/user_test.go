@@ -8,14 +8,14 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/Sehsyha/crounch-back/config"
-	"github.com/Sehsyha/crounch-back/model"
-	storagemock "github.com/Sehsyha/crounch-back/storage/mock"
-
 	"github.com/gin-gonic/gin"
 	"github.com/oliveagle/jsonpath"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/Sehsyha/crounch-back/configuration"
+	"github.com/Sehsyha/crounch-back/model"
+	storagemock "github.com/Sehsyha/crounch-back/storage/mock"
 )
 
 type createUserStorageMock struct {
@@ -73,7 +73,7 @@ func TestSignup(t *testing.T) {
 			w := httptest.NewRecorder()
 			req, _ := http.NewRequest(http.MethodPost, "/signup", bytes.NewBuffer([]byte(tc.requestBody)))
 
-			config := &config.Config{
+			config := &configuration.Config{
 				Mock: true,
 			}
 			hc := NewContext(config)
@@ -155,7 +155,7 @@ func TestLogin(t *testing.T) {
 			w := httptest.NewRecorder()
 			req, _ := http.NewRequest(http.MethodPost, "/login", bytes.NewBuffer([]byte(tc.requestBody)))
 
-			config := &config.Config{
+			config := &configuration.Config{
 				Mock: true,
 			}
 			hc := NewContext(config)
