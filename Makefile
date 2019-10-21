@@ -21,8 +21,7 @@ bump-version:
 		git add VERSION; \
 		git commit -m "build: bump to version $$NEW_VERSION [skip ci]"; \
 		git checkout -b master; \
-		git pull; \
-		git push origin master; \
+		git pull origin master; \
 		rm package.json
 
 .PHONY: build
