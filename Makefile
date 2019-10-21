@@ -11,6 +11,7 @@ DOCKER_USER := sehsyha
 .PHONY: bump-version
 bump-version:
 	@echo "+ $@"
+	git status
 	git fetch --tags
 	echo '{"version": "$(VERSION)"}' > ./package.json
 	npm i -g standard-version@4.2.0
