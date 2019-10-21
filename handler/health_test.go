@@ -5,9 +5,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/Sehsyha/crounch-back/config"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/Sehsyha/crounch-back/configuration"
 )
 
 type healthTestCases struct {
@@ -28,7 +29,7 @@ func TestHealth(t *testing.T) {
 			w := httptest.NewRecorder()
 			req, _ := http.NewRequest(http.MethodGet, "/health", nil)
 
-			config := &config.Config{
+			config := &configuration.Config{
 				Mock: true,
 			}
 			hc := NewContext(config)

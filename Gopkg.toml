@@ -52,3 +52,11 @@
 [[constraint]]
   name = "github.com/neo4j/neo4j-go-driver"
   version = "1.7.2"
+
+[[constraint]]
+  name = "github.com/spf13/cobra"
+  version = "0.0.5"
+
+[[constraint]]
+  name = "github.com/spf13/viper"
+  version = "1.4.0"

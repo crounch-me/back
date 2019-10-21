@@ -1,11 +1,11 @@
 package router
 
 import (
-	"github.com/Sehsyha/crounch-back/config"
-	"github.com/Sehsyha/crounch-back/handler"
-
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+
+	"github.com/Sehsyha/crounch-back/configuration"
+	"github.com/Sehsyha/crounch-back/handler"
 )
 
 const (
@@ -15,15 +15,12 @@ const (
 	loginPath = "/users/login"
 )
 
-func Start() {
+func Start(config *configuration.Config) {
 	gin.SetMode(gin.ReleaseMode)
 
 	r := gin.New()
 	r.HandleMethodNotAllowed = true
 
-	config := &config.Config{
-		Mock: false,
-	}
 	hc := handler.NewContext(config)
 	configureRoutes(r, hc)
 

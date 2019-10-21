@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"github.com/Sehsyha/crounch-back/config"
+	"github.com/Sehsyha/crounch-back/configuration"
 	"github.com/Sehsyha/crounch-back/storage"
 	"github.com/Sehsyha/crounch-back/storage/mock"
 	"github.com/Sehsyha/crounch-back/storage/neo"
@@ -9,10 +9,10 @@ import (
 
 type Context struct {
 	Storage storage.Storage
-	Config  *config.Config
+	Config  *configuration.Config
 }
 
-func NewContext(config *config.Config) *Context {
+func NewContext(config *configuration.Config) *Context {
 	var storage storage.Storage
 
 	if config.Mock {

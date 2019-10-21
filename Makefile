@@ -62,7 +62,7 @@ sleep:
 .PHONY: run-app
 run-app:
 	@echo "+ $@"
-	go run -ldflags "-r $(SEABOLT_DIR)" main.go 
+	go run -ldflags "-r $(SEABOLT_DIR)" main.go serve
 
 .PHONY: run-dependencies
 run-dependencies:
