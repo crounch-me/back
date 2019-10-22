@@ -2,18 +2,18 @@ package handler
 
 import (
 	"bytes"
-	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/oliveagle/jsonpath"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
 	"github.com/Sehsyha/crounch-back/configuration"
+	"github.com/Sehsyha/crounch-back/errorcode"
 	"github.com/Sehsyha/crounch-back/model"
 	storagemock "github.com/Sehsyha/crounch-back/storage/mock"
 )
@@ -35,21 +35,25 @@ type userSignupTestCases struct {
 	expectedStatusCode    int
 	requestBody           string
 	expectedBody          []Body
-	expectedError         string
+	expectedError         *model.Error
+}
+
+var validUser = &model.User{
+	ID: "Hello",
 }
 
 func TestSignup(t *testing.T) {
 	var validBody = `
 		{
 			"email": "test@test.com",
-			"pasword": "test"
+			"password": "test"
 		}
 	`
 	testCases := []userSignupTestCases{
 		{
+			description:           "OK - Should create user",
 			createUserStorageMock: createUserStorageMock{isCalled: true, err: nil},
 			getUserStorageMock:    &getUserStorageMock{result: nil, err: model.NewDatabaseError(model.ErrNotFound, nil)},
-			description:           "OK - Should create user",
 			expectedStatusCode:    http.StatusCreated,
 			requestBody:           validBody,
 			expectedBody: []Body{
@@ -60,11 +64,116 @@ func TestSignup(t *testing.T) {
 			},
 		},
 		{
+			description:           "KO - missing email",
 			createUserStorageMock: createUserStorageMock{isCalled: false, err: nil},
+			expectedStatusCode:    http.StatusBadRequest,
+			requestBody: `
+				{
+					"password": "a"
+				}
+			`,
+			expectedError: &model.Error{
+				Code:        errorcode.InvalidCode,
+				Description: fmt.Sprintf(errorcode.InvalidDescription, "Email", "required"),
+			},
+		},
+		{
+			description:           "KO - missing password",
+			createUserStorageMock: createUserStorageMock{isCalled: false, err: nil},
+			expectedStatusCode:    http.StatusBadRequest,
+			requestBody: `
+				{
+					"email": "test@test.com"
+				}
+			`,
+			expectedError: &model.Error{
+				Code:        errorcode.InvalidCode,
+				Description: fmt.Sprintf(errorcode.InvalidDescription, "Password", "required"),
+			},
+		},
+		{
+			description:           "KO - password length too short",
+			createUserStorageMock: createUserStorageMock{isCalled: false, err: nil},
+			expectedStatusCode:    http.StatusBadRequest,
+			requestBody: `
+				{
+					"email": "test@test.com",
+					"password": "a"
+				}
+			`,
+			expectedError: &model.Error{
+				Code:        errorcode.InvalidCode,
+				Description: fmt.Sprintf(errorcode.InvalidDescription, "Password", "gt"),
+			},
+		},
+		{
+			description:           "KO - email is not an email",
+			createUserStorageMock: createUserStorageMock{isCalled: false, err: nil},
+			expectedStatusCode:    http.StatusBadRequest,
+			requestBody: `
+				{
+					"email": "a",
+					"password": "a"
+				}
+			`,
+			expectedError: &model.Error{
+				Code:        errorcode.InvalidCode,
+				Description: fmt.Sprintf(errorcode.InvalidDescription, "Email", "email"),
+			},
+		},
+		{
 			description:           "KO - unmarshall error",
+			createUserStorageMock: createUserStorageMock{isCalled: false, err: nil},
 			expectedStatusCode:    http.StatusBadRequest,
 			requestBody:           "",
-			expectedError:         "unmarshall error",
+			expectedError: &model.Error{
+				Code:        errorcode.UnmarshalCode,
+				Description: errorcode.UnmarshalDescription,
+			},
+		},
+		{
+			description:           "KO - unknown database error when creating user",
+			createUserStorageMock: createUserStorageMock{isCalled: true, err: errors.New("unknown database error")},
+			getUserStorageMock:    &getUserStorageMock{result: nil, err: model.NewDatabaseError(model.ErrNotFound, nil)},
+			requestBody:           validBody,
+			expectedStatusCode:    http.StatusInternalServerError,
+			expectedError: &model.Error{
+				Code:        errorcode.DatabaseCode,
+				Description: errorcode.DatabaseDescription,
+			},
+		},
+		{
+			description:           "KO - unknown database error when getting user",
+			createUserStorageMock: createUserStorageMock{isCalled: false, err: nil},
+			getUserStorageMock:    &getUserStorageMock{result: nil, err: errors.New("unknown database error")},
+			requestBody:           validBody,
+			expectedStatusCode:    http.StatusInternalServerError,
+			expectedError: &model.Error{
+				Code:        errorcode.DatabaseCode,
+				Description: errorcode.DatabaseDescription,
+			},
+		},
+		{
+			description:           "KO - unknown database error when getting user",
+			createUserStorageMock: createUserStorageMock{isCalled: false, err: nil},
+			getUserStorageMock:    &getUserStorageMock{result: nil, err: model.NewDatabaseError(model.ErrWrongPassword, nil)},
+			requestBody:           validBody,
+			expectedStatusCode:    http.StatusInternalServerError,
+			expectedError: &model.Error{
+				Code:        errorcode.DatabaseCode,
+				Description: errorcode.DatabaseDescription,
+			},
+		},
+		{
+			description:           "KO - duplicated users",
+			createUserStorageMock: createUserStorageMock{isCalled: false, err: nil},
+			getUserStorageMock:    &getUserStorageMock{result: validUser, err: nil},
+			requestBody:           validBody,
+			expectedStatusCode:    http.StatusConflict,
+			expectedError: &model.Error{
+				Code:        errorcode.Duplicate,
+				Description: errorcode.DuplicateDescription,
+			},
 		},
 	}
 
@@ -118,27 +227,22 @@ type userLoginTestCases struct {
 	expectedStatusCode             int
 	requestBody                    string
 	expectedBody                   []Body
-	expectedError                  string
-}
-
-type Body struct {
-	Path string
-	Data string
+	expectedError                  *model.Error
 }
 
 func TestLogin(t *testing.T) {
 	var validBody = `
 		{
 			"email": "test@test.com",
-			"pasword": "test"
+			"password": "test"
 		}
 	`
 	testCases := []userLoginTestCases{
 		{
+			description: "OK - Should create authorization",
 			createAuthorizationStorageMock: createAuthorizationStorageMock{isCalled: true, err: nil, result: &model.Authorization{
 				AccessToken: "Hello",
 			}},
-			description:        "OK - Should create authorization",
 			expectedStatusCode: http.StatusCreated,
 			requestBody:        validBody,
 			expectedBody: []Body{
@@ -146,6 +250,104 @@ func TestLogin(t *testing.T) {
 					Path: "$.accessToken",
 					Data: "Hello",
 				},
+			},
+		},
+		{
+			description:                    "KO - missing email",
+			createAuthorizationStorageMock: createAuthorizationStorageMock{isCalled: false, err: nil},
+			expectedStatusCode:             http.StatusBadRequest,
+			requestBody: `
+				{
+					"password": "a"
+				}
+			`,
+			expectedError: &model.Error{
+				Code:        errorcode.InvalidCode,
+				Description: fmt.Sprintf(errorcode.InvalidDescription, "Email", "required"),
+			},
+		},
+		{
+			description:                    "KO - missing password",
+			createAuthorizationStorageMock: createAuthorizationStorageMock{isCalled: false, err: nil},
+			expectedStatusCode:             http.StatusBadRequest,
+			requestBody: `
+				{
+					"email": "test@test.com"
+				}
+			`,
+			expectedError: &model.Error{
+				Code:        errorcode.InvalidCode,
+				Description: fmt.Sprintf(errorcode.InvalidDescription, "Password", "required"),
+			},
+		},
+		{
+			description:                    "KO - password length too short",
+			createAuthorizationStorageMock: createAuthorizationStorageMock{isCalled: false, err: nil},
+			expectedStatusCode:             http.StatusBadRequest,
+			requestBody: `
+				{
+					"email": "test@test.com",
+					"password": "a"
+				}
+			`,
+			expectedError: &model.Error{
+				Code:        errorcode.InvalidCode,
+				Description: fmt.Sprintf(errorcode.InvalidDescription, "Password", "gt"),
+			},
+		},
+		{
+			description:                    "KO - email is not an email",
+			createAuthorizationStorageMock: createAuthorizationStorageMock{isCalled: false, err: nil},
+			expectedStatusCode:             http.StatusBadRequest,
+			requestBody: `
+				{
+					"email": "a",
+					"password": "a"
+				}
+			`,
+			expectedError: &model.Error{
+				Code:        errorcode.InvalidCode,
+				Description: fmt.Sprintf(errorcode.InvalidDescription, "Email", "email"),
+			},
+		},
+		{
+			description:                    "KO - unmarshall error",
+			createAuthorizationStorageMock: createAuthorizationStorageMock{isCalled: false, err: nil},
+			expectedStatusCode:             http.StatusBadRequest,
+			requestBody:                    "",
+			expectedError: &model.Error{
+				Code:        errorcode.UnmarshalCode,
+				Description: errorcode.UnmarshalDescription,
+			},
+		},
+		{
+			description:                    "KO - wrong password",
+			createAuthorizationStorageMock: createAuthorizationStorageMock{isCalled: true, err: model.NewDatabaseError(model.ErrWrongPassword, nil), result: nil},
+			expectedStatusCode:             http.StatusBadRequest,
+			requestBody:                    validBody,
+			expectedError: &model.Error{
+				Code:        errorcode.WrongPasswordCode,
+				Description: errorcode.WrongPasswordDescription,
+			},
+		},
+		{
+			description:                    "KO - unknown database error",
+			createAuthorizationStorageMock: createAuthorizationStorageMock{isCalled: true, err: errors.New("unknown database error"), result: nil},
+			expectedStatusCode:             http.StatusInternalServerError,
+			requestBody:                    validBody,
+			expectedError: &model.Error{
+				Code:        errorcode.DatabaseCode,
+				Description: errorcode.DatabaseDescription,
+			},
+		},
+		{
+			description:                    "KO - unknown database error of type DatabaseError",
+			createAuthorizationStorageMock: createAuthorizationStorageMock{isCalled: true, err: model.NewDatabaseError(model.ErrNotFound, nil), result: nil},
+			expectedStatusCode:             http.StatusInternalServerError,
+			requestBody:                    validBody,
+			expectedError: &model.Error{
+				Code:        errorcode.DatabaseCode,
+				Description: errorcode.DatabaseDescription,
 			},
 		},
 	}
@@ -182,31 +384,5 @@ func TestLogin(t *testing.T) {
 
 			verify(t, tc.expectedBody, tc.expectedError, string(w.Body.Bytes()))
 		})
-	}
-}
-
-func verify(t *testing.T, expectedBody []Body, expectedError, actualBody string) {
-	fmt.Println(actualBody)
-
-	if expectedError != "" {
-		path, err := jsonpath.Compile("$.error")
-		assert.NoError(t, err)
-
-		var actualData interface{}
-		json.Unmarshal([]byte(actualBody), &actualData)
-		actualError, _ := path.Lookup(actualData)
-
-		assert.Equal(t, expectedError, actualError)
-	} else {
-		for _, eb := range expectedBody {
-			pattern, err := jsonpath.Compile(eb.Path)
-			assert.NoError(t, err)
-
-			var actualData interface{}
-			json.Unmarshal([]byte(actualBody), &actualData)
-			actualDataExtracted, _ := pattern.Lookup(actualData)
-
-			assert.Equal(t, eb.Data, actualDataExtracted)
-		}
 	}
 }

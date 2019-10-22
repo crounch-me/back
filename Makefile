@@ -89,7 +89,6 @@ cover-ci:
 .PHONY: test-ci
 test-ci: build-builder-image
 	@echo "+ $@"
-	docker rm $(APP_NAME)-test || true
 	docker run --name $(APP_NAME)-test $(BUILDER_IMAGE_NAME) /bin/sh -c 'make cover-ci'
 	WORKDIR=$(shell docker inspect --format "{{.Config.WorkingDir}}" $(BUILDER_IMAGE_NAME)); \
 		docker cp $(APP_NAME)-test:$$WORKDIR/profile.cov profile.cov
