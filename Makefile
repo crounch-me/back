@@ -11,6 +11,7 @@ DOCKER_USER := sehsyha
 .PHONY: bump-version
 bump-version:
 	@echo "+ $@"
+	git checkout master
 	git fetch --tags
 	echo '{"version": "$(VERSION)"}' > ./package.json
 	npm i -g standard-version@4.2.0
@@ -20,13 +21,10 @@ bump-version:
 		git add CHANGELOG.md; \
 		git add VERSION; \
 		git commit -m "build: bump to version $$NEW_VERSION [skip ci]"; \
-		git stash; \
-		git checkout $$TRAVIS_BRANCH; \
-		git stash pop; \
 		git tag $$NEW_VERSION; \
-		git push origin master; \
-		git push --tags origin master; \
-		rm package.json
+		git remote rm origin; \
+		git remote add origin https://$(DOCKER_USER):$(GH_TOKEN)@github.com/Sehsyha/crounch-back.git; \
+		git push origin master
 
 .PHONY: build
 build:
@@ -91,7 +89,6 @@ cover-ci:
 .PHONY: test-ci
 test-ci: build-builder-image
 	@echo "+ $@"
-	@echo $$TRAVIS_BRANCH
 	docker rm $(APP_NAME)-test || true
 	docker run --name $(APP_NAME)-test $(BUILDER_IMAGE_NAME) /bin/sh -c 'make cover-ci'
 	WORKDIR=$(shell docker inspect --format "{{.Config.WorkingDir}}" $(BUILDER_IMAGE_NAME)); \
