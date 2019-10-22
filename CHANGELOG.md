@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.1.0"></a>
+# [1.1.0](https://github.com/Sehsyha/crounch-back/compare/1.0.0...1.1.0) (2019-10-22)
+
+
+### Features
+
+* add version in health and missing unit tests ([7c76723](https://github.com/Sehsyha/crounch-back/commit/7c76723))
+
+
+
 <a name="1.0.0"></a>
 # 1.0.0 (2019-10-22)
 
