@@ -12,7 +12,6 @@ DOCKER_USER := sehsyha
 bump-version:
 	@echo "+ $@"
 	git fetch --tags
-	git pull origin master
 	echo '{"version": "$(VERSION)"}' > ./package.json
 	npm i -g standard-version@4.2.0
 	standard-version --skip.commit true --skip.tag true
@@ -21,8 +20,11 @@ bump-version:
 		git add CHANGELOG.md; \
 		git add VERSION; \
 		git commit -m "build: bump to version $$NEW_VERSION [skip ci]"; \
-		git push origin master; \
+		git stash; \
+		git checkout $$TRAVIS_BRANCH; \
+		git stash pop; \
 		git tag $$NEW_VERSION; \
+		git push origin master; \
 		git push --tags origin master; \
 		rm package.json
 
@@ -89,6 +91,7 @@ cover-ci:
 .PHONY: test-ci
 test-ci: build-builder-image
 	@echo "+ $@"
+	@echo $$TRAVIS_BRANCH
 	docker rm $(APP_NAME)-test || true
 	docker run --name $(APP_NAME)-test $(BUILDER_IMAGE_NAME) /bin/sh -c 'make cover-ci'
 	WORKDIR=$(shell docker inspect --format "{{.Config.WorkingDir}}" $(BUILDER_IMAGE_NAME)); \
