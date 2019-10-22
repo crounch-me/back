@@ -12,7 +12,6 @@ DOCKER_USER := sehsyha
 bump-version:
 	@echo "+ $@"
 	git fetch --tags
-	git checkout -b master
 	git pull origin master
 	echo '{"version": "$(VERSION)"}' > ./package.json
 	npm i -g standard-version@4.2.0
