@@ -48,7 +48,7 @@ acceptance-test:
 	cd acceptance; godog
 
 .PHONY: acceptance-test-ci
-acceptance-test-ci: build-builder-image run-image
+acceptance-test-ci: run-image
 	@echo "+ $@"
 	docker rm $(APP_NAME)-acceptance-test || true
 	docker run --net='host' --name $(APP_NAME)-acceptance-test $(BUILDER_IMAGE_NAME) /bin/sh -c "make acceptance-test"
