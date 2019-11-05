@@ -51,6 +51,8 @@ func (hc *Context) Signup(c *gin.Context) {
 		return
 	}
 
+	u.Password = nil
+
 	c.JSON(http.StatusCreated, u)
 }
 

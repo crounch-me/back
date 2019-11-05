@@ -2,14 +2,11 @@ version: "2.1"
 
 services:
   database:
-    image: neo4j:3.0
+    image: postgres:11-alpine
     ports:
-      - "7474:7474"
-      - "7687:7687"
-    environment:
-      - NEO4J_AUTH=none
+      - "5432:5432"
     healthcheck:
-      test: curl -i http://127.0.0.1:7474 2>&1 | grep -c -e '200 OK'
-      interval: 5s
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
       timeout: 30s
       retries: 3

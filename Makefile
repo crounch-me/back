@@ -24,7 +24,7 @@ bump-version:
 		git tag $$NEW_VERSION; \
 		git remote rm origin; \
 		git remote add origin https://$(DOCKER_USER):$(GH_TOKEN)@github.com/Sehsyha/crounch-back.git; \
-		git push origin master
+		git push --follow-tags origin master
 
 .PHONY: build
 build:
@@ -56,14 +56,10 @@ acceptance-test-ci: run-image
 .PHONY: run
 run: run-dependencies sleep run-app
 
-.PHONY: sleep
-sleep:
-	sleep 3
-
 .PHONY: run-app
 run-app:
 	@echo "+ $@"
-	go run -ldflags "-r $(SEABOLT_DIR)" main.go serve
+	go run main.go serve --db-connection-uri postgresql://postgres:secretpassword@localhost/postgres?sslmode=disable --db-schema public
 
 .PHONY: run-dependencies
 run-dependencies:
@@ -81,14 +77,18 @@ test:
 	@echo "+ $@"
 	go test -v -ldflags "-r $(SEABOLT_DIR)"  $(shell go list ./... | grep -v vendor | grep -v acceptance)
 
-.PHONY: cover-ci 
-cover-ci:
-	@echo "+ $@"
-	go test -v -covermode=count -coverprofile=profile.cov ./handler
-
 .PHONY: test-ci
 test-ci: build-builder-image
 	@echo "+ $@"
 	docker run --name $(APP_NAME)-test $(BUILDER_IMAGE_NAME) /bin/sh -c 'make cover-ci'
 	WORKDIR=$(shell docker inspect --format "{{.Config.WorkingDir}}" $(BUILDER_IMAGE_NAME)); \
 		docker cp $(APP_NAME)-test:$$WORKDIR/profile.cov profile.cov
+
+.PHONY: cover-ci 
+cover-ci:
+	@echo "+ $@"
+	go test -v -covermode=count -coverprofile=profile.cov ./handler
+
+.PHONY: sleep
+sleep:
+	sleep 3
