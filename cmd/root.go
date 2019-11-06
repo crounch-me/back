@@ -17,6 +17,9 @@ const (
 	// Database
 	parameterDBConnectionURI = "db-connection-uri"
 	defaultDBConnectionURI   = "postgresql://postgres:password@database/postgres?sslmode=disable"
+
+	parameterDBSchema = "db-schema"
+	defaultDBSchema   = "crounch"
 )
 
 var (
@@ -45,4 +48,5 @@ func initConfig() {
 	config.Mock = viper.GetBool(parameterMock)
 
 	config.DBConnectionURI = viper.GetString(parameterDBConnectionURI)
+	config.DBSchema = viper.GetString(parameterDBSchema)
 }
