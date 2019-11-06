@@ -24,7 +24,8 @@ bump-version:
 		git tag $$NEW_VERSION; \
 		git remote rm origin; \
 		git remote add origin https://$(DOCKER_USER):$(GH_TOKEN)@github.com/Sehsyha/crounch-back.git; \
-		git push --follow-tags origin master
+		git push origin master; \
+		git push --tags
 
 .PHONY: build
 build:
