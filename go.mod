@@ -5,7 +5,7 @@ go 1.12
 require (
 	github.com/DATA-DOG/godog v0.7.9
 	github.com/gin-contrib/sse v0.0.0-20190125020943-a7658810eb74 // indirect
-	github.com/gin-gonic/gin v1.3.0
+	github.com/gin-gonic/gin v1.4.0
 	github.com/go-playground/locales v0.12.1 // indirect
 	github.com/go-playground/universal-translator v0.16.0 // indirect
 	github.com/golang-migrate/migrate/v4 v4.7.0
