@@ -1,0 +1,30 @@
+language: node_js
+node_js:
+  - "10"
+script:
+  - npm i
+  - npm run test
+before_deploy:
+  - openssl aes-256-cbc -K $encrypted_349a92424679_key -iv $encrypted_349a92424679_iv
+    -in deploy_rsa-front.enc -out /tmp/deploy_rsa-front -d
+  - eval "$(ssh-agent -s)"
+  - chmod 600 /tmp/deploy_rsa-front
+  - ssh-add /tmp/deploy_rsa-front
+  - git remote set-url origin https://Sehsyha:$GH_TOKEN@github.com/Sehsyha/crounch-front.git
+  - make bump-version
+  - make build-image
+  - export VERSION_NUMBER=$(jq -r ".version" package.json)
+  - make build-image
+  - docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+  - docker push $DOCKER_USER/crounch-front:$VERSION_NUMBER
+deploy:
+  provider: script
+  script: ssh -oStrictHostKeyChecking=no -p $DEPLOY_PORT $DEPLOY_USER@$DEPLOY_HOST $DEPLOY_PATH/front.sh $VERSION_NUMBER
+  on:
+    branch: master
+env:
+  global:
+    - secure: ZyX5J38BtfUZu8h1q/7xxzK5hDhqbDIZE9zcbUyFJqXcEDnjWkAj9S1QysP51Kmg0IPhdkrXKM+TVd0UsaZDaeNOqlPj+AYswpJfBM7NLG6yyYHdi34IWNupLS6kcwk4Akwd89jnMq0Xp1i+Eqgqesqr15iMLw/LOsS5pdgnuIC4KC0niZice0pJSYWFZoRFFSH5R5Paku8gagFPFBk6VN5B6CGqWXQfW894btKkUoupGp89XZDi60k7EFxw89uVNIir6oPRGRhL5jyjvuDa+FuMQs++tFRqNHUrMQ3hzkBv6MQnrGMJCuLgbDvctuXPpbrzuyuTCpPZu50pHo/coNokONytbDmfV5c0UgSiQk4ekz8aAfjbZDy3++jF5gVuT9MJ7SrSkoCHsXU1Obql+f37YURTIy8TigJ+/OS8e18i1Zok8/yViyPh570tMYCQbd6FXj3KYGgKtK8FWA3xYPfJGzsR2V1pRMPo8+gBtUf5rzmUdoMYjFn1K4RHXSlTf5+zft/rgFJwpx1bE929jrS8T2vRe9ZJC7aXBYf6kzJKzl72tK76kRcKnpw6281d4PZ/ZUTphiOHiqL+u586tLLFglQSEx+OBfokimes6jJpHABLzCco90VPu/IjP6w6HIEV3YPjbgJrVVQhhjJsfTLKYH+K+qauUZTtDEQB4CE=
+    - secure: UOvom6rhcVZG/IM0lBckZm4S5WFwUjUYg+A76Sk4JE7YvIgX4IDyduzlFyLayMIdmdj+nIFr4EJSHiWpqgulLqoDf5f9KK+dN9vXO44ItwN5ksD6NMLx+Cv015+tXbDoXTOhBT2TBHcEY/lwYhAD+o4vVrYG0JKknYAuh+jGuqb+vhE2Q8YXfsuUUuITgM2aJMm6e2Wtrz/+ZOiSN2/s+0ZPh6w5Rb71D11TUOB9WVlhNhMjv4Mvq5I1U2j1aHZeeENMYKj/ergSycupA2moM1prqVYZuc/1jaNOthA1PolyDHeEPDurIj7fCJXm4JXsuDfBsGOHThUSMohOTpHcx54At9rif/qOAQzMDgnkBW/QsjlFzjCcXalpX1/C1jSY4dNuUzxjzg47w5nAE7t2IyLUYU9DxPNvDpnFxsjRvdylBvcwiQefkORvW2pAyVpbHlgQevhsoCnuLtdTW6E0dNNwY8GNRpxT+16SjTjMz8JvPrG/7xNzEfBWN49SrCOZX/vukNX75ahF+XuhAxjfY2fI9x/Dx6MxxyXZHf7Vliy5zuq18nwarmGThl9oV18EZeunYutJAahCk73aHNbKZfmPe8Cz3MU0/BMH6mPT0z4fHlgm4Ri0ErUY3Ct6oWijzxG+3cORREOTwfUIsZBZf/HOsMX2UmNIvSvJstggyg0=
+    - secure: n1YH+obtHmeo9MjBm8sexhBIYLdd27lvZcDsXSQ0/sbLoJLp4y95/KjR1oB+cTD8E5c1jTtZobwziPDDViT9W0u6EMfCobf3ZmDPbVV2calxrZHNqAqBZANxSZCMzmT2No3Nx2xeqrm+gOrmLvpGdhf3VNkASRNZqA3tDT6Br4Gb0VPUEnHVhUhTUZVWLXqGz3CFeafxWS1MsEOkLRwR797rtb0ksAJmLr1OfAJvjLLYl/qMSrQhDZRvPOTBgecDuP47cuXujKW+x0noXxEYtByt050vpjonjwCjEa8xzXZ8iPAQf957i7pQaUmstFtOm7WJxQA4GOv7S2DaK7RZvfTi1lNY24D4+oorDpvhi7KPqtAYaJciDK06cF6PvG3RjkVgrIRZR+AiKs5alF8phMpCgnv9vMBgc4spnlkkVAqH5e3JWiBnKPbH5DpbQ1p/S30A98Uqsrdcep2eNtVVdOZRyY/1CT3dutIbOLYvoseY9/D/0wE5loGWXZX/3y+/5wZvuICosKZUa0fzm/C8mUQsW2KZknPt86NurBIM9kNBpOmGkXYTbU1F9UxKcUcJk6m/nq4WwEIPusRAk4CW0oq1AZ+GKO9vGcDbS0i85IRfFF/EQm5TsdYsRIYzEqfQwVltzIQXeYmSnOuDPfNC38hh47DWkVvMWVtjwD8gBlY=
+    - secure: DwGJxyBLKOQ+nZ5RmIauuUnHi7Wh5TnBggii0feOEzfuHPTX6G5Vb5C8Kj2gy7I4y28LxJBMUc+cPLQqIkfvSigyYnAEZCqt+B0pNxywwy9N0XIY9+pDJMBfsBZZEXonkkAJ6kP8pXgpHPgvGZbr1aWBjC5G0qV2RzCpnDpXdA+FHresFKv2EXwD/aUb8m2TBu4IieFFU0ZtQWy6KmZrTi1smLFCZ1gK38UD2yp1sDkrFFJc4j6SWFtPWWamJXR5nxV2Kk8sBv9DrOwaG9mnwzPjt2NOVLCvhTu5XzRMS57JzumUfqyHYvgR9ftCh3a3noQH4LAe/oYSbBDAgE3YV4vWJDyliigorQNZPXhd/5Ot3qB91/rmG40DXSBp3RlD4EPRE2Y9aYbzPma5aHIaDR0zFuMQ9xpHfC/8sjT3UW5GAnPC1mZ5TXTPdnJQTqwST0OWHIC/XvFaOj9fv2mI4IqlQIipBrcMlfKOykGHBZLEhzHKEhwJdwts0dvX2wtsBrtUUCrX0tzq0sitK00F3HOsDV7tYQA8fkH1cK5LMNTIGiNI45U8GUBrtK4EFHIObA+s5j22GMLYNXdir3U7/95IReaKI6ow93raLhiXLjJcttiXQavnHPCNCe/4xIvBKnVx7rdm2sZMpSNYo0m3ox9ypEKYGJIYX/+I8j1CCEE=

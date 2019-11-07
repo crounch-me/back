@@ -1,77 +1,32 @@
 <template>
   <div id="app">
-    <header>
-      <span>Crounch 
-        <a v-if="!authenticated" @click="auth.login()">Log In</a>
-        <a v-if="authenticated" @click="auth.logout()">Log out</a>
-      </span>
-    </header>
-    <main>
-      <router-view
-        :auth="auth" 
-        :authenticated="authenticated"></router-view>
-    </main>
+    <div id="nav">
+      <router-link to="/">Home</router-link> |
+      <router-link to="/about">About</router-link>
+    </div>
+    <router-view />
   </div>
 </template>
 
-<script>
-import AuthService from './auth/AuthService'
-
-const auth = new AuthService()
-
-const { login, logout, authenticated, authNotifier } = auth
-
-export default {
-  name: 'app',
-    data () {
-    authNotifier.on('authChange', authState => {
-      this.authenticated = authState.authenticated
-    })
-    return {
-      auth,
-      authenticated,
-    }
-  },
-  methods: {
-    login,
-    logout,
-  }
-};
-</script>
-
-<style>
-body {
-  margin: 0;
-}
-
+<style lang="scss">
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  font-family: "Avenir", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-align: center;
   color: #2c3e50;
 }
 
-main {
-  text-align: center;
-  margin-top: 40px;
-}
+#nav {
+  padding: 30px;
 
-header {
-  margin: 0;
-  height: 56px;
-  padding: 0 16px 0 24px;
-  background-color: #35495E;
-  color: #ffffff;
-}
+  a {
+    font-weight: bold;
+    color: #2c3e50;
 
-header span {
-  display: block;
-  position: relative;
-  font-size: 20px;
-  line-height: 1;
-  letter-spacing: .02em;
-  font-weight: 400;
-  box-sizing: border-box;
-  padding-top: 16px;
+    &.router-link-exact-active {
+      color: #42b983;
+    }
+  }
 }
 </style>
