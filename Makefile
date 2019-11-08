@@ -1,7 +1,6 @@
 DATABASE_PORT := 5432
 
 VERSION := $(shell head -n 1 VERSION)
-SEABOLT_DIR := $(shell pkg-config --variable=libdir seabolt17)
 
 APP_NAME := crounch-back
 BUILDER_IMAGE_NAME := $(APP_NAME)-builder:$(VERSION)
@@ -33,10 +32,14 @@ build:
 	go build -o $(GOPATH)/bin/$(APP_NAME)
 
 .PHONY: build-image
-build-image: build-builder-image
+build-image: build-builder-image build-image-ci
+
+.PHONY: build-image-ci
+build-image-ci:
 	@echo "+ $@"
 	docker build -f containers/Dockerfile -t $(APP_NAME):$(VERSION) --build-arg BUILDER_IMAGE=$(BUILDER_IMAGE_NAME) .
 	docker tag $(APP_NAME):$(VERSION) $(DOCKER_USER)/$(APP_NAME):$(VERSION)
+
 
 .PHONY: build-builder-image
 build-builder-image:
@@ -49,7 +52,7 @@ acceptance-test:
 	cd acceptance; godog
 
 .PHONY: acceptance-test-ci
-acceptance-test-ci: run-image
+acceptance-test-ci: run-image-ci
 	@echo "+ $@"
 	docker rm $(APP_NAME)-acceptance-test || true
 	docker run --net='host' --name $(APP_NAME)-acceptance-test $(BUILDER_IMAGE_NAME) /bin/sh -c "make acceptance-test"
@@ -70,13 +73,16 @@ run-dependencies:
 	@docker-compose -p $(APP_NAME) -f containers/docker-compose.dependencies.yml up -d --build
 
 .PHONY: run-image
-run-image: build-builder-image
+run-image: build-builder-image run-image-ci
+
+.PHONY: run-image-ci
+run-image-ci:
 	BUILDER_IMAGE_NAME=$(BUILDER_IMAGE_NAME) APP_NAME=$(APP_NAME) docker-compose -p $(APP_NAME) -f containers/docker-compose.yml up -d --build
 
 .PHONY: test
 test:
 	@echo "+ $@"
-	go test -v -ldflags "-r $(SEABOLT_DIR)"  $(shell go list ./... | grep -v vendor | grep -v acceptance)
+	go test -v $(shell go list ./... | grep -v vendor | grep -v acceptance)
 
 .PHONY: test-ci
 test-ci: build-builder-image

@@ -3,7 +3,7 @@ module github.com/Sehsyha/crounch-back
 go 1.12
 
 require (
-	github.com/DATA-DOG/godog v0.7.9
+	github.com/DATA-DOG/godog v0.7.13
 	github.com/gin-contrib/sse v0.0.0-20190125020943-a7658810eb74 // indirect
 	github.com/gin-gonic/gin v1.3.0
 	github.com/go-playground/locales v0.12.1 // indirect
