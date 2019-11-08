@@ -18,6 +18,7 @@ before_deploy:
   - export VERSION_NUMBER=$(head -n 1 VERSION)
   - docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
   - docker push $DOCKER_USER/crounch-back:$VERSION_NUMBER
+  - docker push $DOCKER_USER/crounch-back:latest
 deploy:
   provider: script
   script: ssh -oStrictHostKeyChecking=no -p $DEPLOY_PORT $DEPLOY_USER@$DEPLOY_HOST $DEPLOY_PATH/back.sh $VERSION_NUMBER
