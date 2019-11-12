@@ -19,7 +19,8 @@ before_deploy:
   - ssh-add /tmp/deploy_rsa
   - git remote set-url origin https://Sehsyha:$GITHUB_API_KEY@github.com/Sehsyha/crounch-back.git
   - make bump-version
-  - make build-image
+  - export VERSION_NUMBER=$(head -n 1 VERSION)
+  - make build-image-ci
   - make publish-image
 deploy:
   provider: script
