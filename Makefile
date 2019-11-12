@@ -39,12 +39,19 @@ build-image-ci:
 	@echo "+ $@"
 	docker build -f containers/Dockerfile -t $(APP_NAME):$(VERSION) --build-arg BUILDER_IMAGE=$(BUILDER_IMAGE_NAME) .
 	docker tag $(APP_NAME):$(VERSION) $(DOCKER_USER)/$(APP_NAME):$(VERSION)
-
+	docker tag $(APP_NAME):$(VERSION) $(DOCKER_USER)/$(APP_NAME):latest
 
 .PHONY: build-builder-image
 build-builder-image:
 	@echo "+ $@"
 	docker build -t $(BUILDER_IMAGE_NAME) -f containers/Dockerfile.builder .
+
+.PHONY: publish-image
+publish-image:
+	@echo "+ $@"
+	docker login -u $(DOCKER_USER) -p $(DOCKER_PASSWORD)
+	docker push $(DOCKER_USER)/crounch-back:$(VERSION)
+	docker push $(DOCKER_USER)/crounch-back:latest
 
 .PHONY: acceptance-test
 acceptance-test:
@@ -91,7 +98,7 @@ test-ci: build-builder-image
 	WORKDIR=$(shell docker inspect --format "{{.Config.WorkingDir}}" $(BUILDER_IMAGE_NAME)); \
 		docker cp $(APP_NAME)-test:$$WORKDIR/profile.cov profile.cov
 
-.PHONY: cover-ci 
+.PHONY: cover-ci
 cover-ci:
 	@echo "+ $@"
 	go test -v -covermode=count -coverprofile=profile.cov ./handler

@@ -19,10 +19,9 @@ before_deploy:
   - ssh-add /tmp/deploy_rsa
   - git remote set-url origin https://Sehsyha:$GITHUB_API_KEY@github.com/Sehsyha/crounch-back.git
   - make bump-version
-  - make build-image
   - export VERSION_NUMBER=$(head -n 1 VERSION)
-  - docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
-  - docker push $DOCKER_USER/crounch-back:$VERSION_NUMBER
+  - make build-image-ci
+  - make publish-image
 deploy:
   provider: script
   script: ssh -oStrictHostKeyChecking=no -p $DEPLOY_PORT $DEPLOY_USER@$DEPLOY_HOST $DEPLOY_PATH/back.sh $VERSION_NUMBER

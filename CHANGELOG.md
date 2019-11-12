@@ -2,6 +2,36 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.1.8"></a>
+## [1.1.8](https://github.com/Sehsyha/crounch-back/compare/1.1.7...1.1.8) (2019-11-12)
+
+
+### Bug Fixes
+
+* **build:** export version number again in travis file ([#58](https://github.com/Sehsyha/crounch-back/issues/58)) ([1c81016](https://github.com/Sehsyha/crounch-back/commit/1c81016))
+
+
+
+<a name="1.1.7"></a>
+## [1.1.7](https://github.com/Sehsyha/crounch-back/compare/1.1.6...1.1.7) (2019-11-12)
+
+
+### Bug Fixes
+
+* **build:** push latest docker image ([#57](https://github.com/Sehsyha/crounch-back/issues/57)) ([0633d02](https://github.com/Sehsyha/crounch-back/commit/0633d02))
+
+
+
+<a name="1.1.6"></a>
+## [1.1.6](https://github.com/Sehsyha/crounch-back/compare/1.1.5...1.1.6) (2019-11-12)
+
+
+
+<a name="1.1.5"></a>
+## [1.1.5](https://github.com/Sehsyha/crounch-back/compare/1.1.4...1.1.5) (2019-11-07)
+
+
+
 <a name="1.1.4"></a>
 ## [1.1.4](https://github.com/Sehsyha/crounch-back/compare/1.1.3...1.1.4) (2019-11-06)
 
