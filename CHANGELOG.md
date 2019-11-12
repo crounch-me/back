@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.1.7"></a>
+## [1.1.7](https://github.com/Sehsyha/crounch-back/compare/1.1.6...1.1.7) (2019-11-12)
+
+
+### Bug Fixes
+
+* **build:** push latest docker image ([#57](https://github.com/Sehsyha/crounch-back/issues/57)) ([0633d02](https://github.com/Sehsyha/crounch-back/commit/0633d02))
+
+
+
 <a name="1.1.6"></a>
 ## [1.1.6](https://github.com/Sehsyha/crounch-back/compare/1.1.5...1.1.6) (2019-11-12)
 
