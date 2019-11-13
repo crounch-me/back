@@ -20,7 +20,7 @@ before_deploy:
   - git remote set-url origin https://Sehsyha:$GITHUB_API_KEY@github.com/Sehsyha/crounch-back.git
   - make bump-version
   - export VERSION_NUMBER=$(head -n 1 VERSION)
-  - make build-image-ci
+  - make build-image
   - make publish-image
 deploy:
   provider: script
