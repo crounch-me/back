@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"testing"
 
 	"github.com/Sehsyha/crounch-back/model"
@@ -16,8 +15,6 @@ type Body struct {
 }
 
 func verify(t *testing.T, expectedBody []Body, expectedError *model.Error, actualBody string) {
-	fmt.Println(actualBody)
-
 	if expectedError != nil {
 		path, err := jsonpath.Compile("$.error")
 		assert.NoError(t, err)

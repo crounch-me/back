@@ -1,6 +1,7 @@
 package router
 
 import (
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 
@@ -15,13 +16,15 @@ const (
 	loginPath = "/users/login"
 )
 
+// Version represents the version of the application
 var Version string
 
+// Start launches the router which handle connection and execute the right functions
 func Start(config *configuration.Config) {
 	gin.SetMode(gin.ReleaseMode)
 
 	r := gin.New()
-	r.HandleMethodNotAllowed = true
+	r.Use(cors.Default())
 
 	hc := handler.NewContext(config)
 	configureRoutes(r, hc)
