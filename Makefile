@@ -32,10 +32,7 @@ build:
 	go build -o $(GOPATH)/bin/$(APP_NAME)
 
 .PHONY: build-image
-build-image: build-builder-image build-image-ci
-
-.PHONY: build-image-ci
-build-image-ci:
+build-image: build-builder-image
 	@echo "+ $@"
 	docker build -f containers/Dockerfile -t $(APP_NAME):$(VERSION) --build-arg BUILDER_IMAGE=$(BUILDER_IMAGE_NAME) .
 	docker tag $(APP_NAME):$(VERSION) $(DOCKER_USER)/$(APP_NAME):$(VERSION)
