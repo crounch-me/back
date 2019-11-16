@@ -17,4 +17,7 @@ const (
 
 	UnmarshalCode        = "unmarshal"
 	UnmarshalDescription = "An error occured while reading request body"
+
+	UserDataCode        = "user-data"
+	UserDataDescription = "An error occured while retrieving user data"
 )

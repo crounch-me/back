@@ -66,3 +66,32 @@ func (s *PostgresStorage) GetUserByEmail(email string) (*model.User, error) {
 
 	return user, nil
 }
+
+// GetUserIDByToken find the user with his token
+func (s *PostgresStorage) GetUserIDByToken(token string) (*string, error) {
+	log.WithField("token", token).Debug("Getting user by token")
+
+	query := fmt.Sprintf(`
+		SELECT id
+    FROM %s."user"
+    LEFT JOIN %s."authorization" ON "authorization".user_id = "user".id
+		WHERE "authorization".token = $1
+	`, s.schema, s.schema)
+
+	row := s.session.QueryRow(query, token)
+
+	var id *string
+
+	err := row.Scan(&id)
+
+	if err == sql.ErrNoRows {
+		return nil, model.NewDatabaseError(model.ErrNotFound, nil)
+	}
+
+	if err != nil {
+		log.WithError(err).Error("Unable to find user by token")
+		return nil, err
+	}
+
+	return id, nil
+}

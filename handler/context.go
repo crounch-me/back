@@ -17,6 +17,11 @@ import (
 	"github.com/Sehsyha/crounch-back/storage/postgres"
 )
 
+const (
+	// ContextUserID is the key to retrieve user id from gin context
+	ContextUserID = "ContextUserID"
+)
+
 // Context holds everything to respond to requests
 type Context struct {
 	Storage  storage.Storage

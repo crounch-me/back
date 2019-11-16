@@ -14,7 +14,7 @@ func GenerateToken() string {
 }
 
 func RandStringRunes(length int) string {
-	b := make([]byte, tokenLength)
+	b := make([]byte, length)
 	for i := range b {
 		b[i] = charset[rand.Intn(len(charset))]
 	}
