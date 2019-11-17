@@ -1,5 +1,6 @@
 package model
 
+// User represents an user of the application
 type User struct {
 	ID       string  `json:"id"`
 	Email    string  `json:"email" validate:"required,email"`
