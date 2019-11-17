@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.2.0"></a>
+# [1.2.0](https://github.com/Sehsyha/crounch-back/compare/1.1.12...1.2.0) (2019-11-17)
+
+
+### Features
+
+* add user data retrieval and create product list ([#64](https://github.com/Sehsyha/crounch-back/issues/64)) ([280cbb0](https://github.com/Sehsyha/crounch-back/commit/280cbb0)), closes [#18](https://github.com/Sehsyha/crounch-back/issues/18)
+
+
+
 <a name="1.1.12"></a>
 ## [1.1.12](https://github.com/Sehsyha/crounch-back/compare/1.1.11...1.1.12) (2019-11-13)
 
