@@ -7,6 +7,11 @@ BUILDER_IMAGE_NAME := $(APP_NAME)-builder:$(VERSION)
 TEST_IMAGE_NAME := $(APP_NAME)-test-$(VERSION)
 DOCKER_USER := sehsyha
 
+TAG_FLAG :=
+ifneq ($(TAG),)
+	TAG_FLAG:=--tags=$(TAG)
+endif
+
 .PHONY: bump-version
 bump-version:
 	@echo "+ $@"
@@ -53,7 +58,7 @@ publish-image:
 .PHONY: acceptance-test
 acceptance-test:
 	@echo "+ $@"
-	cd acceptance; godog
+	cd acceptance; godog $(TAG_FLAG)
 
 .PHONY: acceptance-test-ci
 acceptance-test-ci: run-image-ci

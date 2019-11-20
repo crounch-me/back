@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -12,6 +13,7 @@ import (
 	"github.com/DATA-DOG/godog/gherkin"
 	"github.com/Sehsyha/crounch-back/util"
 	"github.com/oliveagle/jsonpath"
+	uuid "github.com/satori/go.uuid"
 )
 
 type TestExecutor struct {
@@ -32,18 +34,53 @@ func (te *TestExecutor) iUseThisBody(body *gherkin.DocString) error {
 	return nil
 }
 
-func (te *TestExecutor) hasStringValue(path, expectedValue string) error {
+func (te *TestExecutor) getValue(path string) (interface{}, error) {
 	pattern, err := jsonpath.Compile(path)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var actualData interface{}
+
+	json.Unmarshal(te.ResponseBody, &actualData)
+	foundValue, err := pattern.Lookup(actualData)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return foundValue, nil
+}
+
+func (te *TestExecutor) hasStringValue(path, expectedValue string) error {
+	foundValue, err := te.getValue(path)
+
 	if err != nil {
 		return err
 	}
 
-	var actualData interface{}
-	json.Unmarshal(te.ResponseBody, &actualData)
-	foundValue, _ := pattern.Lookup(actualData)
-
 	if foundValue != expectedValue {
 		return fmt.Errorf("actual %s is not equal to expected %s", foundValue, expectedValue)
+	}
+
+	return nil
+}
+
+func (te *TestExecutor) hasBoolValue(path, expectedValue string) error {
+	foundValue, err := te.getValue(path)
+
+	if err != nil {
+		return err
+	}
+
+	expectedBoolValue, err := strconv.ParseBool(expectedValue)
+	if err != nil {
+		return err
+	}
+
+	if foundValue.(bool) != expectedBoolValue {
+		return fmt.Errorf("actual %s is not equal to expected %s for path %s", foundValue, expectedValue, path)
 	}
 
 	return nil
@@ -212,10 +249,18 @@ func (te *TestExecutor) isANonEmptyString(path string) error {
 	return nil
 }
 
+func (te *TestExecutor) theHeaderEquals(header, value string) error {
+	headerValue := te.Response.Header.Get(header)
+
+	if headerValue != value {
+		return fmt.Errorf("actual value \"%s\" for header \"%s\" should equal \"%s\"", headerValue, header, value)
+	}
+
+	return nil
+}
+
 func randomEmail() string {
-	characters := util.RandStringRunes(3)
-	characters = strings.ToLower(characters)
-	return fmt.Sprintf("%s@%s.%s", characters, characters, characters)
+	return fmt.Sprintf("%s@crounch.me", uuid.NewV4())
 }
 
 func randomPassword() string {
@@ -226,6 +271,7 @@ func FeatureContext(s *godog.Suite) {
 	te := &TestExecutor{}
 	s.Step(`^I use this body$`, te.iUseThisBody)
 	s.Step(`^"([^"]*)" has string value "([^"]*)"$`, te.hasStringValue)
+	s.Step(`^"([^"]*)" has bool value "([^"]*)"$`, te.hasBoolValue)
 	s.Step(`^I send a "([^"]*)" request on "([^"]*)"$`, te.iSendARequestOn)
 	s.Step(`^I create these users?$`, te.iCreateTheseUsers)
 	s.Step(`^the status code is (\d+)$`, te.theStatusCodeIs)
@@ -233,4 +279,5 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`^"([^"]*)" is a string equal to "([^"]*)"$`, te.isAStringEqualTo)
 	s.Step(`^I\'m authenticated with this random user$`, te.imAuthenticatedWithThisRandomUSer)
 	s.Step(`^I create a random user$`, te.iCreateARandomUser)
+	s.Step(`^the header "([^"]*)" equals "([^"]*)"$`, te.theHeaderEquals)
 }
