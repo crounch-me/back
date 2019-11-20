@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.2.2"></a>
+## [1.2.2](https://github.com/Sehsyha/crounch-back/compare/1.2.1...1.2.2) (2019-11-20)
+
+
+### Bug Fixes
+
+* add headers for options requests ([#66](https://github.com/Sehsyha/crounch-back/issues/66)) ([04d55fe](https://github.com/Sehsyha/crounch-back/commit/04d55fe))
+
+
+
 <a name="1.2.1"></a>
 ## [1.2.1](https://github.com/Sehsyha/crounch-back/compare/1.2.0...1.2.1) (2019-11-17)
 
