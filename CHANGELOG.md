@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.2.3"></a>
+## [1.2.3](https://github.com/Sehsyha/crounch-back/compare/1.2.2...1.2.3) (2019-11-22)
+
+
+### Bug Fixes
+
+* unknown error on login when user not found ([#67](https://github.com/Sehsyha/crounch-back/issues/67)) ([edfc822](https://github.com/Sehsyha/crounch-back/commit/edfc822)), closes [#62](https://github.com/Sehsyha/crounch-back/issues/62)
+
+
+
 <a name="1.2.2"></a>
 ## [1.2.2](https://github.com/Sehsyha/crounch-back/compare/1.2.1...1.2.2) (2019-11-20)
 
