@@ -76,6 +76,9 @@ func (hc *Context) Login(c *gin.Context) {
 	if err != nil {
 		if databaseError, ok := err.(*model.DatabaseError); ok {
 			switch databaseError.Type {
+			case model.ErrNotFound:
+				c.AbortWithStatus(http.StatusForbidden)
+				return
 			case model.ErrWrongPassword:
 				hc.LogAndSendError(c, err, errorcode.WrongPasswordCode, errorcode.WrongPasswordDescription, http.StatusBadRequest)
 				return
