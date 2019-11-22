@@ -342,13 +342,19 @@ func TestLogin(t *testing.T) {
 		},
 		{
 			description:                    "KO - unknown database error of type DatabaseError",
-			createAuthorizationStorageMock: createAuthorizationStorageMock{isCalled: true, err: model.NewDatabaseError(model.ErrNotFound, nil), result: nil},
+			createAuthorizationStorageMock: createAuthorizationStorageMock{isCalled: true, err: model.NewDatabaseError(model.ErrCreation, nil), result: nil},
 			expectedStatusCode:             http.StatusInternalServerError,
 			requestBody:                    validBody,
 			expectedError: &model.Error{
 				Code:        errorcode.DatabaseCode,
 				Description: errorcode.DatabaseDescription,
 			},
+		},
+		{
+			description:                    "KO - user not found",
+			createAuthorizationStorageMock: createAuthorizationStorageMock{isCalled: true, err: model.NewDatabaseError(model.ErrNotFound, nil), result: nil},
+			expectedStatusCode:             http.StatusForbidden,
+			requestBody:                    validBody,
 		},
 	}
 
