@@ -55,7 +55,7 @@ func (hc *Context) GetValidationErrorDescription(err error) string {
 }
 
 // LogAndSendError logs and sends the error
-func (hc *Context) LogAndSendError(c *gin.Context, causeError error /*, title*/, code, description string, status int) {
+func (hc *Context) LogAndSendError(c *gin.Context, causeError error, code, description string, status int) {
 	if causeError != nil {
 		log.WithError(causeError).Error(code)
 	}

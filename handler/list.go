@@ -6,6 +6,8 @@ import (
 	"github.com/Sehsyha/crounch-back/errorcode"
 	"github.com/Sehsyha/crounch-back/model"
 	"github.com/gin-gonic/gin"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func (hc *Context) CreateList(c *gin.Context) {
@@ -41,4 +43,23 @@ func (hc *Context) CreateList(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, list)
+}
+
+func (hc *Context) GetOwnerLists(c *gin.Context) {
+	userID, exists := c.Get(ContextUserID)
+
+	if !exists {
+		hc.LogAndSendError(c, nil, errorcode.UserDataCode, errorcode.UserDataDescription, http.StatusInternalServerError)
+		return
+	}
+
+	lists, err := hc.Storage.GetOwnerLists(userID.(string))
+
+	if err != nil {
+		hc.LogAndSendError(c, err, errorcode.DatabaseCode, errorcode.DatabaseDescription, http.StatusInternalServerError)
+		return
+	}
+
+	log.WithField("lists", lists).Debug("Response: lists")
+	c.JSON(http.StatusOK, lists)
 }

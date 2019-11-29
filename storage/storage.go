@@ -13,4 +13,5 @@ type Storage interface {
 	CreateAuthorization(user *model.User) (*model.Authorization, error)
 
 	CreateList(list *model.List) error
+	GetOwnerLists(ownerID string) ([]*model.List, error)
 }
