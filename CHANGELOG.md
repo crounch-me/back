@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.3.0"></a>
+# [1.3.0](https://github.com/Sehsyha/crounch-back/compare/1.2.3...1.3.0) (2019-11-30)
+
+
+### Features
+
+* **lists:** add get owner's shopping list endpoint ([#71](https://github.com/Sehsyha/crounch-back/issues/71)) ([f993b29](https://github.com/Sehsyha/crounch-back/commit/f993b29))
+
+
+
 <a name="1.2.3"></a>
 ## [1.2.3](https://github.com/Sehsyha/crounch-back/compare/1.2.2...1.2.3) (2019-11-22)
 
