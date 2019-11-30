@@ -249,6 +249,41 @@ func (te *TestExecutor) isANonEmptyString(path string) error {
 	return nil
 }
 
+func (te *TestExecutor) iCreateAndAuthenticateWithARandomUser() error {
+	err := te.iCreateARandomUser()
+
+	if err != nil {
+		return err
+	}
+
+	err = te.imAuthenticatedWithThisRandomUSer()
+
+	return err
+}
+
+func (te *TestExecutor) iCreateTheseLists(listDataTable *gherkin.DataTable) error {
+	for i, row := range listDataTable.Rows {
+		if i != 0 {
+			name := strings.TrimSpace(row.Cells[0].Value)
+			te.RequestBody = fmt.Sprintf(`
+        {
+          "name": "%s"
+        }
+      `, name)
+			err := te.iSendARequestOn(http.MethodPost, "/lists")
+			if err != nil {
+				return err
+			}
+
+			err = te.theStatusCodeIs(http.StatusCreated)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
 func (te *TestExecutor) theHeaderEquals(header, value string) error {
 	headerValue := te.Response.Header.Get(header)
 
@@ -269,15 +304,26 @@ func randomPassword() string {
 
 func FeatureContext(s *godog.Suite) {
 	te := &TestExecutor{}
+	// Requests
 	s.Step(`^I use this body$`, te.iUseThisBody)
+	s.Step(`^I send a "([^"]*)" request on "([^"]*)"$`, te.iSendARequestOn)
+
+	// Assertions
+	s.Step(`^the header "([^"]*)" equals "([^"]*)"$`, te.theHeaderEquals)
+	s.Step(`^the status code is (\d+)$`, te.theStatusCodeIs)
 	s.Step(`^"([^"]*)" has string value "([^"]*)"$`, te.hasStringValue)
 	s.Step(`^"([^"]*)" has bool value "([^"]*)"$`, te.hasBoolValue)
-	s.Step(`^I send a "([^"]*)" request on "([^"]*)"$`, te.iSendARequestOn)
-	s.Step(`^I create these users?$`, te.iCreateTheseUsers)
-	s.Step(`^the status code is (\d+)$`, te.theStatusCodeIs)
-	s.Step(`^"([^"]*)" is a non empty string$`, te.isANonEmptyString)
 	s.Step(`^"([^"]*)" is a string equal to "([^"]*)"$`, te.isAStringEqualTo)
+	s.Step(`^"([^"]*)" is a non empty string$`, te.isANonEmptyString)
+
+	// Authentication
 	s.Step(`^I\'m authenticated with this random user$`, te.imAuthenticatedWithThisRandomUSer)
+	s.Step(`^I create and authenticate with a random user$`, te.iCreateAndAuthenticateWithARandomUser)
 	s.Step(`^I create a random user$`, te.iCreateARandomUser)
-	s.Step(`^the header "([^"]*)" equals "([^"]*)"$`, te.theHeaderEquals)
+
+	// Users
+	s.Step(`^I create these users?$`, te.iCreateTheseUsers)
+
+	// Lists
+	s.Step(`^I create this lists$`, te.iCreateTheseLists)
 }

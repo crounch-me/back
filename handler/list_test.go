@@ -18,6 +18,8 @@ import (
 	storagemock "github.com/Sehsyha/crounch-back/storage/mock"
 )
 
+const userID = "user-id"
+
 type createListStorageMock struct {
 	isCalled bool
 	err      error
@@ -34,7 +36,6 @@ type listCreateTestCases struct {
 }
 
 func TestCreateList(t *testing.T) {
-	userID := "user-id"
 	validBody := `
 		{
 			"name": "Ma liste de course"
@@ -141,6 +142,103 @@ func TestCreateList(t *testing.T) {
 				storageMock.AssertCalled(t, "CreateList", mock.Anything)
 			} else {
 				storageMock.AssertNotCalled(t, "CreateList", mock.Anything)
+			}
+
+			assert.Equal(t, tc.expectedStatusCode, w.Code)
+
+			verify(t, tc.expectedBody, tc.expectedError, string(w.Body.Bytes()))
+		})
+	}
+}
+
+type getOwnerListsStorageMock struct {
+	isCalled bool
+	result   []*model.List
+	err      error
+}
+
+type listOwnerGetTestCases struct {
+	getOwnerListsStorageMock getOwnerListsStorageMock
+	description              string
+	expectedStatusCode       int
+	expectedBody             []Body
+	expectedError            *model.Error
+	noContext                bool
+}
+
+func TestGetOwnerLists(t *testing.T) {
+	lists := []*model.List{
+		&model.List{
+			ID:   "list id",
+			Name: "list name",
+		},
+	}
+	testCases := []listOwnerGetTestCases{
+		{
+			description:              "KO - error when retrieving user id from context",
+			noContext:                true,
+			expectedStatusCode:       http.StatusInternalServerError,
+			getOwnerListsStorageMock: getOwnerListsStorageMock{},
+			expectedError: &model.Error{
+				Code:        errorcode.UserDataCode,
+				Description: errorcode.UserDataDescription,
+			},
+		},
+		{
+			description:              "KO - error when retrieving lists from database",
+			expectedStatusCode:       http.StatusInternalServerError,
+			getOwnerListsStorageMock: getOwnerListsStorageMock{isCalled: true, err: errors.New("unknown")},
+			expectedError: &model.Error{
+				Code:        errorcode.DatabaseCode,
+				Description: errorcode.DatabaseDescription,
+			},
+		},
+		{
+			description:              "OK - Return owner lists",
+			expectedStatusCode:       http.StatusOK,
+			getOwnerListsStorageMock: getOwnerListsStorageMock{isCalled: true, result: lists},
+			expectedBody: []Body{
+				{
+					Path: "$.id[0]",
+					Data: "list id",
+				},
+				{
+					Path: "$.name[0]",
+					Data: "list name",
+				},
+			},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.description, func(t *testing.T) {
+			w := httptest.NewRecorder()
+			req, _ := http.NewRequest(http.MethodGet, "/lists", nil)
+
+			config := &configuration.Config{
+				Mock: true,
+			}
+			hc := NewContext(config)
+			gin.SetMode(gin.TestMode)
+
+			contextTest, _ := gin.CreateTestContext(w)
+			contextTest.Request = req
+
+			if !tc.noContext {
+				contextTest.Set(ContextUserID, userID)
+			}
+
+			storageMock := &storagemock.StorageMock{}
+
+			storageMock.On("GetOwnerLists", mock.Anything).Return(tc.getOwnerListsStorageMock.result, tc.getOwnerListsStorageMock.err)
+
+			hc.Storage = storageMock
+
+			hc.GetOwnerLists(contextTest)
+
+			if tc.getOwnerListsStorageMock.isCalled {
+				storageMock.AssertCalled(t, "GetOwnerLists", mock.Anything)
+			} else {
+				storageMock.AssertNotCalled(t, "GetOwnerLists", mock.Anything)
 			}
 
 			assert.Equal(t, tc.expectedStatusCode, w.Code)

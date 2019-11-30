@@ -64,7 +64,8 @@ func configureRoutes(r *gin.Engine, hc *handler.Context) {
 
 	// List routes
 	r.POST(listPath, checkAccess(hc.Storage), hc.CreateList)
-	r.OPTIONS(listPath, optionsHandler([]string{http.MethodPost}))
+	r.GET(listPath, checkAccess(hc.Storage), hc.GetOwnerLists)
+	r.OPTIONS(listPath, optionsHandler([]string{http.MethodPost, http.MethodGet}))
 }
 
 func checkAccess(s storage.Storage) gin.HandlerFunc {
