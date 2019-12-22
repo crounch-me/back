@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.5.0"></a>
+# [1.5.0](https://github.com/Sehsyha/crounch-back/compare/1.4.0...1.5.0) (2019-12-22)
+
+
+### Features
+
+* **lists:** get off products of an user's list ([#81](https://github.com/Sehsyha/crounch-back/issues/81)) ([a580ab0](https://github.com/Sehsyha/crounch-back/commit/a580ab0))
+
+
+
 <a name="1.4.0"></a>
 # [1.4.0](https://github.com/Sehsyha/crounch-back/compare/1.3.1...1.4.0) (2019-12-22)
 
