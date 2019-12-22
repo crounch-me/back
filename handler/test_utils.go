@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	userID      = "user-id"
+	userIDMock  = "user-id"
 	otherUserID = "other-user-id"
 )
 
