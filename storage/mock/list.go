@@ -25,3 +25,9 @@ func (sm *StorageMock) AddOFFProductToList(listID string, offProduct *model.OFFP
 	args := sm.Called(listID, offProduct)
 	return args.Error(0)
 }
+
+// GetProdutsFromList mocks the retrieval of OFFProducts from a list
+func (sm *StorageMock) GetOFFProducts(listID string) ([]*model.OFFProduct, error) {
+	args := sm.Called(listID)
+	return args.Get(0).([]*model.OFFProduct), args.Error(1)
+}

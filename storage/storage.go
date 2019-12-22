@@ -16,4 +16,5 @@ type Storage interface {
 	GetOwnerLists(ownerID string) ([]*model.List, error)
 	GetList(id string) (*model.List, error)
 	AddOFFProductToList(listID string, offProduct *model.OFFProduct) error
+	GetOFFProducts(listID string) ([]*model.OFFProduct, error)
 }

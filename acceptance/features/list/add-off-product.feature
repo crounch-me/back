@@ -1,6 +1,5 @@
 Feature: Add Open Food Facts Product to List
 
-  @current
   Scenario: OK
     Given I create and authenticate with a random user
     And I create a random list
