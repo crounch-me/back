@@ -1,4 +1,3 @@
-@current
 Feature: Health
 
   Scenario: CORS
