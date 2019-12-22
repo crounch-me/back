@@ -4,7 +4,7 @@ const (
 	Duplicate            = "duplicate"
 	DuplicateDescription = "User with this email already exists"
 
-	NotFound = "not-found"
+	NotFoundCode = "not-found"
 
 	WrongPasswordCode        = "wrong-password"
 	WrongPasswordDescription = "The password doesn't match the saved one"

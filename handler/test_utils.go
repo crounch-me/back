@@ -9,6 +9,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const (
+	userID      = "user-id"
+	otherUserID = "other-user-id"
+)
+
 type Body struct {
 	Path string
 	Data string

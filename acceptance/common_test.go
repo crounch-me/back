@@ -7,14 +7,20 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"text/template"
 	"time"
 
 	"github.com/DATA-DOG/godog"
 	"github.com/DATA-DOG/godog/gherkin"
+	"github.com/Sehsyha/crounch-back/model"
 	"github.com/Sehsyha/crounch-back/util"
 	"github.com/oliveagle/jsonpath"
 	uuid "github.com/satori/go.uuid"
 )
+
+type ExecutorVariables struct {
+	ListID string
+}
 
 type TestExecutor struct {
 	RequestBody  string
@@ -23,6 +29,7 @@ type TestExecutor struct {
 	UserEmail    string
 	UserPassword string
 	UserToken    string
+	Variables    ExecutorVariables
 }
 
 const (
@@ -87,14 +94,46 @@ func (te *TestExecutor) hasBoolValue(path, expectedValue string) error {
 }
 
 func (te *TestExecutor) iSendARequestOn(method, path string) error {
-	var body *strings.Reader
-	if method == http.MethodPost || method == http.MethodPut || method != http.MethodPatch {
-		body = strings.NewReader(te.RequestBody)
-	} else if method != http.MethodGet {
+	var b strings.Builder
+	var u strings.Builder
+	if method != http.MethodPost &&
+		method != http.MethodPut &&
+		method != http.MethodPatch &&
+		method != http.MethodGet &&
+		method != http.MethodOptions {
 		return fmt.Errorf("unknown http method %s", method)
 	}
 
-	req, err := http.NewRequest(method, BaseURL+path, body)
+	tmpl, err := template.New("body").Parse(te.RequestBody)
+
+	if err != nil {
+		return err
+	}
+
+	err = tmpl.Execute(&b, te.Variables)
+
+	if err != nil {
+		return err
+	}
+
+	replacedBody := b.String()
+	body := *strings.NewReader(replacedBody)
+
+	tmpl, err = template.New("url").Parse(path)
+
+	if err != nil {
+		return err
+	}
+
+	err = tmpl.Execute(&u, te.Variables)
+
+	if err != nil {
+		return err
+	}
+
+	url := u.String()
+
+	req, err := http.NewRequest(method, BaseURL+url, &body)
 
 	if err != nil {
 		return err
@@ -183,7 +222,7 @@ func (te *TestExecutor) iCreateTheseUsers(userDataTable *gherkin.DataTable) erro
 
 func (te *TestExecutor) iCreateARandomUser() error {
 	email := randomEmail()
-	password := randomPassword()
+	password := randomString()
 	te.RequestBody = fmt.Sprintf(`
     {
       "email": "%s",
@@ -261,26 +300,61 @@ func (te *TestExecutor) iCreateAndAuthenticateWithARandomUser() error {
 	return err
 }
 
+func (te *TestExecutor) createList(l *model.List) error {
+	te.RequestBody = fmt.Sprintf(`
+    {
+      "name": "%s"
+    }
+  `, l.Name)
+	err := te.iSendARequestOn(http.MethodPost, "/lists")
+	if err != nil {
+		return err
+	}
+
+	err = te.theStatusCodeIs(http.StatusCreated)
+
+	if err != nil {
+		return err
+	}
+
+	id, err := te.getValue("$.id")
+
+	if err != nil {
+		return err
+	}
+
+	te.Variables.ListID = id.(string)
+
+	return nil
+}
+
 func (te *TestExecutor) iCreateTheseLists(listDataTable *gherkin.DataTable) error {
 	for i, row := range listDataTable.Rows {
 		if i != 0 {
 			name := strings.TrimSpace(row.Cells[0].Value)
-			te.RequestBody = fmt.Sprintf(`
-        {
-          "name": "%s"
-        }
-      `, name)
-			err := te.iSendARequestOn(http.MethodPost, "/lists")
-			if err != nil {
-				return err
+			l := &model.List{
+				Name: name,
 			}
-
-			err = te.theStatusCodeIs(http.StatusCreated)
+			err := te.createList(l)
 			if err != nil {
 				return err
 			}
 		}
 	}
+	return nil
+}
+
+func (te *TestExecutor) iCreateARandomList() error {
+	l := &model.List{
+		Name: randomString(),
+	}
+
+	err := te.createList(l)
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -298,12 +372,16 @@ func randomEmail() string {
 	return fmt.Sprintf("%s@crounch.me", uuid.NewV4())
 }
 
-func randomPassword() string {
+func randomString() string {
 	return util.RandStringRunes(10)
 }
 
 func FeatureContext(s *godog.Suite) {
-	te := &TestExecutor{}
+	te := &TestExecutor{
+		Variables: ExecutorVariables{
+			ListID: "",
+		},
+	}
 	// Requests
 	s.Step(`^I use this body$`, te.iUseThisBody)
 	s.Step(`^I send a "([^"]*)" request on "([^"]*)"$`, te.iSendARequestOn)
@@ -326,4 +404,5 @@ func FeatureContext(s *godog.Suite) {
 
 	// Lists
 	s.Step(`^I create this lists$`, te.iCreateTheseLists)
+	s.Step(`^I create a random list$`, te.iCreateARandomList)
 }

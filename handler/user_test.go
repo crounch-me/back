@@ -64,9 +64,8 @@ func TestSignup(t *testing.T) {
 			},
 		},
 		{
-			description:           "KO - missing email",
-			createUserStorageMock: createUserStorageMock{isCalled: false, err: nil},
-			expectedStatusCode:    http.StatusBadRequest,
+			description:        "KO - missing email",
+			expectedStatusCode: http.StatusBadRequest,
 			requestBody: `
 				{
 					"password": "a"
@@ -78,9 +77,8 @@ func TestSignup(t *testing.T) {
 			},
 		},
 		{
-			description:           "KO - missing password",
-			createUserStorageMock: createUserStorageMock{isCalled: false, err: nil},
-			expectedStatusCode:    http.StatusBadRequest,
+			description:        "KO - missing password",
+			expectedStatusCode: http.StatusBadRequest,
 			requestBody: `
 				{
 					"email": "test@test.com"
@@ -92,9 +90,8 @@ func TestSignup(t *testing.T) {
 			},
 		},
 		{
-			description:           "KO - password length too short",
-			createUserStorageMock: createUserStorageMock{isCalled: false, err: nil},
-			expectedStatusCode:    http.StatusBadRequest,
+			description:        "KO - password length too short",
+			expectedStatusCode: http.StatusBadRequest,
 			requestBody: `
 				{
 					"email": "test@test.com",
@@ -107,9 +104,8 @@ func TestSignup(t *testing.T) {
 			},
 		},
 		{
-			description:           "KO - email is not an email",
-			createUserStorageMock: createUserStorageMock{isCalled: false, err: nil},
-			expectedStatusCode:    http.StatusBadRequest,
+			description:        "KO - email is not an email",
+			expectedStatusCode: http.StatusBadRequest,
 			requestBody: `
 				{
 					"email": "a",
@@ -122,10 +118,9 @@ func TestSignup(t *testing.T) {
 			},
 		},
 		{
-			description:           "KO - unmarshall error",
-			createUserStorageMock: createUserStorageMock{isCalled: false, err: nil},
-			expectedStatusCode:    http.StatusBadRequest,
-			requestBody:           "",
+			description:        "KO - unmarshall error",
+			expectedStatusCode: http.StatusBadRequest,
+			requestBody:        "",
 			expectedError: &model.Error{
 				Code:        errorcode.UnmarshalCode,
 				Description: errorcode.UnmarshalDescription,
@@ -143,33 +138,30 @@ func TestSignup(t *testing.T) {
 			},
 		},
 		{
-			description:           "KO - unknown database error when getting user",
-			createUserStorageMock: createUserStorageMock{isCalled: false, err: nil},
-			getUserStorageMock:    &getUserStorageMock{result: nil, err: errors.New("unknown database error")},
-			requestBody:           validBody,
-			expectedStatusCode:    http.StatusInternalServerError,
+			description:        "KO - unknown database error when getting user",
+			getUserStorageMock: &getUserStorageMock{result: nil, err: errors.New("unknown database error")},
+			requestBody:        validBody,
+			expectedStatusCode: http.StatusInternalServerError,
 			expectedError: &model.Error{
 				Code:        errorcode.DatabaseCode,
 				Description: errorcode.DatabaseDescription,
 			},
 		},
 		{
-			description:           "KO - unknown database error when getting user",
-			createUserStorageMock: createUserStorageMock{isCalled: false, err: nil},
-			getUserStorageMock:    &getUserStorageMock{result: nil, err: model.NewDatabaseError(model.ErrWrongPassword, nil)},
-			requestBody:           validBody,
-			expectedStatusCode:    http.StatusInternalServerError,
+			description:        "KO - unknown database error when getting user",
+			getUserStorageMock: &getUserStorageMock{result: nil, err: model.NewDatabaseError(model.ErrWrongPassword, nil)},
+			requestBody:        validBody,
+			expectedStatusCode: http.StatusInternalServerError,
 			expectedError: &model.Error{
 				Code:        errorcode.DatabaseCode,
 				Description: errorcode.DatabaseDescription,
 			},
 		},
 		{
-			description:           "KO - duplicated users",
-			createUserStorageMock: createUserStorageMock{isCalled: false, err: nil},
-			getUserStorageMock:    &getUserStorageMock{result: validUser, err: nil},
-			requestBody:           validBody,
-			expectedStatusCode:    http.StatusConflict,
+			description:        "KO - duplicated users",
+			getUserStorageMock: &getUserStorageMock{result: validUser, err: nil},
+			requestBody:        validBody,
+			expectedStatusCode: http.StatusConflict,
 			expectedError: &model.Error{
 				Code:        errorcode.Duplicate,
 				Description: errorcode.DuplicateDescription,
@@ -253,9 +245,8 @@ func TestLogin(t *testing.T) {
 			},
 		},
 		{
-			description:                    "KO - missing email",
-			createAuthorizationStorageMock: createAuthorizationStorageMock{isCalled: false, err: nil},
-			expectedStatusCode:             http.StatusBadRequest,
+			description:        "KO - missing email",
+			expectedStatusCode: http.StatusBadRequest,
 			requestBody: `
 				{
 					"password": "a"
@@ -267,9 +258,8 @@ func TestLogin(t *testing.T) {
 			},
 		},
 		{
-			description:                    "KO - missing password",
-			createAuthorizationStorageMock: createAuthorizationStorageMock{isCalled: false, err: nil},
-			expectedStatusCode:             http.StatusBadRequest,
+			description:        "KO - missing password",
+			expectedStatusCode: http.StatusBadRequest,
 			requestBody: `
 				{
 					"email": "test@test.com"
@@ -281,9 +271,8 @@ func TestLogin(t *testing.T) {
 			},
 		},
 		{
-			description:                    "KO - password length too short",
-			createAuthorizationStorageMock: createAuthorizationStorageMock{isCalled: false, err: nil},
-			expectedStatusCode:             http.StatusBadRequest,
+			description:        "KO - password length too short",
+			expectedStatusCode: http.StatusBadRequest,
 			requestBody: `
 				{
 					"email": "test@test.com",
@@ -296,9 +285,8 @@ func TestLogin(t *testing.T) {
 			},
 		},
 		{
-			description:                    "KO - email is not an email",
-			createAuthorizationStorageMock: createAuthorizationStorageMock{isCalled: false, err: nil},
-			expectedStatusCode:             http.StatusBadRequest,
+			description:        "KO - email is not an email",
+			expectedStatusCode: http.StatusBadRequest,
 			requestBody: `
 				{
 					"email": "a",
@@ -311,10 +299,9 @@ func TestLogin(t *testing.T) {
 			},
 		},
 		{
-			description:                    "KO - unmarshall error",
-			createAuthorizationStorageMock: createAuthorizationStorageMock{isCalled: false, err: nil},
-			expectedStatusCode:             http.StatusBadRequest,
-			requestBody:                    "",
+			description:        "KO - unmarshall error",
+			expectedStatusCode: http.StatusBadRequest,
+			requestBody:        "",
 			expectedError: &model.Error{
 				Code:        errorcode.UnmarshalCode,
 				Description: errorcode.UnmarshalDescription,
