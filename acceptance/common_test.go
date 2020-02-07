@@ -10,10 +10,10 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/DATA-DOG/godog"
-	"github.com/DATA-DOG/godog/gherkin"
 	"github.com/Sehsyha/crounch-back/model"
 	"github.com/Sehsyha/crounch-back/util"
+	"github.com/cucumber/godog"
+	"github.com/cucumber/godog/gherkin"
 	"github.com/oliveagle/jsonpath"
 	uuid "github.com/satori/go.uuid"
 )
@@ -386,32 +386,6 @@ func (te *TestExecutor) theHeaderEquals(header, value string) error {
 	return nil
 }
 
-func (te *TestExecutor) iAddRandomOFFProduct() error {
-	code := util.RandomInt(1000000000000, 9999999999999)
-
-	te.RequestBody = fmt.Sprintf(`
-    {
-      "code": "%d"
-    }
-  `, code)
-
-	err := te.iSendARequestOn(http.MethodPost, fmt.Sprintf("/lists/%s/offproducts", te.Variables.ListID))
-
-	if err != nil {
-		return err
-	}
-
-	err = te.theStatusCodeIs(http.StatusCreated)
-
-	if err != nil {
-		return err
-	}
-
-	te.Variables.OFFProductCode = strconv.Itoa(code)
-
-	return nil
-}
-
 func randomEmail() string {
 	return fmt.Sprintf("%s@crounch.me", uuid.NewV4())
 }
@@ -451,5 +425,4 @@ func FeatureContext(s *godog.Suite) {
 	// Lists
 	s.Step(`^I create this lists$`, te.iCreateTheseLists)
 	s.Step(`^I create a random list$`, te.iCreateARandomList)
-	s.Step(`^I add a random off product$`, te.iAddRandomOFFProduct)
 }
