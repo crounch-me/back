@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.5.1"></a>
+## [1.5.1](https://github.com/Sehsyha/crounch-back/compare/1.5.0...1.5.1) (2020-02-07)
+
+
+
 <a name="1.5.0"></a>
 # [1.5.0](https://github.com/Sehsyha/crounch-back/compare/1.4.0...1.5.0) (2019-12-22)
 
