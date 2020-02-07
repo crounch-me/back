@@ -61,3 +61,4 @@ typings/
 vendor
 
 profile.cov
+.vscode
