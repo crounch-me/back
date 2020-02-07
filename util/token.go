@@ -13,10 +13,10 @@ const (
 )
 
 func GenerateToken() string {
-	return RandString(tokenLength)
+	return RandStringRunes(tokenLength)
 }
 
-func RandString(n int) string {
+func RandStringRunes(n int) string {
 	b := make([]byte, n)
 	for i, cache, remain := n-1, rand.Int63(), letterIdxMax; i >= 0; {
 		if remain == 0 {
@@ -31,8 +31,4 @@ func RandString(n int) string {
 	}
 
 	return string(b)
-}
-
-func RandomInt(min, max int) int {
-	return min + rand.Intn(max-min)
 }

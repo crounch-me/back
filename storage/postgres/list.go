@@ -94,42 +94,9 @@ func (s *PostgresStorage) GetList(id string) (*model.List, error) {
 	return l, nil
 }
 
-func (s *PostgresStorage) GetOFFProducts(listID string) ([]*model.OFFProduct, error) {
-	log.WithField("listID", listID).Debug("Get OFF products")
-
-	query := fmt.Sprintf(`
-    SELECT code
-    FROM %s.list_off_product
-    WHERE list_id = $1
-  `, s.schema)
-
-	rows, err := s.session.Query(query, listID)
-	defer rows.Close()
-	if err != nil {
-		log.WithError(err).Error("Unable to get off products")
-		return nil, err
-	}
-
-	products := make([]*model.OFFProduct, 0)
-	for rows.Next() {
-		if err = rows.Err(); err != nil {
-			return nil, err
-		}
-
-		p := &model.OFFProduct{}
-		err = rows.Scan(&p.Code)
-		if err != nil {
-			return nil, err
-		}
-		products = append(products, p)
-	}
-
-	return products, nil
-}
-
 // AddOFFProductToList adds a product from open food facts to an user list
 func (s *PostgresStorage) AddOFFProductToList(listID string, offProduct *model.OFFProduct) error {
-	log.WithField("listID", listID).WithField("offProduct.code", offProduct.Code).Debug("Add OFF product to list")
+	log.WithField("listID", listID).WithField("offProduct.code", offProduct.Code).Debug("Creating list")
 
 	query := fmt.Sprintf(`
 		INSERT INTO %s."list_off_product"(list_id, code)

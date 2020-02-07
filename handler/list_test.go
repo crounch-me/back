@@ -122,7 +122,7 @@ func TestCreateList(t *testing.T) {
 			contextTest.Request = req
 
 			if !tc.noContext {
-				contextTest.Set(ContextUserID, userIDMock)
+				contextTest.Set(ContextUserID, userID)
 			}
 
 			storageMock := &storagemock.StorageMock{}
@@ -219,7 +219,7 @@ func TestGetOwnerLists(t *testing.T) {
 			contextTest.Request = req
 
 			if !tc.noContext {
-				contextTest.Set(ContextUserID, userIDMock)
+				contextTest.Set(ContextUserID, userID)
 			}
 
 			storageMock := &storagemock.StorageMock{}
@@ -243,158 +243,14 @@ func TestGetOwnerLists(t *testing.T) {
 	}
 }
 
+type addOFFProductListMock struct {
+	isCalled bool
+	err      error
+}
+
 type getListMock struct {
 	isCalled bool
 	result   *model.List
-	err      error
-}
-
-type getOFFProductsListMock struct {
-	result   []*model.OFFProduct
-	isCalled bool
-	err      error
-}
-
-type getOFFProductsListTestCases struct {
-	getOFFProductsListMock getOFFProductsListMock
-	getListMock            getListMock
-	description            string
-	expectedStatusCode     int
-	expectedBody           []Body
-	expectedError          *model.Error
-	noContext              bool
-}
-
-func TestGetOFFProducts(t *testing.T) {
-	id := "list-id"
-	expectedProducts := []*model.OFFProduct{
-		{
-			Code: "1234123412341",
-		},
-		{
-			Code: "5432154321543",
-		},
-	}
-	testCases := []getOFFProductsListTestCases{
-		{
-			description:        "KO - error when retrieving user id from context",
-			noContext:          true,
-			expectedStatusCode: http.StatusInternalServerError,
-			expectedError: &model.Error{
-				Code:        errorcode.UserDataCode,
-				Description: errorcode.UserDataDescription,
-			},
-		},
-		{
-			description:        "KO - error when searching list",
-			expectedStatusCode: http.StatusInternalServerError,
-			getListMock:        getListMock{err: errors.New("unknown"), isCalled: true},
-			expectedError: &model.Error{
-				Code:        errorcode.DatabaseCode,
-				Description: errorcode.DatabaseDescription,
-			},
-		},
-		{
-			description:        "KO - list not found",
-			expectedStatusCode: http.StatusNotFound,
-			getListMock:        getListMock{err: model.NewDatabaseError(model.ErrNotFound, nil), isCalled: true},
-			expectedError: &model.Error{
-				Code:        errorcode.NotFoundCode,
-				Description: ListNotFoundDescription,
-			},
-		},
-		{
-			description:        "KO - user is not owner",
-			expectedStatusCode: http.StatusForbidden,
-			getListMock: getListMock{isCalled: true, result: &model.List{
-				Owner: &model.User{
-					ID: otherUserID,
-				},
-			}},
-		},
-		{
-			description:        "KO - unknown error while retrieving products of the list",
-			expectedStatusCode: http.StatusInternalServerError,
-			getListMock: getListMock{isCalled: true, result: &model.List{
-				Owner: &model.User{
-					ID: userIDMock,
-				},
-			}},
-			getOFFProductsListMock: getOFFProductsListMock{isCalled: true, err: errors.New("unknown")},
-			expectedError: &model.Error{
-				Code:        errorcode.DatabaseCode,
-				Description: errorcode.DatabaseDescription,
-			},
-		},
-		{
-			description:        "OK - retrieved products of the list",
-			expectedStatusCode: http.StatusOK,
-			getListMock: getListMock{isCalled: true, result: &model.List{
-				Owner: &model.User{
-					ID: userIDMock,
-				},
-			}},
-			getOFFProductsListMock: getOFFProductsListMock{result: expectedProducts, isCalled: true},
-			expectedBody: []Body{
-				{
-					Path: "$.code[0]",
-					Data: expectedProducts[0].Code,
-				},
-				{
-					Path: "$.code[1]",
-					Data: expectedProducts[1].Code,
-				},
-			},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.description, func(t *testing.T) {
-			w := httptest.NewRecorder()
-			req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("/lists/%s/offproducts", id), nil)
-
-			config := &configuration.Config{
-				Mock: true,
-			}
-			hc := NewContext(config)
-			gin.SetMode(gin.TestMode)
-
-			contextTest, _ := gin.CreateTestContext(w)
-			contextTest.Request = req
-
-			if !tc.noContext {
-				contextTest.Set(ContextUserID, userIDMock)
-			}
-
-			storageMock := &storagemock.StorageMock{}
-
-			storageMock.On("GetList", mock.Anything).Return(tc.getListMock.result, tc.getListMock.err)
-			storageMock.On("GetOFFProducts", mock.Anything, mock.Anything).Return(tc.getOFFProductsListMock.result, tc.getOFFProductsListMock.err)
-
-			hc.Storage = storageMock
-
-			hc.GetOFFProducts(contextTest)
-
-			if tc.getListMock.isCalled {
-				storageMock.AssertCalled(t, "GetList", mock.Anything)
-			} else {
-				storageMock.AssertNotCalled(t, "GetList", mock.Anything)
-			}
-
-			if tc.getOFFProductsListMock.isCalled {
-				storageMock.AssertCalled(t, "GetOFFProducts", mock.Anything)
-			} else {
-				storageMock.AssertNotCalled(t, "GetOFFProducts", mock.Anything)
-			}
-
-			assert.Equal(t, tc.expectedStatusCode, w.Code)
-
-			verify(t, tc.expectedBody, tc.expectedError, string(w.Body.Bytes()))
-		})
-	}
-}
-
-type addOFFProductListMock struct {
-	isCalled bool
 	err      error
 }
 
@@ -410,7 +266,7 @@ type addOFFProductListTestCases struct {
 }
 
 func TestAddOFFProduct(t *testing.T) {
-	id := "list-id"
+	id := "product-id"
 	code := "1234567890123"
 	validBody := fmt.Sprintf(`
     {
@@ -508,7 +364,7 @@ func TestAddOFFProduct(t *testing.T) {
 			expectedStatusCode: http.StatusInternalServerError,
 			getListMock: getListMock{isCalled: true, result: &model.List{
 				Owner: &model.User{
-					ID: userIDMock,
+					ID: userID,
 				},
 			}},
 			requestBody:           validBody,
@@ -523,7 +379,7 @@ func TestAddOFFProduct(t *testing.T) {
 			expectedStatusCode: http.StatusCreated,
 			getListMock: getListMock{isCalled: true, result: &model.List{
 				Owner: &model.User{
-					ID: userIDMock,
+					ID: userID,
 				},
 			}},
 			requestBody:           validBody,
@@ -551,7 +407,7 @@ func TestAddOFFProduct(t *testing.T) {
 			contextTest.Request = req
 
 			if !tc.noContext {
-				contextTest.Set(ContextUserID, userIDMock)
+				contextTest.Set(ContextUserID, userID)
 			}
 
 			storageMock := &storagemock.StorageMock{}

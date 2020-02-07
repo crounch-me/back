@@ -20,8 +20,6 @@ import (
 
 type ExecutorVariables struct {
 	ListID string
-
-	OFFProductCode string
 }
 
 type TestExecutor struct {
@@ -257,9 +255,7 @@ func (te *TestExecutor) theStatusCodeIs(code int) error {
 }
 
 func (te *TestExecutor) isAStringEqualTo(path string, expected string) error {
-	var e strings.Builder
 	pattern, err := jsonpath.Compile(path)
-
 	if err != nil {
 		return err
 	}
@@ -268,22 +264,8 @@ func (te *TestExecutor) isAStringEqualTo(path string, expected string) error {
 	json.Unmarshal(te.ResponseBody, &actualData)
 	foundValue, _ := pattern.Lookup(actualData)
 
-	tmpl, err := template.New("body-string").Parse(expected)
-
-	if err != nil {
-		return err
-	}
-
-	err = tmpl.Execute(&e, te.Variables)
-
-	if err != nil {
-		return err
-	}
-
-	realExpected := e.String()
-
-	if foundValue != realExpected {
-		return fmt.Errorf("actual %s should be equal to expected %s", foundValue, realExpected)
+	if foundValue != expected {
+		return fmt.Errorf("actual %s should be equal to expected %s", foundValue, expected)
 	}
 
 	return nil
@@ -386,48 +368,20 @@ func (te *TestExecutor) theHeaderEquals(header, value string) error {
 	return nil
 }
 
-func (te *TestExecutor) iAddRandomOFFProduct() error {
-	code := util.RandomInt(1000000000000, 9999999999999)
-
-	te.RequestBody = fmt.Sprintf(`
-    {
-      "code": "%d"
-    }
-  `, code)
-
-	err := te.iSendARequestOn(http.MethodPost, fmt.Sprintf("/lists/%s/offproducts", te.Variables.ListID))
-
-	if err != nil {
-		return err
-	}
-
-	err = te.theStatusCodeIs(http.StatusCreated)
-
-	if err != nil {
-		return err
-	}
-
-	te.Variables.OFFProductCode = strconv.Itoa(code)
-
-	return nil
-}
-
 func randomEmail() string {
 	return fmt.Sprintf("%s@crounch.me", uuid.NewV4())
 }
 
 func randomString() string {
-	return util.RandString(10)
+	return util.RandStringRunes(10)
 }
 
 func FeatureContext(s *godog.Suite) {
 	te := &TestExecutor{
 		Variables: ExecutorVariables{
-			ListID:         "",
-			OFFProductCode: "",
+			ListID: "",
 		},
 	}
-
 	// Requests
 	s.Step(`^I use this body$`, te.iUseThisBody)
 	s.Step(`^I send a "([^"]*)" request on "([^"]*)"$`, te.iSendARequestOn)
@@ -451,5 +405,4 @@ func FeatureContext(s *godog.Suite) {
 	// Lists
 	s.Step(`^I create this lists$`, te.iCreateTheseLists)
 	s.Step(`^I create a random list$`, te.iCreateARandomList)
-	s.Step(`^I add a random off product$`, te.iAddRandomOFFProduct)
 }

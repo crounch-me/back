@@ -68,46 +68,6 @@ func (hc *Context) GetOwnerLists(c *gin.Context) {
 	c.JSON(http.StatusOK, lists)
 }
 
-func (hc *Context) GetOFFProducts(c *gin.Context) {
-	userID, exists := c.Get(ContextUserID)
-
-	if !exists {
-		hc.LogAndSendError(c, nil, errorcode.UserDataCode, errorcode.UserDataDescription, http.StatusInternalServerError)
-		return
-	}
-
-	id := c.Param("id")
-
-	l, err := hc.Storage.GetList(id)
-
-	if err != nil {
-		if databaseError, ok := err.(*model.DatabaseError); ok {
-			switch databaseError.Type {
-			case model.ErrNotFound:
-				hc.LogAndSendError(c, err, errorcode.NotFoundCode, ListNotFoundDescription, http.StatusNotFound)
-				return
-			}
-		}
-		hc.LogAndSendError(c, err, errorcode.DatabaseCode, errorcode.DatabaseDescription, http.StatusInternalServerError)
-		return
-	}
-
-	if l.Owner.ID != userID {
-		log.WithField("listID", l.ID).WithField("userID", userID).Warn("User unauthorized to get off product from list")
-		c.AbortWithStatus(http.StatusForbidden)
-		return
-	}
-
-	products, err := hc.Storage.GetOFFProducts(id)
-
-	if err != nil {
-		hc.LogAndSendError(c, err, errorcode.DatabaseCode, errorcode.DatabaseDescription, http.StatusInternalServerError)
-		return
-	}
-
-	c.JSON(http.StatusOK, products)
-}
-
 func (hc *Context) AddOFFProduct(c *gin.Context) {
 	userID, exists := c.Get(ContextUserID)
 
@@ -147,7 +107,6 @@ func (hc *Context) AddOFFProduct(c *gin.Context) {
 	}
 
 	if l.Owner.ID != userID {
-		log.WithField("listID", l.ID).WithField("userID", userID).Warn("User unauthorized to add off product to list")
 		c.AbortWithStatus(http.StatusForbidden)
 		return
 	}
