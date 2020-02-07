@@ -20,8 +20,6 @@ import (
 
 type ExecutorVariables struct {
 	ListID string
-
-	OFFProductCode string
 }
 
 type TestExecutor struct {
@@ -397,8 +395,7 @@ func randomString() string {
 func FeatureContext(s *godog.Suite) {
 	te := &TestExecutor{
 		Variables: ExecutorVariables{
-			ListID:         "",
-			OFFProductCode: "",
+			ListID: "",
 		},
 	}
 
