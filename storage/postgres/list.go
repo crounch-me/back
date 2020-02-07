@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"database/sql"
 	"fmt"
 
 	"github.com/Sehsyha/crounch-back/model"
@@ -60,4 +61,87 @@ func (s *PostgresStorage) GetOwnerLists(ownerID string) ([]*model.List, error) {
 		lists = append(lists, list)
 	}
 	return lists, nil
+}
+
+// GetList retrieves a list with its id
+func (s *PostgresStorage) GetList(id string) (*model.List, error) {
+	log.WithField("id", id).Debug("Get list")
+
+	query := fmt.Sprintf(`
+    SELECT l.id, l.name, u.id
+    FROM %s.list l
+    LEFT JOIN %s.user u
+    ON l.user_id = u.id
+    WHERE l.id = $1
+  `, s.schema, s.schema)
+
+	row := s.session.QueryRow(query, id)
+
+	l := &model.List{
+		Owner: &model.User{},
+	}
+
+	err := row.Scan(&l.ID, &l.Name, &l.Owner.ID)
+
+	if err == sql.ErrNoRows {
+		return nil, model.NewDatabaseError(model.ErrNotFound, nil)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return l, nil
+}
+
+func (s *PostgresStorage) GetOFFProducts(listID string) ([]*model.OFFProduct, error) {
+	log.WithField("listID", listID).Debug("Get OFF products")
+
+	query := fmt.Sprintf(`
+    SELECT code
+    FROM %s.list_off_product
+    WHERE list_id = $1
+  `, s.schema)
+
+	rows, err := s.session.Query(query, listID)
+	defer rows.Close()
+	if err != nil {
+		log.WithError(err).Error("Unable to get off products")
+		return nil, err
+	}
+
+	products := make([]*model.OFFProduct, 0)
+	for rows.Next() {
+		if err = rows.Err(); err != nil {
+			return nil, err
+		}
+
+		p := &model.OFFProduct{}
+		err = rows.Scan(&p.Code)
+		if err != nil {
+			return nil, err
+		}
+		products = append(products, p)
+	}
+
+	return products, nil
+}
+
+// AddOFFProductToList adds a product from open food facts to an user list
+func (s *PostgresStorage) AddOFFProductToList(listID string, offProduct *model.OFFProduct) error {
+	log.WithField("listID", listID).WithField("offProduct.code", offProduct.Code).Debug("Add OFF product to list")
+
+	query := fmt.Sprintf(`
+		INSERT INTO %s."list_off_product"(list_id, code)
+		VALUES ($1, $2)
+	`, s.schema)
+
+	_, err := s.session.Exec(query, listID, offProduct.Code)
+
+	if err != nil {
+		log.WithError(err).Error("Unable to add off product to list")
+		return err
+	}
+
+	return nil
 }

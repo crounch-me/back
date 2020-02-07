@@ -20,7 +20,8 @@ const (
 	userPath  = "/users"
 	loginPath = "/users/login"
 
-	listPath = "/lists"
+	listPath           = "/lists"
+	listOFFProductPath = "/lists/:id/offproducts"
 )
 
 // Version represents the version of the application
@@ -52,6 +53,7 @@ func emptyHandler(c *gin.Context) {}
 
 func configureRoutes(r *gin.Engine, hc *handler.Context) {
 	r.Use(otherMethodsHandler())
+
 	// Health routes
 	r.GET(healthPath, hc.Health)
 	r.OPTIONS(healthPath, optionsHandler([]string{http.MethodGet}))
@@ -66,6 +68,11 @@ func configureRoutes(r *gin.Engine, hc *handler.Context) {
 	r.POST(listPath, checkAccess(hc.Storage), hc.CreateList)
 	r.GET(listPath, checkAccess(hc.Storage), hc.GetOwnerLists)
 	r.OPTIONS(listPath, optionsHandler([]string{http.MethodPost, http.MethodGet}))
+
+	// List OFF Products routes
+	r.POST(listOFFProductPath, checkAccess(hc.Storage), hc.AddOFFProduct)
+	r.GET(listOFFProductPath, checkAccess(hc.Storage), hc.GetOFFProducts)
+	r.OPTIONS(listOFFProductPath, optionsHandler([]string{http.MethodPost, http.MethodGet}))
 }
 
 func checkAccess(s storage.Storage) gin.HandlerFunc {
