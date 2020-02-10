@@ -1,15 +1,12 @@
 module github.com/Sehsyha/crounch-back
 
-go 1.12
+go 1.13
 
 require (
 	github.com/cucumber/godog v0.8.0
 	github.com/gin-contrib/cors v1.3.0
-	github.com/gin-gonic/gin v1.4.0
-	github.com/go-playground/locales v0.12.1 // indirect
-	github.com/go-playground/universal-translator v0.16.0 // indirect
+	github.com/gin-gonic/gin v1.5.0
 	github.com/golang-migrate/migrate/v4 v4.7.0
-	github.com/leodido/go-urn v1.1.0 // indirect
 	github.com/lib/pq v1.3.0
 	github.com/oliveagle/jsonpath v0.0.0-20180606110733-2e52cf6e6852
 	github.com/pelletier/go-toml v1.5.0 // indirect
