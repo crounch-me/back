@@ -14,7 +14,7 @@ Feature: Login
     And I use this body
       """
         {
-          "email": "login@test.com",
+          "email": "LoGiN@test.com",
           "password": "test"
         }
       """

@@ -46,7 +46,7 @@ func (s *PostgresStorage) GetUserByEmail(email string) (*model.User, error) {
 	query := fmt.Sprintf(`
 		SELECT id, password
 		FROM %s."user"
-		WHERE "user".email = $1
+		WHERE LOWER("user".email) = LOWER($1)
 	`, s.schema)
 
 	row := s.session.QueryRow(query, email)
