@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.5.3"></a>
+## [1.5.3](https://github.com/Sehsyha/crounch-back/compare/1.5.2...1.5.3) (2020-02-17)
+
+
+### Bug Fixes
+
+* make login and signup emails case insensitive ([#91](https://github.com/Sehsyha/crounch-back/issues/91)) ([bab950f](https://github.com/Sehsyha/crounch-back/commit/bab950f)), closes [#80](https://github.com/Sehsyha/crounch-back/issues/80)
+
+
+
 <a name="1.5.2"></a>
 ## [1.5.2](https://github.com/Sehsyha/crounch-back/compare/1.5.1...1.5.2) (2020-02-14)
 
