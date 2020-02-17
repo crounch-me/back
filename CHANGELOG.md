@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.6.0"></a>
+# [1.6.0](https://github.com/Sehsyha/crounch-back/compare/1.5.3...1.6.0) (2020-02-17)
+
+
+### Features
+
+* create product ([#92](https://github.com/Sehsyha/crounch-back/issues/92)) ([3886e1e](https://github.com/Sehsyha/crounch-back/commit/3886e1e)), closes [#17](https://github.com/Sehsyha/crounch-back/issues/17)
+
+
+
 <a name="1.5.3"></a>
 ## [1.5.3](https://github.com/Sehsyha/crounch-back/compare/1.5.2...1.5.3) (2020-02-17)
 
