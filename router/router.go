@@ -21,6 +21,8 @@ const (
 	loginPath = "/users/login"
 
 	listPath = "/lists"
+
+	productPath = "/products"
 )
 
 // Version represents the version of the application
@@ -67,6 +69,10 @@ func configureRoutes(r *gin.Engine, hc *handler.Context) {
 	r.POST(listPath, checkAccess(hc.Storage), hc.CreateList)
 	r.GET(listPath, checkAccess(hc.Storage), hc.GetOwnerLists)
 	r.OPTIONS(listPath, optionsHandler([]string{http.MethodPost, http.MethodGet}))
+
+	// Product routes
+	r.POST(productPath, checkAccess(hc.Storage), hc.CreateProduct)
+	r.OPTIONS(productPath, optionsHandler([]string{http.MethodPost}))
 }
 
 func checkAccess(s storage.Storage) gin.HandlerFunc {

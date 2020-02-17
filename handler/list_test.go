@@ -242,9 +242,3 @@ func TestGetOwnerLists(t *testing.T) {
 		})
 	}
 }
-
-type getListMock struct {
-	isCalled bool
-	result   *model.List
-	err      error
-}
