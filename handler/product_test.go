@@ -85,7 +85,7 @@ func TestCreateProduct(t *testing.T) {
 			},
 		},
 		{
-			description:              "KO - unknown database error when creating list",
+			description:              "KO - unknown database error when creating product",
 			createProductStorageMock: createProductStorageMock{isCalled: true, err: errors.New("unknown database error")},
 			requestBody:              validBody,
 			expectedStatusCode:       http.StatusInternalServerError,
