@@ -22,6 +22,8 @@ const (
 
 	listPath = "/lists"
 
+	listProductPath = "/lists/:listID/products/:productID"
+
 	productPath = "/products"
 )
 
@@ -38,7 +40,7 @@ func Start(config *configuration.Config) {
 	corsConfig := cors.DefaultConfig()
 	corsConfig.AllowAllOrigins = true
 
-	configureRoutes(r, hc)
+	ConfigureRoutes(r, hc)
 
 	r.Use(cors.New(corsConfig))
 	log.SetLevel(log.DebugLevel)
@@ -52,7 +54,7 @@ func Start(config *configuration.Config) {
 
 func emptyHandler(c *gin.Context) {}
 
-func configureRoutes(r *gin.Engine, hc *handler.Context) {
+func ConfigureRoutes(r *gin.Engine, hc *handler.Context) {
 	r.Use(otherMethodsHandler())
 
 	// Health routes
@@ -73,6 +75,10 @@ func configureRoutes(r *gin.Engine, hc *handler.Context) {
 	// Product routes
 	r.POST(productPath, checkAccess(hc.Storage), hc.CreateProduct)
 	r.OPTIONS(productPath, optionsHandler([]string{http.MethodPost}))
+
+	// List product routes
+	r.POST(listProductPath, checkAccess(hc.Storage), hc.AddProductToList)
+	r.OPTIONS(listProductPath, optionsHandler([]string{http.MethodPost}))
 }
 
 func checkAccess(s storage.Storage) gin.HandlerFunc {

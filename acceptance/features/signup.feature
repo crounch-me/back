@@ -28,7 +28,7 @@ Feature: Sign up
         }
       """
     And I send a "POST" request on "/users"
-    Given I use this body
+    And I use this body
       """
         {
           "email": "duPliCated@test.com",
@@ -38,4 +38,4 @@ Feature: Sign up
     When I send a "POST" request on "/users"
     Then the status code is 409
     And "$.error" has string value "duplicate"
-    And "$.errorDescription" has string value "User with this email already exists"
+    And "$.errorDescription" has string value "Entity already exists"

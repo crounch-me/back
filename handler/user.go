@@ -41,7 +41,7 @@ func (hc *Context) Signup(c *gin.Context) {
 	}
 
 	if err == nil {
-		hc.LogAndSendError(c, err, errorcode.Duplicate, errorcode.DuplicateDescription, http.StatusConflict)
+		hc.LogAndSendError(c, err, errorcode.DuplicateCode, errorcode.DuplicateDescription, http.StatusConflict)
 		return
 	}
 

@@ -18,16 +18,6 @@ import (
 	storagemock "github.com/Sehsyha/crounch-back/storage/mock"
 )
 
-type createUserStorageMock struct {
-	isCalled bool
-	err      error
-}
-
-type getUserStorageMock struct {
-	result *model.User
-	err    error
-}
-
 type userSignupTestCases struct {
 	createUserStorageMock createUserStorageMock
 	getUserStorageMock    *getUserStorageMock
@@ -73,7 +63,7 @@ func TestSignup(t *testing.T) {
 			`,
 			expectedError: &model.Error{
 				Code:        errorcode.InvalidCode,
-				Description: fmt.Sprintf(errorcode.InvalidDescription, "Email", "required"),
+				Description: fmt.Sprintf(errorcode.InvalidDescription, "Email", "required", ""),
 			},
 		},
 		{
@@ -86,7 +76,7 @@ func TestSignup(t *testing.T) {
 			`,
 			expectedError: &model.Error{
 				Code:        errorcode.InvalidCode,
-				Description: fmt.Sprintf(errorcode.InvalidDescription, "Password", "required"),
+				Description: fmt.Sprintf(errorcode.InvalidDescription, "Password", "required", "<nil>"),
 			},
 		},
 		{
@@ -100,7 +90,7 @@ func TestSignup(t *testing.T) {
 			`,
 			expectedError: &model.Error{
 				Code:        errorcode.InvalidCode,
-				Description: fmt.Sprintf(errorcode.InvalidDescription, "Password", "gt"),
+				Description: fmt.Sprintf(errorcode.InvalidDescription, "Password", "gt", "a"),
 			},
 		},
 		{
@@ -114,7 +104,7 @@ func TestSignup(t *testing.T) {
 			`,
 			expectedError: &model.Error{
 				Code:        errorcode.InvalidCode,
-				Description: fmt.Sprintf(errorcode.InvalidDescription, "Email", "email"),
+				Description: fmt.Sprintf(errorcode.InvalidDescription, "Email", "email", "a"),
 			},
 		},
 		{
@@ -163,7 +153,7 @@ func TestSignup(t *testing.T) {
 			requestBody:        validBody,
 			expectedStatusCode: http.StatusConflict,
 			expectedError: &model.Error{
-				Code:        errorcode.Duplicate,
+				Code:        errorcode.DuplicateCode,
 				Description: errorcode.DuplicateDescription,
 			},
 		},
@@ -207,12 +197,6 @@ func TestSignup(t *testing.T) {
 	}
 }
 
-type createAuthorizationStorageMock struct {
-	isCalled bool
-	result   *model.Authorization
-	err      error
-}
-
 type userLoginTestCases struct {
 	createAuthorizationStorageMock createAuthorizationStorageMock
 	description                    string
@@ -254,7 +238,7 @@ func TestLogin(t *testing.T) {
 			`,
 			expectedError: &model.Error{
 				Code:        errorcode.InvalidCode,
-				Description: fmt.Sprintf(errorcode.InvalidDescription, "Email", "required"),
+				Description: fmt.Sprintf(errorcode.InvalidDescription, "Email", "required", ""),
 			},
 		},
 		{
@@ -267,7 +251,7 @@ func TestLogin(t *testing.T) {
 			`,
 			expectedError: &model.Error{
 				Code:        errorcode.InvalidCode,
-				Description: fmt.Sprintf(errorcode.InvalidDescription, "Password", "required"),
+				Description: fmt.Sprintf(errorcode.InvalidDescription, "Password", "required", "<nil>"),
 			},
 		},
 		{
@@ -281,7 +265,7 @@ func TestLogin(t *testing.T) {
 			`,
 			expectedError: &model.Error{
 				Code:        errorcode.InvalidCode,
-				Description: fmt.Sprintf(errorcode.InvalidDescription, "Password", "gt"),
+				Description: fmt.Sprintf(errorcode.InvalidDescription, "Password", "gt", "a"),
 			},
 		},
 		{
@@ -295,7 +279,7 @@ func TestLogin(t *testing.T) {
 			`,
 			expectedError: &model.Error{
 				Code:        errorcode.InvalidCode,
-				Description: fmt.Sprintf(errorcode.InvalidDescription, "Email", "email"),
+				Description: fmt.Sprintf(errorcode.InvalidDescription, "Email", "email", "a"),
 			},
 		},
 		{

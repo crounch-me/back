@@ -47,11 +47,42 @@ func NewContext(config *configuration.Config) *Context {
 	}
 }
 
-// GetValidationErrorDescription returns a formatted string with first error field and tag
+// GetValidationErrorDescription returns a formatted string with first error field, tag and value
 func (hc *Context) GetValidationErrorDescription(err error) string {
+	return hc.GetValidationErrorDescriptionWithFieldAndValue(err, nil, nil)
+}
+
+// GetValidationErrorDescriptionWithField returns a formatted string with given field and first error tag and value
+func (hc *Context) GetValidationErrorDescriptionWithField(err error, fieldName string) string {
+	return hc.GetValidationErrorDescriptionWithFieldAndValue(err, &fieldName, nil)
+}
+
+// GetValidationErrorDescriptionWithValue returns a formatted string with given value and first error tag and field
+func (hc *Context) GetValidationErrorDescriptionWithValue(err error, value string) string {
+	return hc.GetValidationErrorDescriptionWithFieldAndValue(err, nil, &value)
+}
+
+// GetValidationErrorDescriptionWithFieldAndValue returns a formatted string with given field and value and first error tag
+func (hc *Context) GetValidationErrorDescriptionWithFieldAndValue(err error, givenFieldName, givenValue *string) string {
+	var value interface{}
+	fieldName := ""
+
 	validationErrors := err.(validator.ValidationErrors)
 	firstError := validationErrors[0]
-	return fmt.Sprintf(errorcode.InvalidDescription, firstError.Field(), firstError.Tag())
+
+	if givenFieldName == nil {
+		fieldName = firstError.Field()
+	} else {
+		fieldName = *givenFieldName
+	}
+
+	if givenValue == nil {
+		value = firstError.Value()
+	} else {
+		value = *givenValue
+	}
+
+	return fmt.Sprintf(errorcode.InvalidDescription, fieldName, firstError.Tag(), value)
 }
 
 // LogAndSendError logs and sends the error

@@ -17,11 +17,6 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-type createProductStorageMock struct {
-	isCalled bool
-	err      error
-}
-
 type productCreateTestCases struct {
 	createProductStorageMock createProductStorageMock
 	description              string
@@ -59,7 +54,7 @@ func TestCreateProduct(t *testing.T) {
 			`,
 			expectedError: &model.Error{
 				Code:        errorcode.InvalidCode,
-				Description: fmt.Sprintf(errorcode.InvalidDescription, "Name", "required"),
+				Description: fmt.Sprintf(errorcode.InvalidDescription, "Name", "required", ""),
 			},
 		},
 		{
@@ -72,7 +67,7 @@ func TestCreateProduct(t *testing.T) {
 			`,
 			expectedError: &model.Error{
 				Code:        errorcode.InvalidCode,
-				Description: fmt.Sprintf(errorcode.InvalidDescription, "Name", "lt"),
+				Description: fmt.Sprintf(errorcode.InvalidDescription, "Name", "lt", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
 			},
 		},
 		{
