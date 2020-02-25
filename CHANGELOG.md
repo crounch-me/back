@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.7.0"></a>
+# [1.7.0](https://github.com/Sehsyha/crounch-back/compare/1.6.0...1.7.0) (2020-02-25)
+
+
+### Features
+
+* **lists:** add product to user's list ([#96](https://github.com/Sehsyha/crounch-back/issues/96)) ([86faf02](https://github.com/Sehsyha/crounch-back/commit/86faf02)), closes [#19](https://github.com/Sehsyha/crounch-back/issues/19)
+
+
+
 <a name="1.6.0"></a>
 # [1.6.0](https://github.com/Sehsyha/crounch-back/compare/1.5.3...1.6.0) (2020-02-17)
 
