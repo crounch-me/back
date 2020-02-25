@@ -1,8 +1,8 @@
 package errorcode
 
 const (
-	Duplicate            = "duplicate"
-	DuplicateDescription = "User with this email already exists"
+	DuplicateCode        = "duplicate"
+	DuplicateDescription = "Entity already exists"
 
 	NotFoundCode = "not-found"
 
@@ -10,7 +10,7 @@ const (
 	WrongPasswordDescription = "The password doesn't match the saved one"
 
 	InvalidCode        = "invalid"
-	InvalidDescription = "The field %s has failed validation, reason: '%s'"
+	InvalidDescription = "The field %s has failed validation, reason: '%s', actualValue: '%v'"
 
 	DatabaseCode        = "database"
 	DatabaseDescription = "An error occured while accessing the database"

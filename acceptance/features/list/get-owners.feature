@@ -2,7 +2,7 @@ Feature: Get owner's Lists
 
   Scenario: OK
     Given I create and authenticate with a random user
-    And I create this lists
+    And I create these lists
       | name                           |
       | Récupération listes de courses |
     When I send a "GET" request on "/lists"

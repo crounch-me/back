@@ -19,3 +19,13 @@ func (sm *StorageMock) GetList(id string) (*model.List, error) {
 	args := sm.Called(id)
 	return args.Get(0).(*model.List), args.Error(1)
 }
+
+func (sm *StorageMock) GetProductInList(productID string, listID string) (*model.ProductInList, error) {
+	args := sm.Called(productID, listID)
+	return args.Get(0).(*model.ProductInList), args.Error(1)
+}
+
+func (sm *StorageMock) AddProductToList(productID string, listID string) error {
+	args := sm.Called(productID, listID)
+	return args.Error(0)
+}

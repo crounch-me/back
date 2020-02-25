@@ -8,6 +8,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const (
+	ProductNotFoundDescription = "The product was not found"
+)
+
 func (hc *Context) CreateProduct(c *gin.Context) {
 	product := &model.Product{}
 

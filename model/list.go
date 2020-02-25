@@ -9,3 +9,8 @@ type List struct {
 	CreationDate time.Time `json:"CreationDate"`
 	Owner        *User
 }
+
+type ProductInList struct {
+	ProductID string `json:"product_id"`
+	ListID    string `json:"list_id"`
+}

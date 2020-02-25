@@ -19,7 +19,8 @@ import (
 )
 
 type ExecutorVariables struct {
-	ListID string
+	ListID    string
+	ProductID string
 }
 
 type TestExecutor struct {
@@ -360,6 +361,50 @@ func (te *TestExecutor) iCreateTheseLists(listDataTable *gherkin.DataTable) erro
 	return nil
 }
 
+func (te *TestExecutor) iCreateTheseProducts(productDataTable *gherkin.DataTable) error {
+	for i, row := range productDataTable.Rows {
+		if i != 0 {
+			name := strings.TrimSpace(row.Cells[0].Value)
+			p := &model.Product{
+				Name: name,
+			}
+			err := te.createProduct(p)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (te *TestExecutor) createProduct(p *model.Product) error {
+	te.RequestBody = fmt.Sprintf(`
+    {
+      "name": "%s"
+    }
+  `, p.Name)
+	err := te.iSendARequestOn(http.MethodPost, "/products")
+	if err != nil {
+		return err
+	}
+
+	err = te.theStatusCodeIs(http.StatusCreated)
+
+	if err != nil {
+		return err
+	}
+
+	id, err := te.getValue("$.id")
+
+	if err != nil {
+		return err
+	}
+
+	te.Variables.ProductID = id.(string)
+
+	return nil
+}
+
 func (te *TestExecutor) iCreateARandomList() error {
 	l := &model.List{
 		Name: randomString(),
@@ -395,7 +440,8 @@ func randomString() string {
 func FeatureContext(s *godog.Suite) {
 	te := &TestExecutor{
 		Variables: ExecutorVariables{
-			ListID: "",
+			ListID:    "",
+			ProductID: "",
 		},
 	}
 
@@ -420,6 +466,9 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`^I create these users?$`, te.iCreateTheseUsers)
 
 	// Lists
-	s.Step(`^I create this lists$`, te.iCreateTheseLists)
+	s.Step(`^I create these lists$`, te.iCreateTheseLists)
 	s.Step(`^I create a random list$`, te.iCreateARandomList)
+
+	// Products
+	s.Step(`^I create these products$`, te.iCreateTheseProducts)
 }

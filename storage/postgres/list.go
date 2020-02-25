@@ -93,3 +93,44 @@ func (s *PostgresStorage) GetList(id string) (*model.List, error) {
 
 	return l, nil
 }
+
+func (s *PostgresStorage) GetProductInList(productID string, listID string) (*model.ProductInList, error) {
+	log.WithField("productID", productID).WithField("listID", listID).Debug("Get product in list")
+
+	query := fmt.Sprintf(`
+    SELECT product_id, list_id
+    FROM %s.product_in_list
+    WHERE product_id = $1
+    AND list_id = $2
+  `, s.schema)
+
+	row := s.session.QueryRow(query, productID, listID)
+
+	pil := &model.ProductInList{}
+
+	err := row.Scan(pil.ProductID, pil.ListID)
+	err = handleNotFound(err)
+	if err != nil {
+		return nil, err
+	}
+
+	return pil, err
+}
+
+func (s *PostgresStorage) AddProductToList(productID string, listID string) error {
+	log.WithField("productID", productID).WithField("listID", listID).Debug("Add product to list")
+
+	query := fmt.Sprintf(`
+    INSERT INTO %s.product_in_list(product_id, list_id)
+    VALUES ($1, $2)
+  `, s.schema)
+
+	_, err := s.session.Exec(query, productID, listID)
+
+	if err != nil {
+		log.WithError(err).Error("Unable to add product to list")
+		return err
+	}
+
+	return nil
+}

@@ -17,7 +17,10 @@ type Storage interface {
 	CreateList(list *model.List) error
 	GetOwnerLists(ownerID string) ([]*model.List, error)
 	GetList(id string) (*model.List, error)
+	GetProductInList(productID string, listID string) (*model.ProductInList, error)
+	AddProductToList(productID string, listID string) error
 
 	// Products
 	CreateProduct(product *model.Product) error
+	GetProduct(id string) (*model.Product, error)
 }
