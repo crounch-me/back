@@ -288,6 +288,13 @@ func (te *TestExecutor) isAStringEqualTo(path string, expected string) error {
 	return nil
 }
 
+func (te *TestExecutor) theBodyIsAnEmptyArray() error {
+	if string(te.ResponseBody) == "[]" {
+		return fmt.Errorf("the body is not empty, actual value %s", te.ResponseBody)
+	}
+	return nil
+}
+
 func (te *TestExecutor) isANonEmptyString(path string) error {
 	pattern, err := jsonpath.Compile(path)
 	if err != nil {
@@ -456,6 +463,7 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`^"([^"]*)" has bool value "([^"]*)"$`, te.hasBoolValue)
 	s.Step(`^"([^"]*)" is a string equal to "([^"]*)"$`, te.isAStringEqualTo)
 	s.Step(`^"([^"]*)" is a non empty string$`, te.isANonEmptyString)
+	s.Step(`^the body is an empty array$`, te.theBodyIsAnEmptyArray)
 
 	// Authentication
 	s.Step(`^I\'m authenticated with this random user$`, te.imAuthenticatedWithThisRandomUSer)

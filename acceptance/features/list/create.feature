@@ -5,10 +5,10 @@ Feature: Create List
     And I use this body
       """
         {
-          "name": "Creation liste de courses"
+          "name": "Courses"
         }
       """
     When I send a "POST" request on "/lists"
     Then the status code is 201
-    And "$.name" is a string equal to "Creation liste de courses"
+    And "$.name" is a string equal to "Courses"
     And "$.id" is a non empty string
