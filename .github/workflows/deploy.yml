@@ -35,7 +35,7 @@ jobs:
         run: go build -v .
 
       - name: Unit tests
-        run: go test -v .
+        run: go test -v $(go list ./... | grep -v vendor | grep -v acceptance)
 
       - name: Build image
         run: docker build -f containers/Dockerfile -t crounch .
