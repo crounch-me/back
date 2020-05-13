@@ -18,13 +18,25 @@ jobs:
           go-version: ^1.13
         id: go
 
+      - name: Cache Go modules
+        uses: actions/cache@preview
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-build-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
       - name: Install dependencies
         run: go get -v -t -d ./...
 
       - name: Build
         run: go build -v .
 
+      - name: List files to test
+        run: echo ::set-env name=TEST_FILES::$(go list ./... | grep -v vendor | grep -v acceptance)
+
       - name: Unit tests
         run: |
-          FILES=go list ./... | grep -v vendor | grep -v acceptance
           go test -v $FILES
