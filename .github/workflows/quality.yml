@@ -34,9 +34,5 @@ jobs:
       - name: Build
         run: go build -v .
 
-      - name: List files to test
-        run: echo ::set-env name=TEST_FILES::$(go list ./... | grep -v vendor | grep -v acceptance)
-
       - name: Unit tests
-        run: |
-          go test -v $FILES
+        run: go test -v $(go list ./... | grep -v vendor | grep -v acceptance)
