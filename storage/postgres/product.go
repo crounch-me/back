@@ -3,7 +3,7 @@ package postgres
 import (
 	"fmt"
 
-	"github.com/Sehsyha/crounch-back/model"
+	"github.com/crounch-me/back/model"
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 )

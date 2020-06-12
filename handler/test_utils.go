@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/Sehsyha/crounch-back/model"
+	"github.com/crounch-me/back/model"
 	"github.com/oliveagle/jsonpath"
 	"github.com/stretchr/testify/assert"
 )

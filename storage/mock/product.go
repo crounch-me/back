@@ -1,6 +1,6 @@
 package mock
 
-import "github.com/Sehsyha/crounch-back/model"
+import "github.com/crounch-me/back/model"
 
 // CreateProduct mocks create product
 func (sm *StorageMock) CreateProduct(product *model.Product) error {

@@ -12,10 +12,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"github.com/Sehsyha/crounch-back/configuration"
-	"github.com/Sehsyha/crounch-back/errorcode"
-	"github.com/Sehsyha/crounch-back/model"
-	storagemock "github.com/Sehsyha/crounch-back/storage/mock"
+	"github.com/crounch-me/back/configuration"
+	"github.com/crounch-me/back/errorcode"
+	"github.com/crounch-me/back/model"
+	storagemock "github.com/crounch-me/back/storage/mock"
 )
 
 type userSignupTestCases struct {

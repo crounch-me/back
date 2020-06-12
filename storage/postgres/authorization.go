@@ -6,8 +6,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/Sehsyha/crounch-back/model"
-	"github.com/Sehsyha/crounch-back/util"
+	"github.com/crounch-me/back/model"
+	"github.com/crounch-me/back/util"
 )
 
 // CreateAuthorization creates a user id and token couple

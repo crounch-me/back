@@ -3,8 +3,8 @@ package handler
 import (
 	"net/http"
 
-	"github.com/Sehsyha/crounch-back/errorcode"
-	"github.com/Sehsyha/crounch-back/model"
+	"github.com/crounch-me/back/errorcode"
+	"github.com/crounch-me/back/model"
 
 	"github.com/gin-gonic/gin"
 )

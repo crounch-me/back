@@ -1,6 +1,6 @@
 package mock
 
-import "github.com/Sehsyha/crounch-back/model"
+import "github.com/crounch-me/back/model"
 
 // CreateAuthorization mocks create authorization
 func (sm *StorageMock) CreateAuthorization(u *model.User) (*model.Authorization, error) {

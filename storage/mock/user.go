@@ -1,7 +1,7 @@
 package mock
 
 import (
-	"github.com/Sehsyha/crounch-back/model"
+	"github.com/crounch-me/back/model"
 )
 
 func (sm *StorageMock) CreateUser(u *model.User) error {

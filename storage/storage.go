@@ -1,7 +1,7 @@
 package storage
 
 import (
-	"github.com/Sehsyha/crounch-back/model"
+	"github.com/crounch-me/back/model"
 )
 
 // Storage defines every data functions that we need

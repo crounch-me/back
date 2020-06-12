@@ -1,6 +1,6 @@
 package mock
 
-import "github.com/Sehsyha/crounch-back/model"
+import "github.com/crounch-me/back/model"
 
 // CreateList mocks create list
 func (sm *StorageMock) CreateList(list *model.List) error {

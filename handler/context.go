@@ -9,12 +9,12 @@ import (
 	log "github.com/sirupsen/logrus"
 	validator "gopkg.in/go-playground/validator.v9"
 
-	"github.com/Sehsyha/crounch-back/configuration"
-	"github.com/Sehsyha/crounch-back/errorcode"
-	"github.com/Sehsyha/crounch-back/model"
-	"github.com/Sehsyha/crounch-back/storage"
-	"github.com/Sehsyha/crounch-back/storage/mock"
-	"github.com/Sehsyha/crounch-back/storage/postgres"
+	"github.com/crounch-me/back/configuration"
+	"github.com/crounch-me/back/errorcode"
+	"github.com/crounch-me/back/model"
+	"github.com/crounch-me/back/storage"
+	"github.com/crounch-me/back/storage/mock"
+	"github.com/crounch-me/back/storage/postgres"
 )
 
 const (

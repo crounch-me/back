@@ -9,8 +9,8 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/lib/pq"
 
-	"github.com/Sehsyha/crounch-back/model"
-	"github.com/Sehsyha/crounch-back/storage"
+	"github.com/crounch-me/back/model"
+	"github.com/crounch-me/back/storage"
 	log "github.com/sirupsen/logrus"
 )
 
