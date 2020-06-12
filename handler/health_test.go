@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/Sehsyha/crounch-back/configuration"
+	"github.com/crounch-me/back/configuration"
 )
 
 type healthTestCases struct {

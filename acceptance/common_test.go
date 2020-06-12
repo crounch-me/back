@@ -10,8 +10,8 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/Sehsyha/crounch-back/model"
-	"github.com/Sehsyha/crounch-back/util"
+	"github.com/crounch-me/back/model"
+	"github.com/crounch-me/back/util"
 	"github.com/cucumber/godog"
 	"github.com/cucumber/godog/gherkin"
 	"github.com/oliveagle/jsonpath"

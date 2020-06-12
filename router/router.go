@@ -8,10 +8,10 @@ import (
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/Sehsyha/crounch-back/configuration"
-	"github.com/Sehsyha/crounch-back/handler"
-	"github.com/Sehsyha/crounch-back/storage"
-	"github.com/Sehsyha/crounch-back/util"
+	"github.com/crounch-me/back/configuration"
+	"github.com/crounch-me/back/handler"
+	"github.com/crounch-me/back/storage"
+	"github.com/crounch-me/back/util"
 )
 
 const (

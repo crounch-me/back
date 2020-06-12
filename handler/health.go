@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/Sehsyha/crounch-back/model"
+	"github.com/crounch-me/back/model"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 )

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/Sehsyha/crounch-back/cmd"
+	"github.com/crounch-me/back/cmd"
 )
 
 func main() {

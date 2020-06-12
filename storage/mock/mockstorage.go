@@ -1,7 +1,7 @@
 package mock
 
 import (
-	"github.com/Sehsyha/crounch-back/storage"
+	"github.com/crounch-me/back/storage"
 
 	testmock "github.com/stretchr/testify/mock"
 )

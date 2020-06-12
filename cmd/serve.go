@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/Sehsyha/crounch-back/router"
+	"github.com/crounch-me/back/router"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/spf13/cobra"

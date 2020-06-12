@@ -1,6 +1,6 @@
 package handler
 
-import "github.com/Sehsyha/crounch-back/model"
+import "github.com/crounch-me/back/model"
 
 const (
 	userIDMock    = "user-id"

@@ -27,7 +27,7 @@ bump-version:
 		git commit -m "build: bump to version $$NEW_VERSION [skip ci]"; \
 		git tag $$NEW_VERSION; \
 		git remote rm origin; \
-		git remote add origin https://$(DOCKER_USER):$(GH_TOKEN)@github.com/Sehsyha/crounch-back.git; \
+		git remote add origin https://$(DOCKER_USER):$(GH_TOKEN)@github.com/crounch-me/back.git; \
 		git push origin master; \
 		git push --tags
 

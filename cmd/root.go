@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/Sehsyha/crounch-back/configuration"
+	"github.com/crounch-me/back/configuration"
 )
 
 const (
