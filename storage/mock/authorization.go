@@ -1,9 +1,12 @@
 package mock
 
-import "github.com/crounch-me/back/model"
+import (
+	"github.com/crounch-me/back/domain"
+	"github.com/crounch-me/back/domain/authorization.go"
+)
 
 // CreateAuthorization mocks create authorization
-func (sm *StorageMock) CreateAuthorization(u *model.User) (*model.Authorization, error) {
-	args := sm.Called(u)
-	return args.Get(0).(*model.Authorization), args.Error(1)
+func (sm *StorageMock) CreateAuthorization(userID, token string) (*authorization.Authorization, *domain.Error) {
+	args := sm.Called(userID, token)
+	return args.Get(0).(*authorization.Authorization), args.Error(1).(*domain.Error)
 }

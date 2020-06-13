@@ -2,6 +2,10 @@ package util
 
 import (
 	"math/rand"
+
+	"github.com/crounch-me/back/domain"
+	"github.com/gofrs/uuid"
+	"golang.org/x/crypto/bcrypt"
 )
 
 const (
@@ -35,4 +39,30 @@ func RandString(n int) string {
 
 func RandomInt(min, max int) int {
 	return min + rand.Intn(max-min)
+}
+
+func GenerateID() (string, *domain.Error) {
+	id, err := uuid.NewV4()
+
+	if err != nil {
+		return "", domain.NewErrorWithCause(domain.UnknownErrorCode, err)
+	}
+
+	return id.String(), nil
+}
+
+func HashPassword(password string) (string, *domain.Error) {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return "", domain.NewErrorWithCause(domain.UnknownErrorCode, err)
+	}
+	return string(hashedPassword), nil
+}
+
+func ComparePassword(hashedPassword, givenPassword string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(givenPassword))
+	if err != nil {
+		return true
+	}
+	return false
 }

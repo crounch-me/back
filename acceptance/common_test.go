@@ -10,10 +10,11 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/crounch-me/back/model"
+	"github.com/crounch-me/back/domain/lists"
+	"github.com/crounch-me/back/domain/products"
 	"github.com/crounch-me/back/util"
 	"github.com/cucumber/godog"
-	"github.com/cucumber/godog/gherkin"
+	"github.com/cucumber/messages-go/v10"
 	"github.com/oliveagle/jsonpath"
 	uuid "github.com/satori/go.uuid"
 )
@@ -37,7 +38,7 @@ const (
 	BaseURL = "http://localhost:3000"
 )
 
-func (te *TestExecutor) iUseThisBody(body *gherkin.DocString) error {
+func (te *TestExecutor) iUseThisBody(body *messages.PickleStepArgument_PickleDocString) error {
 	te.RequestBody = strings.TrimSpace(body.Content)
 	return nil
 }
@@ -194,7 +195,7 @@ func (te *TestExecutor) imAuthenticatedWithThisRandomUSer() error {
 	return nil
 }
 
-func (te *TestExecutor) iCreateTheseUsers(userDataTable *gherkin.DataTable) error {
+func (te *TestExecutor) iCreateTheseUsers(userDataTable *messages.PickleStepArgument_PickleTable) error {
 	for i, row := range userDataTable.Rows {
 		if i != 0 {
 			email := strings.TrimSpace(row.Cells[0].Value)
@@ -306,7 +307,7 @@ func (te *TestExecutor) isANonEmptyString(path string) error {
 	foundValue, _ := pattern.Lookup(actualData)
 
 	if foundValue == "" {
-		return fmt.Errorf("actual %s should not be empty", foundValue)
+		return fmt.Errorf("should not be empty")
 	}
 
 	return nil
@@ -324,7 +325,7 @@ func (te *TestExecutor) iCreateAndAuthenticateWithARandomUser() error {
 	return err
 }
 
-func (te *TestExecutor) createList(l *model.List) error {
+func (te *TestExecutor) createList(l *lists.List) error {
 	te.RequestBody = fmt.Sprintf(`
     {
       "name": "%s"
@@ -352,11 +353,11 @@ func (te *TestExecutor) createList(l *model.List) error {
 	return nil
 }
 
-func (te *TestExecutor) iCreateTheseLists(listDataTable *gherkin.DataTable) error {
+func (te *TestExecutor) iCreateTheseLists(listDataTable *messages.PickleStepArgument_PickleTable) error {
 	for i, row := range listDataTable.Rows {
 		if i != 0 {
 			name := strings.TrimSpace(row.Cells[0].Value)
-			l := &model.List{
+			l := &lists.List{
 				Name: name,
 			}
 			err := te.createList(l)
@@ -368,11 +369,11 @@ func (te *TestExecutor) iCreateTheseLists(listDataTable *gherkin.DataTable) erro
 	return nil
 }
 
-func (te *TestExecutor) iCreateTheseProducts(productDataTable *gherkin.DataTable) error {
+func (te *TestExecutor) iCreateTheseProducts(productDataTable *messages.PickleStepArgument_PickleTable) error {
 	for i, row := range productDataTable.Rows {
 		if i != 0 {
 			name := strings.TrimSpace(row.Cells[0].Value)
-			p := &model.Product{
+			p := &products.Product{
 				Name: name,
 			}
 			err := te.createProduct(p)
@@ -384,7 +385,7 @@ func (te *TestExecutor) iCreateTheseProducts(productDataTable *gherkin.DataTable
 	return nil
 }
 
-func (te *TestExecutor) createProduct(p *model.Product) error {
+func (te *TestExecutor) createProduct(p *products.Product) error {
 	te.RequestBody = fmt.Sprintf(`
     {
       "name": "%s"
@@ -413,7 +414,7 @@ func (te *TestExecutor) createProduct(p *model.Product) error {
 }
 
 func (te *TestExecutor) iCreateARandomList() error {
-	l := &model.List{
+	l := &lists.List{
 		Name: randomString(),
 	}
 

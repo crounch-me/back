@@ -3,91 +3,43 @@ package handler
 import (
 	"net/http"
 
-	"github.com/crounch-me/back/errorcode"
-	"github.com/crounch-me/back/model"
+	"github.com/crounch-me/back/domain/users"
 
 	"github.com/gin-gonic/gin"
 )
 
 func (hc *Context) Signup(c *gin.Context) {
-	u := &model.User{}
+	u := &users.User{}
 
-	err := hc.UnmarshalPayload(c, u)
+	err := hc.UnmarshalAndValidate(c, u)
 	if err != nil {
-		hc.LogAndSendError(c, err, errorcode.UnmarshalCode, errorcode.UnmarshalDescription, http.StatusBadRequest)
+		hc.LogAndSendError(c, err)
 		return
 	}
 
-	err = hc.Validate.Struct(u)
+	user, err := hc.Services.User.CreateUser(u.Email, *u.Password)
 	if err != nil {
-		hc.LogAndSendError(c, err, errorcode.InvalidCode, hc.GetValidationErrorDescription(err), http.StatusBadRequest)
+		hc.LogAndSendError(c, err)
 		return
 	}
 
-	_, err = hc.Storage.GetUserByEmail(u.Email)
-	if err != nil {
-		if databaseError, ok := err.(*model.DatabaseError); ok {
-			switch databaseError.Type {
-			case model.ErrNotFound:
-				break
-			default:
-				hc.LogAndSendError(c, err, errorcode.DatabaseCode, errorcode.DatabaseDescription, http.StatusInternalServerError)
-				return
-			}
-		} else {
-			hc.LogAndSendError(c, err, errorcode.DatabaseCode, errorcode.DatabaseDescription, http.StatusInternalServerError)
-			return
-		}
-	}
+	user.Password = nil
 
-	if err == nil {
-		hc.LogAndSendError(c, err, errorcode.DuplicateCode, errorcode.DuplicateDescription, http.StatusConflict)
-		return
-	}
-
-	err = hc.Storage.CreateUser(u)
-	if err != nil {
-		hc.LogAndSendError(c, err, errorcode.DatabaseCode, errorcode.DatabaseDescription, http.StatusInternalServerError)
-		return
-	}
-
-	u.Password = nil
-
-	c.JSON(http.StatusCreated, u)
+	c.JSON(http.StatusCreated, user)
 }
 
 func (hc *Context) Login(c *gin.Context) {
-	u := &model.User{}
+	u := &users.User{}
 
-	err := hc.UnmarshalPayload(c, u)
+	err := hc.UnmarshalAndValidate(c, u)
 	if err != nil {
-		hc.LogAndSendError(c, err, errorcode.UnmarshalCode, errorcode.UnmarshalDescription, http.StatusBadRequest)
+		hc.LogAndSendError(c, err)
 		return
 	}
 
-	err = hc.Validate.Struct(u)
+	authorization, err := hc.Services.Authorization.CreateAuthorization(u.Email, *u.Password)
 	if err != nil {
-		hc.LogAndSendError(c, err, errorcode.InvalidCode, hc.GetValidationErrorDescription(err), http.StatusBadRequest)
-		return
-	}
-
-	authorization, err := hc.Storage.CreateAuthorization(u)
-
-	if err != nil {
-		if databaseError, ok := err.(*model.DatabaseError); ok {
-			switch databaseError.Type {
-			case model.ErrNotFound:
-				c.AbortWithStatus(http.StatusForbidden)
-				return
-			case model.ErrWrongPassword:
-				hc.LogAndSendError(c, err, errorcode.WrongPasswordCode, errorcode.WrongPasswordDescription, http.StatusBadRequest)
-				return
-			default:
-				hc.LogAndSendError(c, err, errorcode.DatabaseCode, errorcode.DatabaseDescription, http.StatusInternalServerError)
-				return
-			}
-		}
-		hc.LogAndSendError(c, err, errorcode.DatabaseCode, errorcode.DatabaseDescription, http.StatusInternalServerError)
+		hc.LogAndSendError(c, err)
 		return
 	}
 

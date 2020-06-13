@@ -9,7 +9,6 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/lib/pq"
 
-	"github.com/crounch-me/back/model"
 	"github.com/crounch-me/back/storage"
 	log "github.com/sirupsen/logrus"
 )
@@ -50,16 +49,4 @@ func InitDB(connectionURI string) {
 	if err := m.Up(); err != nil && err.Error() != migrate.ErrNoChange.Error() {
 		log.WithError(err).Fatal("Unable to initialize database")
 	}
-}
-
-func handleNotFound(err error) error {
-	if err == sql.ErrNoRows {
-		return model.NewDatabaseError(model.ErrNotFound, nil)
-	}
-
-	if err != nil {
-		return err
-	}
-
-	return nil
 }

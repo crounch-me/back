@@ -4,16 +4,13 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/crounch-me/back/model"
-	uuid "github.com/satori/go.uuid"
-	log "github.com/sirupsen/logrus"
+	"github.com/crounch-me/back/domain"
+	"github.com/crounch-me/back/domain/lists"
+	"github.com/crounch-me/back/domain/users"
 )
 
 // CreateList inserts a new list
-func (s *PostgresStorage) CreateList(list *model.List) error {
-	log.WithField("name", list.Name).Debug("Creating list")
-
-	list.ID = uuid.NewV4().String()
+func (s *PostgresStorage) CreateList(list *lists.List) *domain.Error {
 	query := fmt.Sprintf(`
 		INSERT INTO %s."list"(id, name, user_id)
 		VALUES ($1, $2, $3)
@@ -22,17 +19,14 @@ func (s *PostgresStorage) CreateList(list *model.List) error {
 	_, err := s.session.Exec(query, list.ID, list.Name, list.Owner.ID)
 
 	if err != nil {
-		log.WithError(err).Error("Unable to create list")
-		return err
+		return domain.NewErrorWithCause(domain.UnknownErrorCode, err)
 	}
 
 	return nil
 }
 
 // GetOwnerLists get all owner's lists
-func (s *PostgresStorage) GetOwnerLists(ownerID string) ([]*model.List, error) {
-	log.WithField("id", ownerID).Debug("Get lists of owner")
-
+func (s *PostgresStorage) GetOwnerLists(ownerID string) ([]*lists.List, *domain.Error) {
 	query := fmt.Sprintf(`
     SELECT l.id, l.name
     FROM %s.list l
@@ -43,30 +37,30 @@ func (s *PostgresStorage) GetOwnerLists(ownerID string) ([]*model.List, error) {
 	rows, err := s.session.Query(query, ownerID)
 	defer rows.Close()
 	if err != nil {
-		log.WithError(err).Error("Unable to get owner's list")
-		return nil, err
+		return nil, domain.NewErrorWithCause(domain.UnknownErrorCode, err)
 	}
 
-	lists := make([]*model.List, 0)
+	ownersLists := make([]*lists.List, 0)
 	for rows.Next() {
 		if err = rows.Err(); err != nil {
-			return nil, err
+			return nil, domain.NewErrorWithCause(domain.UnknownErrorCode, err)
 		}
 
-		list := &model.List{}
+		list := &lists.List{}
+
 		err = rows.Scan(&list.ID, &list.Name)
 		if err != nil {
-			return nil, err
+			return nil, domain.NewErrorWithCause(domain.UnknownErrorCode, err)
 		}
-		lists = append(lists, list)
+
+		ownersLists = append(ownersLists, list)
 	}
-	return lists, nil
+
+	return ownersLists, nil
 }
 
 // GetList retrieves a list with its id
-func (s *PostgresStorage) GetList(id string) (*model.List, error) {
-	log.WithField("id", id).Debug("Get list")
-
+func (s *PostgresStorage) GetList(id string) (*lists.List, *domain.Error) {
 	query := fmt.Sprintf(`
     SELECT l.id, l.name, u.id
     FROM %s.list l
@@ -77,26 +71,24 @@ func (s *PostgresStorage) GetList(id string) (*model.List, error) {
 
 	row := s.session.QueryRow(query, id)
 
-	l := &model.List{
-		Owner: &model.User{},
+	l := &lists.List{
+		Owner: &users.User{},
 	}
 
 	err := row.Scan(&l.ID, &l.Name, &l.Owner.ID)
 
 	if err == sql.ErrNoRows {
-		return nil, model.NewDatabaseError(model.ErrNotFound, nil)
+		return nil, domain.NewError(lists.ListNotFoundErrorCode)
 	}
 
 	if err != nil {
-		return nil, err
+		return nil, domain.NewErrorWithCause(domain.UnknownErrorCode, err)
 	}
 
 	return l, nil
 }
 
-func (s *PostgresStorage) GetProductInList(productID string, listID string) (*model.ProductInList, error) {
-	log.WithField("productID", productID).WithField("listID", listID).Debug("Get product in list")
-
+func (s *PostgresStorage) GetProductInList(productID string, listID string) (*lists.ProductInList, *domain.Error) {
 	query := fmt.Sprintf(`
     SELECT product_id, list_id
     FROM %s.product_in_list
@@ -106,20 +98,20 @@ func (s *PostgresStorage) GetProductInList(productID string, listID string) (*mo
 
 	row := s.session.QueryRow(query, productID, listID)
 
-	pil := &model.ProductInList{}
+	pil := &lists.ProductInList{}
 
-	err := row.Scan(pil.ProductID, pil.ListID)
-	err = handleNotFound(err)
+	err := row.Scan(&pil.ProductID, &pil.ListID)
+	if err == sql.ErrNoRows {
+		return nil, domain.NewError(lists.ProductInListNotFoundErrorCode)
+	}
 	if err != nil {
-		return nil, err
+		return nil, domain.NewErrorWithCause(domain.UnknownErrorCode, err)
 	}
 
-	return pil, err
+	return pil, nil
 }
 
-func (s *PostgresStorage) AddProductToList(productID string, listID string) error {
-	log.WithField("productID", productID).WithField("listID", listID).Debug("Add product to list")
-
+func (s *PostgresStorage) AddProductToList(productID string, listID string) *domain.Error {
 	query := fmt.Sprintf(`
     INSERT INTO %s.product_in_list(product_id, list_id)
     VALUES ($1, $2)
@@ -128,8 +120,7 @@ func (s *PostgresStorage) AddProductToList(productID string, listID string) erro
 	_, err := s.session.Exec(query, productID, listID)
 
 	if err != nil {
-		log.WithError(err).Error("Unable to add product to list")
-		return err
+		return domain.NewErrorWithCause(domain.UnknownErrorCode, err)
 	}
 
 	return nil

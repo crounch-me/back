@@ -37,5 +37,4 @@ Feature: Sign up
       """
     When I send a "POST" request on "/users"
     Then the status code is 409
-    And "$.error" has string value "duplicate"
-    And "$.errorDescription" has string value "Entity already exists"
+    And "$.error" has string value "duplicate-user-error"

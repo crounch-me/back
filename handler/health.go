@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/crounch-me/back/model"
+	"github.com/crounch-me/back/domain"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 )
@@ -18,12 +18,15 @@ func (hc *Context) Health(c *gin.Context) {
 		versionBytes, err := ioutil.ReadFile("VERSION")
 		if err != nil {
 			log.Error(err)
+			c.AbortWithStatus(http.StatusInternalServerError)
 		}
-		version = string(versionBytes)
-		version = strings.TrimSuffix(version, "\n")
+		version = strings.TrimSuffix(string(versionBytes), "\n")
 	}
-	health := &model.Health{}
-	health.Alive = true
-	health.Version = version
+
+	health := &domain.Health{
+		Alive:   true,
+		Version: version,
+	}
+
 	c.JSON(http.StatusOK, health)
 }

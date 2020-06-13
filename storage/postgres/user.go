@@ -4,45 +4,28 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/crounch-me/back/model"
-	uuid "github.com/satori/go.uuid"
-	log "github.com/sirupsen/logrus"
-	"golang.org/x/crypto/bcrypt"
+	"github.com/crounch-me/back/domain"
+	"github.com/crounch-me/back/domain/users"
 )
 
 // CreateUser inserts a new user with hashed password
-func (s *PostgresStorage) CreateUser(user *model.User) error {
-	log.WithField("email", user.Email).Debug("Creating user")
-
-	user.ID = uuid.NewV4().String()
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(*user.Password), bcrypt.DefaultCost)
-	if err != nil {
-		return err
-	}
-
-	stringPassword := string(hashedPassword)
-
-	user.Password = &stringPassword
-
+func (s *PostgresStorage) CreateUser(user *users.User) *domain.Error {
 	query := fmt.Sprintf(`
 		INSERT INTO %s."user"(id, email, password)
 		VALUES ($1, $2, $3)
 	`, s.schema)
 
-	_, err = s.session.Exec(query, user.ID, user.Email, user.Password)
+	_, err := s.session.Exec(query, user.ID, user.Email, user.Password)
 
 	if err != nil {
-		log.WithError(err).Error("Unable to create user")
-		return err
+		return domain.NewErrorWithCause(domain.UnknownErrorCode, err)
 	}
 
 	return nil
 }
 
 // GetUserByEmail find the user with his email
-func (s *PostgresStorage) GetUserByEmail(email string) (*model.User, error) {
-	log.WithField("email", email).Debug("Getting user by email")
-
+func (s *PostgresStorage) GetUserByEmail(email string) (*users.User, *domain.Error) {
 	query := fmt.Sprintf(`
 		SELECT id, password
 		FROM %s."user"
@@ -51,26 +34,23 @@ func (s *PostgresStorage) GetUserByEmail(email string) (*model.User, error) {
 
 	row := s.session.QueryRow(query, email)
 
-	user := &model.User{}
+	user := &users.User{}
 
 	err := row.Scan(&user.ID, &user.Password)
 
 	if err == sql.ErrNoRows {
-		return nil, model.NewDatabaseError(model.ErrNotFound, nil)
+		return nil, domain.NewError(users.UserNotFoundErrorCode)
 	}
 
 	if err != nil {
-		log.WithError(err).Error("Unable to find user by email")
-		return nil, err
+		return nil, domain.NewErrorWithCause(domain.UnknownErrorCode, err)
 	}
 
 	return user, nil
 }
 
 // GetUserIDByToken find the user with his token
-func (s *PostgresStorage) GetUserIDByToken(token string) (*string, error) {
-	log.WithField("token", token).Debug("Getting user by token")
-
+func (s *PostgresStorage) GetUserIDByToken(token string) (*string, *domain.Error) {
 	query := fmt.Sprintf(`
 		SELECT id
     FROM %s."user"
@@ -85,12 +65,11 @@ func (s *PostgresStorage) GetUserIDByToken(token string) (*string, error) {
 	err := row.Scan(&id)
 
 	if err == sql.ErrNoRows {
-		return nil, model.NewDatabaseError(model.ErrNotFound, nil)
+		return nil, domain.NewError(users.UserNotFoundErrorCode)
 	}
 
 	if err != nil {
-		log.WithError(err).Error("Unable to find user by token")
-		return nil, err
+		return nil, domain.NewErrorWithCause(domain.UnknownErrorCode, err)
 	}
 
 	return id, nil

@@ -3,11 +3,9 @@ package handler
 import (
 	"net/http"
 
-	"github.com/crounch-me/back/errorcode"
-	"github.com/crounch-me/back/model"
+	"github.com/crounch-me/back/domain"
+	"github.com/crounch-me/back/domain/lists"
 	"github.com/gin-gonic/gin"
-
-	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -15,64 +13,51 @@ const (
 )
 
 func (hc *Context) CreateList(c *gin.Context) {
-	list := &model.List{}
+	list := &lists.List{}
 
-	err := hc.UnmarshalPayload(c, list)
+	err := hc.UnmarshalAndValidate(c, list)
 	if err != nil {
-		hc.LogAndSendError(c, err, errorcode.UnmarshalCode, errorcode.UnmarshalDescription, http.StatusBadRequest)
-		return
-	}
-
-	err = hc.Validate.Struct(list)
-	if err != nil {
-		hc.LogAndSendError(c, err, errorcode.InvalidCode, hc.GetValidationErrorDescription(err), http.StatusBadRequest)
+		hc.LogAndSendError(c, err)
 		return
 	}
 
 	userID, exists := c.Get(ContextUserID)
-
 	if !exists {
-		hc.LogAndSendError(c, nil, errorcode.UserDataCode, errorcode.UserDataDescription, http.StatusInternalServerError)
+		hc.LogAndSendError(c, domain.NewError(domain.UnknownErrorCode))
 		return
 	}
 
-	list.Owner = &model.User{
-		ID: userID.(string),
-	}
-
-	err = hc.Storage.CreateList(list)
+	list, err = hc.Services.List.CreateList(list.Name, userID.(string))
 	if err != nil {
-		hc.LogAndSendError(c, err, errorcode.DatabaseCode, errorcode.DatabaseDescription, http.StatusInternalServerError)
+		hc.LogAndSendError(c, err)
 		return
 	}
 
 	c.JSON(http.StatusCreated, list)
 }
 
+// GetOwnerLists handles the request to get the owner's lists
 func (hc *Context) GetOwnerLists(c *gin.Context) {
 	userID, exists := c.Get(ContextUserID)
-
 	if !exists {
-		hc.LogAndSendError(c, nil, errorcode.UserDataCode, errorcode.UserDataDescription, http.StatusInternalServerError)
+		hc.LogAndSendError(c, domain.NewError(domain.UnknownErrorCode))
 		return
 	}
 
-	lists, err := hc.Storage.GetOwnerLists(userID.(string))
-
+	lists, err := hc.Services.List.GetOwnerLists(userID.(string))
 	if err != nil {
-		hc.LogAndSendError(c, err, errorcode.DatabaseCode, errorcode.DatabaseDescription, http.StatusInternalServerError)
+		hc.LogAndSendError(c, err)
 		return
 	}
 
-	log.WithField("lists", lists).Debug("Response: lists")
 	c.JSON(http.StatusOK, lists)
 }
 
+// AddProductToList handles the request to add a product to a list
 func (hc *Context) AddProductToList(c *gin.Context) {
-	userID, exists := c.Get(ContextUserID)
-
-	if !exists {
-		hc.LogAndSendError(c, nil, errorcode.UserDataCode, errorcode.UserDataDescription, http.StatusInternalServerError)
+	userID, domainErr := hc.GetUserIDFromContext(c)
+	if domainErr != nil {
+		hc.LogAndSendError(c, domainErr)
 		return
 	}
 
@@ -80,7 +65,7 @@ func (hc *Context) AddProductToList(c *gin.Context) {
 
 	err := hc.Validate.Var(listID, "uuid")
 	if err != nil {
-		hc.LogAndSendError(c, err, errorcode.InvalidCode, hc.GetValidationErrorDescriptionWithField(err, "list ID"), http.StatusBadRequest)
+		hc.LogAndSendError(c, err)
 		return
 	}
 
@@ -88,74 +73,14 @@ func (hc *Context) AddProductToList(c *gin.Context) {
 
 	err = hc.Validate.Var(productID, "uuid")
 	if err != nil {
-		hc.LogAndSendError(c, err, errorcode.InvalidCode, hc.GetValidationErrorDescriptionWithField(err, "product ID"), http.StatusBadRequest)
+		hc.LogAndSendError(c, err)
 		return
 	}
 
-	list, err := hc.Storage.GetList(listID)
-
-	if err != nil {
-		if databaseError, ok := err.(*model.DatabaseError); ok {
-			switch databaseError.Type {
-			case model.ErrNotFound:
-				hc.LogAndSendError(c, err, errorcode.NotFoundCode, ListNotFoundDescription, http.StatusNotFound)
-				return
-			}
-		}
-		hc.LogAndSendError(c, err, errorcode.DatabaseCode, errorcode.DatabaseDescription, http.StatusInternalServerError)
+	productInList, domainErr := hc.Services.List.AddProductToList(productID, listID, userID)
+	if domainErr != nil {
+		hc.LogAndSendError(c, domainErr)
 		return
-	}
-
-	if list.Owner.ID != userID {
-		c.AbortWithStatus(http.StatusForbidden)
-		return
-	}
-
-	product, err := hc.Storage.GetProduct(productID)
-
-	if err != nil {
-		if databaseError, ok := err.(*model.DatabaseError); ok {
-			switch databaseError.Type {
-			case model.ErrNotFound:
-				hc.LogAndSendError(c, err, errorcode.NotFoundCode, ProductNotFoundDescription, http.StatusNotFound)
-				return
-			}
-		}
-		hc.LogAndSendError(c, err, errorcode.DatabaseCode, errorcode.DatabaseDescription, http.StatusInternalServerError)
-		return
-	}
-
-	if product.Owner.ID != userID {
-		c.AbortWithStatus(http.StatusForbidden)
-		return
-	}
-
-	productInList, err := hc.Storage.GetProductInList(productID, listID)
-
-	if err != nil {
-		if _, ok := err.(*model.DatabaseError); ok {
-			// No return when not found, it's normal because the association must not exist
-		} else {
-			hc.LogAndSendError(c, err, errorcode.DatabaseCode, errorcode.DatabaseDescription, http.StatusInternalServerError)
-			return
-		}
-	}
-
-	if productInList != nil {
-		hc.LogAndSendError(c, err, errorcode.DuplicateCode, errorcode.DuplicateDescription, http.StatusConflict)
-		return
-	}
-
-	err = hc.Storage.AddProductToList(productID, listID)
-
-	if err != nil {
-		hc.LogAndSendError(c, err, errorcode.DatabaseCode, errorcode.DatabaseDescription, http.StatusInternalServerError)
-		return
-	}
-
-	productInList = &model.ProductInList{
-		ProductID: productID,
-		ListID:    listID,
 	}
 
 	c.JSON(http.StatusCreated, productInList)
