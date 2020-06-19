@@ -9,13 +9,13 @@ import (
 )
 
 // CreateUser inserts a new user with hashed password
-func (s *PostgresStorage) CreateUser(user *users.User) *domain.Error {
+func (s *PostgresStorage) CreateUser(id, email, password string) *domain.Error {
 	query := fmt.Sprintf(`
 		INSERT INTO %s."user"(id, email, password)
 		VALUES ($1, $2, $3)
 	`, s.schema)
 
-	_, err := s.session.Exec(query, user.ID, user.Email, user.Password)
+	_, err := s.session.Exec(query, id, email, password)
 
 	if err != nil {
 		return domain.NewErrorWithCause(domain.UnknownErrorCode, err)
@@ -24,8 +24,8 @@ func (s *PostgresStorage) CreateUser(user *users.User) *domain.Error {
 	return nil
 }
 
-// GetUserByEmail find the user with his email
-func (s *PostgresStorage) GetUserByEmail(email string) (*users.User, *domain.Error) {
+// GetByEmail find the user with his email
+func (s *PostgresStorage) GetByEmail(email string) (*users.User, *domain.Error) {
 	query := fmt.Sprintf(`
 		SELECT id, password
 		FROM %s."user"
@@ -49,7 +49,7 @@ func (s *PostgresStorage) GetUserByEmail(email string) (*users.User, *domain.Err
 	return user, nil
 }
 
-// GetUserIDByToken find the user with his token
+// GetUserIDByToken find the user id with his token
 func (s *PostgresStorage) GetUserIDByToken(token string) (*string, *domain.Error) {
 	query := fmt.Sprintf(`
 		SELECT id

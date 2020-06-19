@@ -16,8 +16,8 @@ import (
 	"github.com/crounch-me/back/domain/products"
 	"github.com/crounch-me/back/domain/users"
 	"github.com/crounch-me/back/storage"
-	"github.com/crounch-me/back/storage/mock"
 	"github.com/crounch-me/back/storage/postgres"
+	"github.com/crounch-me/back/util"
 )
 
 const (
@@ -34,28 +34,26 @@ type Services struct {
 
 // Context holds everything to respond to requests
 type Context struct {
-	Storage  storage.Storage
-	Config   *configuration.Config
-	Validate *validator.Validate
-	Services *Services
+	Generation domain.Generation
+	Storage    storage.Storage
+	Config     *configuration.Config
+	Validate   *validator.Validate
+	Services   *Services
 }
 
 // NewContext creates and initialize everything for the requests
 func NewContext(config *configuration.Config) *Context {
 	var storage storage.Storage
 
-	if config.Mock {
-		storage = mock.NewStorageMock()
-	} else {
-		postgres.InitDB(config.DBConnectionURI)
-		storage = postgres.NewStorage(config.DBConnectionURI, config.DBSchema)
-	}
+	postgres.InitDB(config.DBConnectionURI)
+	storage = postgres.NewStorage(config.DBConnectionURI, config.DBSchema)
+	generation := &util.GenerationImpl{}
 
 	return &Context{
 		Storage:  storage,
 		Config:   config,
 		Validate: validator.New(),
-		Services: NewServices(storage),
+		Services: NewServices(storage, generation),
 	}
 }
 
@@ -111,21 +109,25 @@ func (hc *Context) UnmarshalAndValidate(c *gin.Context, i interface{}) *domain.E
 }
 
 // NewServices create an object which contains all necessary services
-func NewServices(storage storage.Storage) *Services {
+func NewServices(storage storage.Storage, generation domain.Generation) *Services {
 	return &Services{
 		Authorization: &authorization.AuthorizationService{
 			AuthorizationStorage: storage,
 			UserStorage:          storage,
+			Generation:           generation,
 		},
 		List: &lists.ListService{
 			ListStorage:    storage,
 			ProductStorage: storage,
+			Generation:     generation,
 		},
 		Product: &products.ProductService{
 			ProductStorage: storage,
+			Generation:     generation,
 		},
 		User: &users.UserService{
 			UserStorage: storage,
+			Generation:  generation,
 		},
 	}
 }

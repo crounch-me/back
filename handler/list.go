@@ -44,7 +44,7 @@ func (hc *Context) GetOwnerLists(c *gin.Context) {
 		return
 	}
 
-	lists, err := hc.Services.List.GetOwnerLists(userID.(string))
+	lists, err := hc.Services.List.GetOwnersLists(userID.(string))
 	if err != nil {
 		hc.LogAndSendError(c, err)
 		return

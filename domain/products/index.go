@@ -3,11 +3,11 @@ package products
 import (
 	"github.com/crounch-me/back/domain"
 	"github.com/crounch-me/back/domain/users"
-	"github.com/crounch-me/back/util"
 )
 
 type ProductService struct {
-	ProductStorage ProductStorage
+	ProductStorage Storage
+	Generation     domain.Generation
 }
 
 func (ps *ProductService) GetProduct(productID, userID string) (*Product, *domain.Error) {
@@ -24,7 +24,7 @@ func (ps *ProductService) GetProduct(productID, userID string) (*Product, *domai
 }
 
 func (ps *ProductService) CreateProduct(name, userID string) (*Product, *domain.Error) {
-	id, err := util.GenerateID()
+	id, err := ps.Generation.GenerateID()
 	if err != nil {
 		return nil, err
 	}
@@ -37,5 +37,10 @@ func (ps *ProductService) CreateProduct(name, userID string) (*Product, *domain.
 		},
 	}
 
-	return product, ps.ProductStorage.CreateProduct(product)
+	err = ps.ProductStorage.CreateProduct(product)
+	if err != nil {
+		return nil, err
+	}
+
+	return product, nil
 }

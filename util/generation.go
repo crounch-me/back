@@ -16,8 +16,33 @@ const (
 	letterIdxMax  = 63 / letterIdxBits   // # of letter indices fitting in 63 bits
 )
 
-func GenerateToken() string {
+type GenerationImpl struct{}
+
+func (g *GenerationImpl) GenerateToken() string {
 	return RandString(tokenLength)
+}
+
+func (g *GenerationImpl) GenerateID() (string, *domain.Error) {
+	id, err := uuid.NewV4()
+
+	if err != nil {
+		return "", domain.NewErrorWithCause(domain.UnknownErrorCode, err)
+	}
+
+	return id.String(), nil
+}
+
+func (g *GenerationImpl) HashPassword(password string) (string, *domain.Error) {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return "", domain.NewErrorWithCause(domain.UnknownErrorCode, err)
+	}
+	return string(hashedPassword), nil
+}
+
+func (g *GenerationImpl) ComparePassword(hashedPassword, givenPassword string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(givenPassword))
+	return err == nil
 }
 
 func RandString(n int) string {
@@ -39,30 +64,4 @@ func RandString(n int) string {
 
 func RandomInt(min, max int) int {
 	return min + rand.Intn(max-min)
-}
-
-func GenerateID() (string, *domain.Error) {
-	id, err := uuid.NewV4()
-
-	if err != nil {
-		return "", domain.NewErrorWithCause(domain.UnknownErrorCode, err)
-	}
-
-	return id.String(), nil
-}
-
-func HashPassword(password string) (string, *domain.Error) {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		return "", domain.NewErrorWithCause(domain.UnknownErrorCode, err)
-	}
-	return string(hashedPassword), nil
-}
-
-func ComparePassword(hashedPassword, givenPassword string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(givenPassword))
-	if err != nil {
-		return true
-	}
-	return false
 }

@@ -2,47 +2,46 @@ package users
 
 import (
 	"github.com/crounch-me/back/domain"
-	"github.com/crounch-me/back/util"
 )
 
 type UserService struct {
-	UserStorage UserStorage
+	UserStorage Storage
+	Generation  domain.Generation
 }
 
 func (us *UserService) CreateUser(email string, password string) (*User, *domain.Error) {
-	hashedPassword, err := util.HashPassword(password)
+	hashedPassword, err := us.Generation.HashPassword(password)
 	if err != nil {
 		return nil, err
 	}
 
-	newUserID, err := util.GenerateID()
+	newUserID, err := us.Generation.GenerateID()
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = us.UserStorage.GetUserByEmail(email)
+	_, err = us.UserStorage.GetByEmail(email)
 	if err == nil {
 		return nil, domain.NewError(DuplicateUserErrorCode)
 	} else if err.Code != UserNotFoundErrorCode {
 		return nil, err
 	}
 
-	user := &User{
-		ID:       newUserID,
-		Email:    email,
-		Password: &hashedPassword,
-	}
-
-	err = us.UserStorage.CreateUser(user)
+	err = us.UserStorage.CreateUser(newUserID, email, hashedPassword)
 	if err != nil {
 		return nil, err
+	}
+
+	user := &User{
+		ID:    newUserID,
+		Email: email,
 	}
 
 	return user, nil
 }
 
-func (us *UserService) GetUserByEmail(email string) (*User, *domain.Error) {
-	user, err := us.UserStorage.GetUserByEmail(email)
+func (us *UserService) GetByEmail(email string) (*User, *domain.Error) {
+	user, err := us.UserStorage.GetByEmail(email)
 	if err != nil {
 		return nil, err
 	}

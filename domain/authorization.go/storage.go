@@ -2,6 +2,6 @@ package authorization
 
 import "github.com/crounch-me/back/domain"
 
-type AuthorizationStorage interface {
-	CreateAuthorization(userID, token string) (*Authorization, *domain.Error)
+type Storage interface {
+	CreateAuthorization(userID, token string) *domain.Error
 }

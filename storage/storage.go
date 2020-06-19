@@ -9,8 +9,8 @@ import (
 
 // Storage defines every data functions that we need
 type Storage interface {
-	users.UserStorage
-	authorization.AuthorizationStorage
-	lists.ListStorage
-	products.ProductStorage
+	users.Storage
+	authorization.Storage
+	lists.Storage
+	products.Storage
 }

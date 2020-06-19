@@ -4,16 +4,22 @@ import (
 	"github.com/crounch-me/back/domain"
 	"github.com/crounch-me/back/domain/products"
 	"github.com/crounch-me/back/domain/users"
-	"github.com/crounch-me/back/util"
 )
 
 type ListService struct {
-	ListStorage    ListStorage
-	ProductStorage products.ProductStorage
+	ListStorage    Storage
+	ProductStorage products.Storage
+	Generation     domain.Generation
 }
 
 func (ls *ListService) CreateList(name, userID string) (*List, *domain.Error) {
-	id, err := util.GenerateID()
+	id, err := ls.Generation.GenerateID()
+	if err != nil {
+		return nil, err
+	}
+
+	err = ls.ListStorage.CreateList(id, name, userID)
+
 	if err != nil {
 		return nil, err
 	}
@@ -26,17 +32,11 @@ func (ls *ListService) CreateList(name, userID string) (*List, *domain.Error) {
 		},
 	}
 
-	err = ls.ListStorage.CreateList(list)
-
-	if err != nil {
-		return nil, err
-	}
-
 	return list, nil
 }
 
-func (ls *ListService) GetOwnerLists(ownerID string) ([]*List, *domain.Error) {
-	lists, err := ls.ListStorage.GetOwnerLists(ownerID)
+func (ls *ListService) GetOwnersLists(ownerID string) ([]*List, *domain.Error) {
+	lists, err := ls.ListStorage.GetOwnersLists(ownerID)
 
 	if err != nil {
 		return nil, err
