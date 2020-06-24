@@ -18,9 +18,13 @@ func (g *GenerationMock) GenerateID() (string, *Error) {
 	return args.String(0), err.(*Error)
 }
 
-func (g *GenerationMock) GenerateToken() string {
+func (g *GenerationMock) GenerateToken() (string, *Error) {
 	args := g.Called()
-	return args.String(0)
+	err := args.Error(1)
+	if err == nil {
+		return args.String(0), nil
+	}
+	return args.String(0), err.(*Error)
 }
 
 func (g *GenerationMock) HashPassword(password string) (string, *Error) {

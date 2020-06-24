@@ -16,7 +16,6 @@ import (
 	"github.com/cucumber/godog"
 	"github.com/cucumber/messages-go/v10"
 	"github.com/oliveagle/jsonpath"
-	uuid "github.com/satori/go.uuid"
 )
 
 type ExecutorVariables struct {
@@ -438,7 +437,7 @@ func (te *TestExecutor) theHeaderEquals(header, value string) error {
 }
 
 func randomEmail() string {
-	return fmt.Sprintf("%s@crounch.me", uuid.NewV4())
+	return fmt.Sprintf("%s@crounch.me", util.RandString(10))
 }
 
 func randomString() string {

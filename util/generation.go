@@ -18,8 +18,8 @@ const (
 
 type GenerationImpl struct{}
 
-func (g *GenerationImpl) GenerateToken() string {
-	return RandString(tokenLength)
+func (g *GenerationImpl) GenerateToken() (string, *domain.Error) {
+	return g.GenerateID()
 }
 
 func (g *GenerationImpl) GenerateID() (string, *domain.Error) {

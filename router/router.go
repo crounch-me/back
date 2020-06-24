@@ -9,8 +9,9 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/crounch-me/back/configuration"
+	"github.com/crounch-me/back/domain"
+	"github.com/crounch-me/back/domain/users"
 	"github.com/crounch-me/back/handler"
-	"github.com/crounch-me/back/storage"
 	"github.com/crounch-me/back/util"
 )
 
@@ -81,7 +82,7 @@ func ConfigureRoutes(r *gin.Engine, hc *handler.Context) {
 	r.OPTIONS(listProductPath, optionsHandler([]string{http.MethodPost}))
 }
 
-func checkAccess(s storage.Storage) gin.HandlerFunc {
+func checkAccess(us users.Storage) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token := c.GetHeader("Authorization")
 
@@ -91,9 +92,14 @@ func checkAccess(s storage.Storage) gin.HandlerFunc {
 			return
 		}
 
-		userID, err := s.GetUserIDByToken(token)
+		log.WithField("token", token).Debug("Get user with token")
+		userID, err := us.GetUserIDByToken(token)
 
 		if err != nil {
+			if err.Code == users.UserNotFoundErrorCode {
+				c.AbortWithStatusJSON(http.StatusUnauthorized, domain.NewError(domain.UnauthorizedErrorCode))
+				return
+			}
 			log.WithError(err).Error("Unauthorized - Error while accessing database")
 			c.AbortWithStatus(http.StatusInternalServerError)
 			return

@@ -1,7 +1,7 @@
 package domain
 
 type Generation interface {
-	GenerateToken() string
+	GenerateToken() (string, *Error)
 	GenerateID() (string, *Error)
 	HashPassword(string) (string, *Error)
 	ComparePassword(string, string) bool

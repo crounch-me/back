@@ -5,7 +5,7 @@ import "fmt"
 // Error describes the possible errors
 type Error struct {
 	Code  string `json:"error"`
-	Cause error
+	Cause error  `json:"-"`
 }
 
 const (

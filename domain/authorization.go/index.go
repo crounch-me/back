@@ -22,7 +22,11 @@ func (as *AuthorizationService) CreateAuthorization(email, password string) (*Au
 		return nil, domain.NewError(WrongPasswordErrorCode)
 	}
 
-	token := as.Generation.GenerateToken()
+	token, err := as.Generation.GenerateToken()
+
+	if err != nil {
+		return nil, err
+	}
 
 	err = as.AuthorizationStorage.CreateAuthorization(user.ID, token)
 	if err != nil {

@@ -55,6 +55,41 @@ func TestCreateAuthorizationWrongPassword(t *testing.T) {
 	assert.Equal(t, WrongPasswordErrorCode, err.Code)
 }
 
+func TestCreateAuthorizationGenerateTokenError(t *testing.T) {
+	email := "email"
+	password := "wrong-password"
+	userID := "user-id"
+	token := "generated-token"
+	user := &users.User{
+		ID:       userID,
+		Password: &password,
+	}
+
+	generationMock := &domain.GenerationMock{}
+	generationMock.On("ComparePassword", password, password).Return(true)
+	generationMock.On("GenerateToken").Return("", domain.NewError(domain.UnknownErrorCode))
+
+	userStorageMock := &users.StorageMock{}
+	userStorageMock.On("GetByEmail", email).Return(user, nil)
+
+	authorizationStorageMock := &StorageMock{}
+	authorizationStorageMock.On("CreateAuthorization", userID, token).Return(domain.NewError(domain.UnknownErrorCode))
+
+	authorizationService := &AuthorizationService{
+		AuthorizationStorage: authorizationStorageMock,
+		UserStorage:          userStorageMock,
+		Generation:           generationMock,
+	}
+
+	result, err := authorizationService.CreateAuthorization(email, password)
+
+	generationMock.AssertCalled(t, "ComparePassword", password, password)
+	generationMock.AssertCalled(t, "GenerateToken")
+	userStorageMock.AssertCalled(t, "GetByEmail", email)
+	authorizationStorageMock.AssertNotCalled(t, "CreateAuthorization")
+	assert.Empty(t, result)
+	assert.Equal(t, domain.UnknownErrorCode, err.Code)
+}
 func TestCreateAuthorizationCreateAuthorizationError(t *testing.T) {
 	email := "email"
 	password := "wrong-password"
@@ -67,7 +102,7 @@ func TestCreateAuthorizationCreateAuthorizationError(t *testing.T) {
 
 	generationMock := &domain.GenerationMock{}
 	generationMock.On("ComparePassword", password, password).Return(true)
-	generationMock.On("GenerateToken").Return(token)
+	generationMock.On("GenerateToken").Return(token, nil)
 
 	userStorageMock := &users.StorageMock{}
 	userStorageMock.On("GetByEmail", email).Return(user, nil)
@@ -103,7 +138,7 @@ func TestCreateAuthorizationOK(t *testing.T) {
 
 	generationMock := &domain.GenerationMock{}
 	generationMock.On("ComparePassword", password, password).Return(true)
-	generationMock.On("GenerateToken").Return(token)
+	generationMock.On("GenerateToken").Return(token, nil)
 
 	userStorageMock := &users.StorageMock{}
 	userStorageMock.On("GetByEmail", email).Return(user, nil)
