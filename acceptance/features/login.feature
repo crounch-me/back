@@ -31,4 +31,4 @@ Feature: Login
         }
       """
     When I send a "POST" request on "/users/login"
-    Then the status code is 403
+    Then the status code is 404

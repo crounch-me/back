@@ -1,18 +1,16 @@
 package postgres
 
 import (
+	"database/sql"
 	"fmt"
 
-	"github.com/crounch-me/back/model"
-	uuid "github.com/satori/go.uuid"
-	log "github.com/sirupsen/logrus"
+	"github.com/crounch-me/back/domain"
+	"github.com/crounch-me/back/domain/products"
+	"github.com/crounch-me/back/domain/users"
 )
 
 // CreateProduct inserts a new product
-func (s *PostgresStorage) CreateProduct(product *model.Product) error {
-	log.WithField("name", product.Name).Debug("Creating product")
-
-	product.ID = uuid.NewV4().String()
+func (s *PostgresStorage) CreateProduct(product *products.Product) *domain.Error {
 	query := fmt.Sprintf(`
 		INSERT INTO %s."product"(id, name, user_id)
 		VALUES ($1, $2, $3)
@@ -21,17 +19,14 @@ func (s *PostgresStorage) CreateProduct(product *model.Product) error {
 	_, err := s.session.Exec(query, product.ID, product.Name, product.Owner.ID)
 
 	if err != nil {
-		log.WithError(err).Error("Unable to create product")
-		return err
+		return domain.NewErrorWithCause(domain.UnknownErrorCode, err)
 	}
 
 	return nil
 }
 
 // GetProduct fetchs an existing product or return error
-func (s *PostgresStorage) GetProduct(id string) (*model.Product, error) {
-	log.WithField("userID", id).Debug("Getting product")
-
+func (s *PostgresStorage) GetProduct(id string) (*products.Product, *domain.Error) {
 	query := fmt.Sprintf(`
     SELECT p.id, p.name, u.id
     FROM %s.product p
@@ -42,15 +37,17 @@ func (s *PostgresStorage) GetProduct(id string) (*model.Product, error) {
 
 	row := s.session.QueryRow(query, id)
 
-	p := &model.Product{
-		Owner: &model.User{},
+	p := &products.Product{
+		Owner: &users.User{},
 	}
 
 	err := row.Scan(&p.ID, &p.Name, &p.Owner.ID)
-	err = handleNotFound(err)
 
+	if err == sql.ErrNoRows {
+		return nil, domain.NewError(products.ProductNotFoundErrorCode)
+	}
 	if err != nil {
-		return nil, err
+		return nil, domain.NewErrorWithCause(domain.UnknownErrorCode, err)
 	}
 
 	return p, nil

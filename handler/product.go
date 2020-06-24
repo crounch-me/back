@@ -3,8 +3,8 @@ package handler
 import (
 	"net/http"
 
-	"github.com/crounch-me/back/errorcode"
-	"github.com/crounch-me/back/model"
+	"github.com/crounch-me/back/domain"
+	"github.com/crounch-me/back/domain/products"
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,34 +13,24 @@ const (
 )
 
 func (hc *Context) CreateProduct(c *gin.Context) {
-	product := &model.Product{}
+	product := &products.Product{}
 
-	err := hc.UnmarshalPayload(c, product)
+	err := hc.UnmarshalAndValidate(c, product)
 	if err != nil {
-		hc.LogAndSendError(c, err, errorcode.UnmarshalCode, errorcode.UnmarshalDescription, http.StatusBadRequest)
-		return
-	}
-
-	err = hc.Validate.Struct(product)
-	if err != nil {
-		hc.LogAndSendError(c, err, errorcode.InvalidCode, hc.GetValidationErrorDescription(err), http.StatusBadRequest)
+		hc.LogAndSendError(c, err)
 		return
 	}
 
 	userID, exists := c.Get(ContextUserID)
-
 	if !exists {
-		hc.LogAndSendError(c, nil, errorcode.UserDataCode, errorcode.UserDataDescription, http.StatusInternalServerError)
+		hc.LogAndSendError(c, domain.NewError(domain.UnknownErrorCode))
 		return
 	}
 
-	product.Owner = &model.User{
-		ID: userID.(string),
-	}
+	product, err = hc.Services.Product.CreateProduct(product.Name, userID.(string))
 
-	err = hc.Storage.CreateProduct(product)
 	if err != nil {
-		hc.LogAndSendError(c, err, errorcode.DatabaseCode, errorcode.DatabaseDescription, http.StatusInternalServerError)
+		hc.LogAndSendError(c, err)
 		return
 	}
 

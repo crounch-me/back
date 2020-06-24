@@ -91,7 +91,7 @@ run-image-ci:
 .PHONY: test
 test:
 	@echo "+ $@"
-	go test -v $(shell go list ./... | grep -v vendor | grep -v acceptance)
+	go test -v ./...
 
 .PHONY: test-ci
 test-ci: build-builder-image
