@@ -9,4 +9,6 @@ type Storage interface {
 	GetList(id string) (*List, *domain.Error)
 	GetProductInList(productID string, listID string) (*ProductInList, *domain.Error)
 	AddProductToList(productID string, listID string) *domain.Error
+	DeleteList(listID string) *domain.Error
+	DeleteProductsFromList(listID string) *domain.Error
 }

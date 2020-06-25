@@ -101,6 +101,7 @@ func (te *TestExecutor) iSendARequestOn(method, path string) error {
 		method != http.MethodPut &&
 		method != http.MethodPatch &&
 		method != http.MethodGet &&
+		method != http.MethodDelete &&
 		method != http.MethodOptions {
 		return fmt.Errorf("unknown http method %s", method)
 	}

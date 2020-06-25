@@ -96,3 +96,21 @@ func (ls *ListService) AddProductToList(productID, listID, userID string) (*Prod
 
 	return productInList, nil
 }
+
+func (ls *ListService) DeleteList(listID, userID string) *domain.Error {
+	list, err := ls.ListStorage.GetList(listID)
+	if err != nil {
+		return err
+	}
+
+	if list.Owner.ID != userID {
+		return domain.NewError(domain.UnauthorizedErrorCode)
+	}
+
+	err = ls.ListStorage.DeleteProductsFromList(listID)
+	if err != nil {
+		return err
+	}
+
+	return ls.ListStorage.DeleteList(listID)
+}

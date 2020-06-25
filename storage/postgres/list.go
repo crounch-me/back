@@ -125,3 +125,31 @@ func (s *PostgresStorage) AddProductToList(productID string, listID string) *dom
 
 	return nil
 }
+
+func (s *PostgresStorage) DeleteProductsFromList(listID string) *domain.Error {
+	deleteProductInListQuery := fmt.Sprintf(`
+    DELETE FROM %s.product_in_list WHERE list_id = $1
+  `, s.schema)
+
+	_, err := s.session.Exec(deleteProductInListQuery, listID)
+
+	if err != nil {
+		return domain.NewErrorWithCause(domain.UnknownErrorCode, err)
+	}
+
+	return nil
+}
+
+func (s *PostgresStorage) DeleteList(listID string) *domain.Error {
+	deleteProductInListQuery := fmt.Sprintf(`
+    DELETE FROM %s.list WHERE id = $1
+  `, s.schema)
+
+	_, err := s.session.Exec(deleteProductInListQuery, listID)
+
+	if err != nil {
+		return domain.NewErrorWithCause(domain.UnknownErrorCode, err)
+	}
+
+	return nil
+}

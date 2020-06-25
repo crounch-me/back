@@ -21,7 +21,8 @@ const (
 	userPath  = "/users"
 	loginPath = "/users/login"
 
-	listPath = "/lists"
+	listPath       = "/lists"
+	listWithIDPath = "/lists/:listID"
 
 	listProductPath = "/lists/:listID/products/:productID"
 
@@ -71,7 +72,8 @@ func ConfigureRoutes(r *gin.Engine, hc *handler.Context) {
 	// List routes
 	r.POST(listPath, checkAccess(hc.Storage), hc.CreateList)
 	r.GET(listPath, checkAccess(hc.Storage), hc.GetOwnerLists)
-	r.OPTIONS(listPath, optionsHandler([]string{http.MethodPost, http.MethodGet}))
+	r.DELETE(listWithIDPath, checkAccess(hc.Storage), hc.DeleteList)
+	r.OPTIONS(listPath, optionsHandler([]string{http.MethodPost, http.MethodGet, http.MethodDelete}))
 
 	// Product routes
 	r.POST(productPath, checkAccess(hc.Storage), hc.CreateProduct)

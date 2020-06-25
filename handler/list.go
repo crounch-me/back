@@ -85,3 +85,26 @@ func (hc *Context) AddProductToList(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, productInList)
 }
+
+func (hc *Context) DeleteList(c *gin.Context) {
+	userID, domainErr := hc.GetUserIDFromContext(c)
+	if domainErr != nil {
+		hc.LogAndSendError(c, domainErr)
+		return
+	}
+
+	listID := c.Param("listID")
+	err := hc.Validate.Var(listID, "uuid")
+	if err != nil {
+		hc.LogAndSendError(c, err)
+		return
+	}
+
+	domainErr = hc.Services.List.DeleteList(listID, userID)
+	if domainErr != nil {
+		hc.LogAndSendError(c, domainErr)
+		return
+	}
+
+	c.Status(http.StatusNoContent)
+}
