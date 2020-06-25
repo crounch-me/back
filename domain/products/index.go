@@ -29,17 +29,17 @@ func (ps *ProductService) CreateProduct(name, userID string) (*Product, *domain.
 		return nil, err
 	}
 
+	err = ps.ProductStorage.CreateProduct(id, name, userID)
+	if err != nil {
+		return nil, err
+	}
+
 	product := &Product{
 		ID:   id,
 		Name: name,
 		Owner: &users.User{
 			ID: userID,
 		},
-	}
-
-	err = ps.ProductStorage.CreateProduct(product)
-	if err != nil {
-		return nil, err
 	}
 
 	return product, nil

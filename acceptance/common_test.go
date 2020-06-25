@@ -290,8 +290,8 @@ func (te *TestExecutor) isAStringEqualTo(path string, expected string) error {
 }
 
 func (te *TestExecutor) theBodyIsAnEmptyArray() error {
-	if string(te.ResponseBody) == "[]" {
-		return fmt.Errorf("the body is not empty, actual value %s", te.ResponseBody)
+	if string(te.ResponseBody) != "[]" {
+		return fmt.Errorf("the body is not an empty array, actual value \"%s\"", string(te.ResponseBody))
 	}
 	return nil
 }

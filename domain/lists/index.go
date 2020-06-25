@@ -1,6 +1,8 @@
 package lists
 
 import (
+	"time"
+
 	"github.com/crounch-me/back/domain"
 	"github.com/crounch-me/back/domain/products"
 	"github.com/crounch-me/back/domain/users"
@@ -18,7 +20,8 @@ func (ls *ListService) CreateList(name, userID string) (*List, *domain.Error) {
 		return nil, err
 	}
 
-	err = ls.ListStorage.CreateList(id, name, userID)
+	creationDate := time.Now()
+	err = ls.ListStorage.CreateList(id, name, userID, creationDate)
 
 	if err != nil {
 		return nil, err
@@ -30,6 +33,7 @@ func (ls *ListService) CreateList(name, userID string) (*List, *domain.Error) {
 		Owner: &users.User{
 			ID: userID,
 		},
+		CreationDate: creationDate,
 	}
 
 	return list, nil

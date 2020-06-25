@@ -3,6 +3,7 @@ package postgres
 import (
 	"database/sql"
 	"fmt"
+	"time"
 
 	"github.com/crounch-me/back/domain"
 	"github.com/crounch-me/back/domain/lists"
@@ -10,13 +11,13 @@ import (
 )
 
 // CreateList inserts a new list
-func (s *PostgresStorage) CreateList(id, name, ownerID string) *domain.Error {
+func (s *PostgresStorage) CreateList(id, name, ownerID string, creationDate time.Time) *domain.Error {
 	query := fmt.Sprintf(`
-		INSERT INTO %s."list"(id, name, user_id)
-		VALUES ($1, $2, $3)
+		INSERT INTO %s."list"(id, name, user_id, creation_date)
+		VALUES ($1, $2, $3, $4)
 	`, s.schema)
 
-	_, err := s.session.Exec(query, id, name, ownerID)
+	_, err := s.session.Exec(query, id, name, ownerID, creationDate)
 
 	if err != nil {
 		return domain.NewErrorWithCause(domain.UnknownErrorCode, err)
@@ -28,7 +29,7 @@ func (s *PostgresStorage) CreateList(id, name, ownerID string) *domain.Error {
 // GetOwnerLists get all owner's lists
 func (s *PostgresStorage) GetOwnersLists(ownerID string) ([]*lists.List, *domain.Error) {
 	query := fmt.Sprintf(`
-    SELECT l.id, l.name
+    SELECT l.id, l.name, l.creation_date
     FROM %s.list l
     LEFT JOIN %s.user u ON u.id = l.user_id
     WHERE u.id = $1
@@ -48,7 +49,7 @@ func (s *PostgresStorage) GetOwnersLists(ownerID string) ([]*lists.List, *domain
 
 		list := &lists.List{}
 
-		err = rows.Scan(&list.ID, &list.Name)
+		err = rows.Scan(&list.ID, &list.Name, &list.CreationDate)
 		if err != nil {
 			return nil, domain.NewErrorWithCause(domain.UnknownErrorCode, err)
 		}

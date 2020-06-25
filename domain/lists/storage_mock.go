@@ -1,6 +1,8 @@
 package lists
 
 import (
+	"time"
+
 	"github.com/crounch-me/back/domain"
 	"github.com/stretchr/testify/mock"
 )
@@ -9,8 +11,8 @@ type StorageMock struct {
 	mock.Mock
 }
 
-func (sm *StorageMock) CreateList(id, name, ownerID string) *domain.Error {
-	args := sm.Called(id, name, ownerID)
+func (sm *StorageMock) CreateList(id, name, ownerID string, creationDate time.Time) *domain.Error {
+	args := sm.Called(id, name, ownerID, creationDate)
 	err := args.Error(0)
 	if err == nil {
 		return nil
