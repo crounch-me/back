@@ -9,8 +9,8 @@ type StorageMock struct {
 	mock.Mock
 }
 
-func (ps *StorageMock) CreateProduct(product *Product) *domain.Error {
-	args := ps.Called(product)
+func (ps *StorageMock) CreateProduct(id, name, ownerID string) *domain.Error {
+	args := ps.Called(id, name, ownerID)
 	err := args.Error(0)
 	if err == nil {
 		return nil

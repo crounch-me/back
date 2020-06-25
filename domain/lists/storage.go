@@ -1,10 +1,14 @@
 package lists
 
-import "github.com/crounch-me/back/domain"
+import (
+	"time"
+
+	"github.com/crounch-me/back/domain"
+)
 
 // ListStorage defines every data functions that we need
 type Storage interface {
-	CreateList(id, name, ownerID string) *domain.Error
+	CreateList(id, name, ownerID string, creationDate time.Time) *domain.Error
 	GetOwnersLists(ownerID string) ([]*List, *domain.Error)
 	GetList(id string) (*List, *domain.Error)
 	GetProductInList(productID string, listID string) (*ProductInList, *domain.Error)

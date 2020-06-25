@@ -26,19 +26,12 @@ func TestCreateProductCreateProductError(t *testing.T) {
 	name := "name"
 	userID := "user-id"
 	productID := "product-id"
-	product := &Product{
-		ID:   productID,
-		Name: name,
-		Owner: &users.User{
-			ID: userID,
-		},
-	}
 
 	generationMock := &domain.GenerationMock{}
 	generationMock.On("GenerateID").Return(productID, nil)
 
 	productStorageMock := &StorageMock{}
-	productStorageMock.On("CreateProduct", product).Return(domain.NewError(domain.UnknownErrorCode))
+	productStorageMock.On("CreateProduct", productID, name, userID).Return(domain.NewError(domain.UnknownErrorCode))
 
 	productService := &ProductService{
 		Generation:     generationMock,
@@ -55,7 +48,19 @@ func TestCreateProductOK(t *testing.T) {
 	name := "name"
 	userID := "user-id"
 	productID := "product-id"
-	product := &Product{
+
+	generationMock := &domain.GenerationMock{}
+	generationMock.On("GenerateID").Return(productID, nil)
+
+	productStorageMock := &StorageMock{}
+	productStorageMock.On("CreateProduct", productID, name, userID).Return(nil)
+
+	productService := &ProductService{
+		Generation:     generationMock,
+		ProductStorage: productStorageMock,
+	}
+
+	expectedProduct := &Product{
 		ID:   productID,
 		Name: name,
 		Owner: &users.User{
@@ -63,19 +68,8 @@ func TestCreateProductOK(t *testing.T) {
 		},
 	}
 
-	generationMock := &domain.GenerationMock{}
-	generationMock.On("GenerateID").Return(productID, nil)
-
-	productStorageMock := &StorageMock{}
-	productStorageMock.On("CreateProduct", product).Return(nil)
-
-	productService := &ProductService{
-		Generation:     generationMock,
-		ProductStorage: productStorageMock,
-	}
-
 	result, err := productService.CreateProduct(name, userID)
 
-	assert.Equal(t, product, result)
+	assert.Equal(t, expectedProduct, result)
 	assert.Empty(t, err)
 }

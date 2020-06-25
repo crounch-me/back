@@ -10,13 +10,13 @@ import (
 )
 
 // CreateProduct inserts a new product
-func (s *PostgresStorage) CreateProduct(product *products.Product) *domain.Error {
+func (s *PostgresStorage) CreateProduct(id, name, ownerID string) *domain.Error {
 	query := fmt.Sprintf(`
 		INSERT INTO %s."product"(id, name, user_id)
 		VALUES ($1, $2, $3)
 	`, s.schema)
 
-	_, err := s.session.Exec(query, product.ID, product.Name, product.Owner.ID)
+	_, err := s.session.Exec(query, id, name, ownerID)
 
 	if err != nil {
 		return domain.NewErrorWithCause(domain.UnknownErrorCode, err)
