@@ -23,7 +23,16 @@ func (ps *StorageMock) GetProduct(id string) (*Product, *domain.Error) {
 	err := args.Error(1)
 	if err == nil {
 		return args.Get(0).(*Product), nil
-	} else {
-		return nil, err.(*domain.Error)
 	}
+	return nil, err.(*domain.Error)
+}
+
+func (ps *StorageMock) SearchDefaults(lowerCasedName string, id string) ([]*Product, *domain.Error) {
+	args := ps.Called(lowerCasedName, id)
+	err := args.Error(1)
+	if err == nil {
+		return args.Get(0).([]*Product), nil
+	}
+
+	return nil, err.(*domain.Error)
 }

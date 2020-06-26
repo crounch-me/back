@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/crounch-me/back/domain"
+	"github.com/crounch-me/back/domain/categories"
 	"github.com/crounch-me/back/domain/products"
 	"github.com/crounch-me/back/domain/users"
 )
@@ -28,12 +29,12 @@ func (s *PostgresStorage) CreateProduct(id, name, ownerID string) *domain.Error 
 // GetProduct fetchs an existing product or return error
 func (s *PostgresStorage) GetProduct(id string) (*products.Product, *domain.Error) {
 	query := fmt.Sprintf(`
-    SELECT p.id, p.name, u.id
+    SELECT p.id, p.name, u.id, c.id, c.name
     FROM %s.product p
-    LEFT JOIN %s.user u
-    ON p.user_id = u.id
+    LEFT JOIN %s.user u ON p.user_id = u.id
+    LEFT JOIN %s.category c ON p.category_id = c.id
     WHERE p.id = $1
-  `, s.schema, s.schema)
+  `, s.schema, s.schema, s.schema)
 
 	row := s.session.QueryRow(query, id)
 
@@ -41,14 +42,60 @@ func (s *PostgresStorage) GetProduct(id string) (*products.Product, *domain.Erro
 		Owner: &users.User{},
 	}
 
-	err := row.Scan(&p.ID, &p.Name, &p.Owner.ID)
+	var nullableCategoryID, nullableCategoryName sql.NullString
+
+	err := row.Scan(&p.ID, &p.Name, &p.Owner.ID, &nullableCategoryID, &nullableCategoryName)
 
 	if err == sql.ErrNoRows {
 		return nil, domain.NewError(products.ProductNotFoundErrorCode)
 	}
 	if err != nil {
-		return nil, domain.NewErrorWithCause(domain.UnknownErrorCode, err)
+		return nil, domain.NewErrorWithCallInfosAndCause(domain.UnknownErrorCode, "postgres", "GetProduct", err)
+	}
+
+	if nullableCategoryName.Valid && nullableCategoryID.Valid {
+		p.Category = &categories.Category{
+			ID:   nullableCategoryID.String,
+			Name: nullableCategoryName.String,
+		}
 	}
 
 	return p, nil
+}
+
+func (s *PostgresStorage) SearchDefaults(lowerCasedName string, userID string) ([]*products.Product, *domain.Error) {
+	query := fmt.Sprintf(`
+    SELECT p.id as product_id, p.name as product_name, c.id as category_id, c.name as category_name
+    FROM %s.product p
+    LEFT JOIN %s.user u ON u.id = p.user_id
+    LEFT JOIN %s.category c ON c.id = p.category_id
+    WHERE LOWER(p.name) SIMILAR TO '(' || $1 || '%%|%% ' || $1 || '%%)'
+    AND u.id = $2
+  `, s.schema, s.schema, s.schema)
+
+	rows, err := s.session.Query(query, lowerCasedName, userID)
+	if err != nil {
+		return nil, domain.NewErrorWithCause(domain.UnknownErrorCode, err)
+	}
+	defer rows.Close()
+
+	productList := make([]*products.Product, 0)
+	for rows.Next() {
+		if err = rows.Err(); err != nil {
+			return nil, domain.NewErrorWithCause(domain.UnknownErrorCode, err)
+		}
+
+		product := &products.Product{
+			Category: &categories.Category{},
+		}
+
+		err = rows.Scan(&product.ID, &product.Name, &product.Category.ID, &product.Category.Name)
+		if err != nil {
+			return nil, domain.NewErrorWithCause(domain.UnknownErrorCode, err)
+		}
+
+		productList = append(productList, product)
+	}
+
+	return productList, nil
 }

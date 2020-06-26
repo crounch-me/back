@@ -1,6 +1,8 @@
 package products
 
 import (
+	"strings"
+
 	"github.com/crounch-me/back/domain"
 	"github.com/crounch-me/back/domain/users"
 )
@@ -43,4 +45,8 @@ func (ps *ProductService) CreateProduct(name, userID string) (*Product, *domain.
 	}
 
 	return product, nil
+}
+
+func (ps *ProductService) SearchDefaults(name string) ([]*Product, *domain.Error) {
+	return ps.ProductStorage.SearchDefaults(strings.ToLower(name), users.AdminID)
 }
