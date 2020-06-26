@@ -1,0 +1,24 @@
+BEGIN;
+
+CREATE TABLE IF NOT EXISTS "product"(
+  id UUID PRIMARY KEY,
+  name VARCHAR(60) NOT NULL,
+  user_id UUID NOT NULL,
+  category_id UUID,
+  CONSTRAINT FK_product_user_id FOREIGN KEY (user_id) REFERENCES "user"(id),
+  CONSTRAINT FK_product_category_id FOREIGN KEY (category_id) REFERENCES "category"(id)
+);
+
+INSERT INTO "product"(id, name, user_id, category_id) VALUES
+  ('e6290326-8c17-4808-a6ae-2846b5239110', 'Saucisse aux herbes', '00000000-0000-0000-0000-000000000000', '5bf5983c-2694-4467-b755-6c43aa870a34'),
+  ('aaf7bfab-4e19-4ca6-bd26-a3d4a6ad3c8d', 'Saucisse de Toulouse', '00000000-0000-0000-0000-000000000000', '5bf5983c-2694-4467-b755-6c43aa870a34'),
+  ('2810ba2e-a0a3-4416-93f8-53fdfbf07803', 'Saucisse de Montbéliard', '00000000-0000-0000-0000-000000000000', '5bf5983c-2694-4467-b755-6c43aa870a34'),
+  ('379b61c1-f565-470d-9f48-56d4c3f99339', 'Saucisse de Francfort', '00000000-0000-0000-0000-000000000000', '5bf5983c-2694-4467-b755-6c43aa870a34'),
+  ('40fe3f75-703a-46d8-9520-0d27f7cf4bab', 'Saucisse à cuire', '00000000-0000-0000-0000-000000000000', '5bf5983c-2694-4467-b755-6c43aa870a34'),
+  ('e2a7069e-8d4c-4a4b-be76-77a67cd07d74', 'Saucisse à rotir', '00000000-0000-0000-0000-000000000000', '5bf5983c-2694-4467-b755-6c43aa870a34'),
+  ('8ccfe215-8560-4e4c-9969-b14f4c300b8d', 'Saucisse à tartiner', '00000000-0000-0000-0000-000000000000', '5bf5983c-2694-4467-b755-6c43aa870a34'),
+  ('132a262d-7bac-4621-912a-58b9eedb9eaf', 'Saucisse de Morteau', '00000000-0000-0000-0000-000000000000', '5bf5983c-2694-4467-b755-6c43aa870a34'),
+  ('a40a3f16-ae0d-4b2a-884d-c8a08bb13aa4', 'Lentille', '00000000-0000-0000-0000-000000000000', '871f95e1-0719-4d45-a011-6c2331fa4fd3')
+;
+
+COMMIT;

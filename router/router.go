@@ -26,7 +26,8 @@ const (
 
 	listProductPath = "/lists/:listID/products/:productID"
 
-	productPath = "/products"
+	productPath       = "/products"
+	productSearchPath = "/products/search"
 )
 
 // Version represents the version of the application
@@ -45,6 +46,7 @@ func Start(config *configuration.Config) {
 	ConfigureRoutes(r, hc)
 
 	r.Use(cors.New(corsConfig))
+	r.Use(gin.Recovery())
 	log.SetLevel(log.DebugLevel)
 
 	log.Info("Launching awesome server")
@@ -80,6 +82,9 @@ func ConfigureRoutes(r *gin.Engine, hc *handler.Context) {
 	// Product routes
 	r.POST(productPath, checkAccess(hc.Storage), hc.CreateProduct)
 	r.OPTIONS(productPath, optionsHandler([]string{http.MethodPost}))
+
+	r.POST(productSearchPath, checkAccess(hc.Storage), hc.SearchDefaultProducts)
+	r.OPTIONS(productSearchPath, optionsHandler([]string{http.MethodPost}))
 
 	// List product routes
 	r.POST(listProductPath, checkAccess(hc.Storage), hc.AddProductToList)

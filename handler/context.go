@@ -62,11 +62,23 @@ func (hc *Context) LogAndSendError(c *gin.Context, err error) {
 	var status int
 	if err, ok := err.(*domain.Error); ok {
 		status = hc.ErrorCodeToHTTPStatus(err.Code)
+		logBuilder := logrus.WithField("code", err.Code)
+
+		if err.CallInfos != nil {
+			logBuilder = logBuilder.
+				WithField("method", err.CallInfos.MethodName).
+				WithField("package", err.CallInfos.PackageName)
+		}
+
+		if err.Cause != nil {
+			logBuilder = logBuilder.WithError(err.Cause)
+		}
+
+		logBuilder.Error("an error occurred")
 	} else {
 		status = http.StatusInternalServerError
+		logrus.WithError(err).Error("an error occured")
 	}
-
-	logrus.WithError(err).Error("an error occured")
 
 	c.AbortWithStatusJSON(status, err)
 }

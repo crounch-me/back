@@ -2,10 +2,16 @@ package domain
 
 import "fmt"
 
+type ErrorCallInfos struct {
+	MethodName  string `json:"-"`
+	PackageName string `json:"-"`
+}
+
 // Error describes the possible errors
 type Error struct {
-	Code  string `json:"error"`
-	Cause error  `json:"-"`
+	Cause     error           `json:"-"`
+	Code      string          `json:"error"`
+	CallInfos *ErrorCallInfos `json:"-"`
 }
 
 const (
@@ -23,17 +29,45 @@ func NewError(code string) *Error {
 }
 
 // NewErrorWithCause creates a new error from the domain with a cause error
-func NewErrorWithCause(code string, err error) *Error {
+func NewErrorWithCause(code string, cause error) *Error {
 	return &Error{
 		Code:  code,
-		Cause: err,
+		Cause: cause,
+	}
+}
+
+func NewErrorWithCallInfosAndCause(code, packageName, methodName string, cause error) *Error {
+	return &Error{
+		Code:  code,
+		Cause: cause,
+		CallInfos: &ErrorCallInfos{
+			MethodName:  methodName,
+			PackageName: packageName,
+		},
+	}
+}
+
+// NewErrorWithCallInfos creates a new error with a code and the call informations
+func NewErrorWithCallInfos(code, packageName, methodName string) *Error {
+	return &Error{
+		Code: code,
+		CallInfos: &ErrorCallInfos{
+			MethodName:  methodName,
+			PackageName: packageName,
+		},
 	}
 }
 
 func (de *Error) Error() string {
-	if de.Cause == nil {
-		return fmt.Sprintf("%s", de.Code)
+	logString := fmt.Sprintf("'%s'", de.Code)
+
+	if de.CallInfos != nil {
+		logString += fmt.Sprintf(" appened in package '%s' and method '%s'", de.CallInfos.PackageName, de.CallInfos.MethodName)
 	}
 
-	return fmt.Sprintf("'%s' because of '%s'", de.Code, de.Cause)
+	if de.Cause != nil {
+		logString += fmt.Sprintf(" because of '%s'", de.Cause)
+	}
+
+	return logString
 }

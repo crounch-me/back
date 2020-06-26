@@ -6,5 +6,5 @@ Feature: Create Product
       | name             |
       | Creation produit |
     Then the status code is 201
-    And "$.name" is a string equal to "Creation produit"
     And "$.id" is a non empty string
+    And "$.name" is a string equal to "Creation produit"

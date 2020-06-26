@@ -12,6 +12,10 @@ const (
 	ProductNotFoundDescription = "The product was not found"
 )
 
+type ProductSearchRequest struct {
+	Name string `json:"name"`
+}
+
 func (hc *Context) CreateProduct(c *gin.Context) {
 	product := &products.Product{}
 
@@ -35,4 +39,22 @@ func (hc *Context) CreateProduct(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, product)
+}
+
+func (hc *Context) SearchDefaultProducts(c *gin.Context) {
+	productSearchRequest := &ProductSearchRequest{}
+
+	err := hc.UnmarshalAndValidate(c, productSearchRequest)
+	if err != nil {
+		hc.LogAndSendError(c, err)
+		return
+	}
+
+	products, err := hc.Services.Product.SearchDefaults(productSearchRequest.Name)
+	if err != nil {
+		hc.LogAndSendError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, products)
 }
