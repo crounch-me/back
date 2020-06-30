@@ -46,7 +46,7 @@ func TestGetProductUnauthorized(t *testing.T) {
 	result, err := productService.GetProduct(productID, userID)
 
 	assert.Empty(t, result)
-	assert.Equal(t, domain.UnauthorizedErrorCode, err.Code)
+	assert.Equal(t, domain.ForbiddenErrorCode, err.Code)
 }
 
 func TestGetProductOK(t *testing.T) {

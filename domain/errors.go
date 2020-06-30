@@ -15,6 +15,7 @@ type Error struct {
 }
 
 const (
+	ForbiddenErrorCode    = "forbidden-error"
 	UnauthorizedErrorCode = "unauthorized-error"
 	UnknownErrorCode      = "unknown-error"
 	UnmarshalErrorCode    = "unmarshal-error"

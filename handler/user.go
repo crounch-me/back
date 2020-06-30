@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 
+	"github.com/crounch-me/back/domain"
 	"github.com/crounch-me/back/domain/users"
 
 	"github.com/gin-gonic/gin"
@@ -44,4 +45,26 @@ func (hc *Context) Login(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, authorization)
+}
+
+func (hc *Context) Me(c *gin.Context) {
+	token := c.GetHeader("Authorization")
+
+	if token == "" {
+		hc.LogAndSendError(c, domain.NewError(domain.UnauthorizedErrorCode))
+		return
+	}
+
+	user, err := hc.Services.User.GetByToken(token)
+
+	if err != nil {
+		if err.Code == users.UserNotFoundErrorCode {
+			hc.LogAndSendError(c, domain.NewError(domain.UnauthorizedErrorCode))
+			return
+		}
+		hc.LogAndSendError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
 }

@@ -33,7 +33,15 @@ func (sm *StorageMock) GetByEmail(email string) (*User, *domain.Error) {
 	err := args.Error(1)
 	if err == nil {
 		return args.Get(0).(*User), nil
-	} else {
-		return nil, err.(*domain.Error)
 	}
+	return nil, err.(*domain.Error)
+}
+
+func (sm *StorageMock) GetByToken(token string) (*User, *domain.Error) {
+	args := sm.Called(token)
+	err := args.Error(1)
+	if err == nil {
+		return args.Get(0).(*User), nil
+	}
+	return nil, err.(*domain.Error)
 }
