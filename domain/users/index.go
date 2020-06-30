@@ -52,3 +52,12 @@ func (us *UserService) GetByEmail(email string) (*User, *domain.Error) {
 
 	return user, nil
 }
+
+func (us *UserService) GetByToken(token string) (*User, *domain.Error) {
+	user, err := us.UserStorage.GetByToken(token)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}

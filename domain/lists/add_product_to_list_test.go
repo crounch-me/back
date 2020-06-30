@@ -62,7 +62,7 @@ func TestAddProductToListUserNotAuthorizedOnList(t *testing.T) {
 	productStorageMock.AssertNotCalled(t, "GetProduct")
 
 	assert.Empty(t, result)
-	assert.Equal(t, err.Code, domain.UnauthorizedErrorCode)
+	assert.Equal(t, err.Code, domain.ForbiddenErrorCode)
 }
 
 func TestAddProductToListGetProductError(t *testing.T) {
@@ -133,7 +133,7 @@ func TestAddProductToListUserNotAuthorizedOnProduct(t *testing.T) {
 	productStorageMock.AssertCalled(t, "GetProduct", productID)
 
 	assert.Empty(t, result)
-	assert.Equal(t, domain.UnauthorizedErrorCode, err.Code)
+	assert.Equal(t, domain.ForbiddenErrorCode, err.Code)
 }
 
 func TestAddProductToListGetProductInListError(t *testing.T) {

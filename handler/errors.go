@@ -18,6 +18,7 @@ func initializeErrorsMap() {
 	// Domain errors
 	errorToStatus[domain.UnmarshalErrorCode] = http.StatusBadRequest
 	errorToStatus[domain.InvalidErrorCode] = http.StatusBadRequest
+	errorToStatus[domain.ForbiddenErrorCode] = http.StatusForbidden
 	errorToStatus[domain.UnauthorizedErrorCode] = http.StatusUnauthorized
 	errorToStatus[domain.UnknownErrorCode] = http.StatusInternalServerError
 

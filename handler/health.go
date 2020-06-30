@@ -19,6 +19,7 @@ func (hc *Context) Health(c *gin.Context) {
 		if err != nil {
 			log.Error(err)
 			c.AbortWithStatus(http.StatusInternalServerError)
+			return
 		}
 		version = strings.TrimSuffix(string(versionBytes), "\n")
 	}

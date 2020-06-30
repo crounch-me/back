@@ -19,7 +19,7 @@ func (ps *ProductService) GetProduct(productID, userID string) (*Product, *domai
 	}
 
 	if !IsUserAuthorized(product, userID) {
-		return nil, domain.NewError(domain.UnauthorizedErrorCode)
+		return nil, domain.NewError(domain.ForbiddenErrorCode)
 	}
 
 	return product, nil

@@ -74,3 +74,29 @@ func (s *PostgresStorage) GetUserIDByToken(token string) (*string, *domain.Error
 
 	return id, nil
 }
+
+// GetByToken find the user with his token
+func (s *PostgresStorage) GetByToken(token string) (*users.User, *domain.Error) {
+	query := fmt.Sprintf(`
+		SELECT id, email
+    FROM %s."user"
+    LEFT JOIN %s."authorization" ON "authorization".user_id = "user".id
+		WHERE "authorization".token = $1
+	`, s.schema, s.schema)
+
+	row := s.session.QueryRow(query, token)
+
+	user := &users.User{}
+
+	err := row.Scan(&user.ID, &user.Password)
+
+	if err == sql.ErrNoRows {
+		return nil, domain.NewError(users.UserNotFoundErrorCode)
+	}
+
+	if err != nil {
+		return nil, domain.NewErrorWithCause(domain.UnknownErrorCode, err)
+	}
+
+	return user, nil
+}

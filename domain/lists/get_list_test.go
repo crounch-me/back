@@ -44,7 +44,7 @@ func TestGetListUnauthorized(t *testing.T) {
 
 	storageMock.AssertCalled(t, "GetList", listID)
 	assert.Empty(t, result)
-	assert.Equal(t, domain.UnauthorizedErrorCode, err.Code)
+	assert.Equal(t, domain.ForbiddenErrorCode, err.Code)
 }
 
 func TestGetListOK(t *testing.T) {

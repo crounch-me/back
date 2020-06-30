@@ -56,7 +56,7 @@ func (ls *ListService) GetList(listID, userID string) (*List, *domain.Error) {
 	}
 
 	if !IsUserAuthorized(list, userID) {
-		return nil, domain.NewError(domain.UnauthorizedErrorCode)
+		return nil, domain.NewError(domain.ForbiddenErrorCode)
 	}
 
 	return list, err
@@ -69,7 +69,7 @@ func (ls *ListService) AddProductToList(productID, listID, userID string) (*Prod
 	}
 
 	if !IsUserAuthorized(list, userID) {
-		return nil, domain.NewError(domain.UnauthorizedErrorCode)
+		return nil, domain.NewError(domain.ForbiddenErrorCode)
 	}
 
 	product, err := ls.ProductStorage.GetProduct(productID)
@@ -78,7 +78,7 @@ func (ls *ListService) AddProductToList(productID, listID, userID string) (*Prod
 	}
 
 	if !products.IsUserAuthorized(product, userID) {
-		return nil, domain.NewError(domain.UnauthorizedErrorCode)
+		return nil, domain.NewError(domain.ForbiddenErrorCode)
 	}
 
 	productInList, err := ls.ListStorage.GetProductInList(productID, listID)
@@ -108,7 +108,7 @@ func (ls *ListService) DeleteList(listID, userID string) *domain.Error {
 	}
 
 	if list.Owner.ID != userID {
-		return domain.NewError(domain.UnauthorizedErrorCode)
+		return domain.NewError(domain.ForbiddenErrorCode)
 	}
 
 	err = ls.ListStorage.DeleteProductsFromList(listID)
