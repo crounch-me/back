@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -37,7 +38,7 @@ type Context struct {
 	Generation domain.Generation
 	Storage    storage.Storage
 	Config     *configuration.Config
-	Validate   *validator.Validate
+	Validator  *util.Validator
 	Services   *Services
 }
 
@@ -49,35 +50,47 @@ func NewContext(config *configuration.Config) *Context {
 	storage = postgres.NewStorage(config.DBConnectionURI, config.DBSchema)
 	generation := &util.GenerationImpl{}
 
+	validator := util.NewValidator()
+
 	return &Context{
-		Storage:  storage,
-		Config:   config,
-		Validate: validator.New(),
-		Services: NewServices(storage, generation),
+		Storage:   storage,
+		Config:    config,
+		Validator: validator,
+		Services:  NewServices(storage, generation),
 	}
 }
 
 // LogAndSendError logs and sends the error
 func (hc *Context) LogAndSendError(c *gin.Context, err error) {
 	var status int
-	if err, ok := err.(*domain.Error); ok {
-		status = hc.ErrorCodeToHTTPStatus(err.Code)
-		logBuilder := logrus.WithField("code", err.Code)
+	if domainErr, ok := err.(*domain.Error); ok {
+		status = hc.ErrorCodeToHTTPStatus(domainErr.Code)
+		logBuilder := logrus.WithTime(time.Now())
 
-		if err.CallInfos != nil {
+		if domainErr.Call != nil {
 			logBuilder = logBuilder.
-				WithField("method", err.CallInfos.MethodName).
-				WithField("package", err.CallInfos.PackageName)
+				WithField("method", domainErr.Call.MethodName).
+				WithField("package", domainErr.Call.PackageName)
 		}
 
-		if err.Cause != nil {
-			logBuilder = logBuilder.WithError(err.Cause)
+		if domainErr.Cause != nil {
+			logBuilder = logBuilder.WithError(domainErr.Cause)
 		}
 
-		logBuilder.Error("an error occurred")
+		if status < http.StatusBadRequest || status >= http.StatusInternalServerError {
+			logBuilder.Error(domainErr.Code)
+		} else {
+			if domainErr.Fields != nil {
+				for _, field := range domainErr.Fields {
+					logBuilder = logBuilder.WithField(field.Name, field.Error)
+				}
+			}
+
+			logBuilder.Debug(domainErr.Code)
+		}
 	} else {
 		status = http.StatusInternalServerError
-		logrus.WithError(err).Error("an error occured")
+		logrus.Error(err)
 	}
 
 	c.AbortWithStatusJSON(status, err)
@@ -100,7 +113,7 @@ func (hc *Context) UnmarshalPayload(c *gin.Context, i interface{}) error {
 func (hc *Context) GetUserIDFromContext(c *gin.Context) (string, *domain.Error) {
 	userID, exists := c.Get(ContextUserID)
 	if !exists {
-		return "", domain.NewError(domain.UnknownErrorCode)
+		return "", domain.NewError(domain.UnknownErrorCode).WithCall("handler", "GetUserIDFromContext")
 	}
 	return userID.(string), nil
 }
@@ -109,12 +122,20 @@ func (hc *Context) UnmarshalAndValidate(c *gin.Context, i interface{}) *domain.E
 	err := hc.UnmarshalPayload(c, i)
 
 	if err != nil {
-		return domain.NewErrorWithCause(domain.UnmarshalErrorCode, err)
+		return domain.NewError(domain.UnmarshalErrorCode).WithCause(err)
 	}
 
-	err = hc.Validate.Struct(i)
+	err = hc.Validator.Struct(i)
 	if err != nil {
-		return domain.NewErrorWithCause(domain.InvalidErrorCode, err)
+		fields := make([]*domain.FieldError, 0)
+		for _, e := range err.(validator.ValidationErrors) {
+			field := &domain.FieldError{
+				Error: e.Tag(),
+				Name:  e.Field(),
+			}
+			fields = append(fields, field)
+		}
+		return domain.NewError(domain.InvalidErrorCode).WithFields(fields)
 	}
 
 	return nil

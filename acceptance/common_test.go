@@ -1,4 +1,4 @@
-package main
+package acceptance
 
 import (
 	"encoding/json"
@@ -42,6 +42,16 @@ func (te *TestExecutor) iUseThisBody(body *messages.PickleStepArgument_PickleDoc
 	return nil
 }
 
+func (te *TestExecutor) iUseAnInvalidBody() error {
+	te.RequestBody = ""
+	return nil
+}
+
+func (te *TestExecutor) iUseAnEmptyValidBody() error {
+	te.RequestBody = "{}"
+	return nil
+}
+
 func (te *TestExecutor) getValue(path string) (interface{}, error) {
 	pattern, err := jsonpath.Compile(path)
 
@@ -59,39 +69,6 @@ func (te *TestExecutor) getValue(path string) (interface{}, error) {
 	}
 
 	return foundValue, nil
-}
-
-func (te *TestExecutor) hasStringValue(path, expectedValue string) error {
-	foundValue, err := te.getValue(path)
-
-	if err != nil {
-		return err
-	}
-
-	if foundValue != expectedValue {
-		return fmt.Errorf("actual %s is not equal to expected %s", foundValue, expectedValue)
-	}
-
-	return nil
-}
-
-func (te *TestExecutor) hasBoolValue(path, expectedValue string) error {
-	foundValue, err := te.getValue(path)
-
-	if err != nil {
-		return err
-	}
-
-	expectedBoolValue, err := strconv.ParseBool(expectedValue)
-	if err != nil {
-		return err
-	}
-
-	if foundValue.(bool) != expectedBoolValue {
-		return fmt.Errorf("actual %s is not equal to expected %s for path %s", foundValue, expectedValue, path)
-	}
-
-	return nil
 }
 
 func (te *TestExecutor) iSendARequestOn(method, path string) error {
@@ -223,8 +200,16 @@ func (te *TestExecutor) iCreateTheseUsers(userDataTable *messages.PickleStepArgu
 }
 
 func (te *TestExecutor) iCreateARandomUser() error {
-	email := randomEmail()
-	password := randomString()
+	email, err := randomEmail()
+	if err != nil {
+		return err
+	}
+
+	password, err := randomString()
+	if err != nil {
+		return err
+	}
+
 	te.RequestBody = fmt.Sprintf(`
     {
       "email": "%s",
@@ -233,7 +218,7 @@ func (te *TestExecutor) iCreateARandomUser() error {
   `,
 		email,
 		password)
-	err := te.iSendARequestOn(http.MethodPost, "/users")
+	err = te.iSendARequestOn(http.MethodPost, "/users")
 	if err != nil {
 		return err
 	}
@@ -245,70 +230,6 @@ func (te *TestExecutor) iCreateARandomUser() error {
 
 	te.UserEmail = email
 	te.UserPassword = password
-
-	return nil
-}
-
-func (te *TestExecutor) theStatusCodeIs(code int) error {
-	if te.Response.StatusCode != code {
-		return fmt.Errorf("status codes are not the same: actual %d expected %d", te.Response.StatusCode, code)
-	}
-	return nil
-}
-
-func (te *TestExecutor) isAStringEqualTo(path string, expected string) error {
-	var e strings.Builder
-	pattern, err := jsonpath.Compile(path)
-
-	if err != nil {
-		return err
-	}
-
-	var actualData interface{}
-	json.Unmarshal(te.ResponseBody, &actualData)
-	foundValue, _ := pattern.Lookup(actualData)
-
-	tmpl, err := template.New("body-string").Parse(expected)
-
-	if err != nil {
-		return err
-	}
-
-	err = tmpl.Execute(&e, te.Variables)
-
-	if err != nil {
-		return err
-	}
-
-	realExpected := e.String()
-
-	if foundValue != realExpected {
-		return fmt.Errorf("actual %s should be equal to expected %s", foundValue, realExpected)
-	}
-
-	return nil
-}
-
-func (te *TestExecutor) theBodyIsAnEmptyArray() error {
-	if string(te.ResponseBody) != "[]" {
-		return fmt.Errorf("the body is not an empty array, actual value \"%s\"", string(te.ResponseBody))
-	}
-	return nil
-}
-
-func (te *TestExecutor) isANonEmptyString(path string) error {
-	pattern, err := jsonpath.Compile(path)
-	if err != nil {
-		return err
-	}
-
-	var actualData interface{}
-	json.Unmarshal(te.ResponseBody, &actualData)
-	foundValue, _ := pattern.Lookup(actualData)
-
-	if foundValue == "" {
-		return fmt.Errorf("should not be empty")
-	}
 
 	return nil
 }
@@ -414,11 +335,16 @@ func (te *TestExecutor) createProduct(p *products.Product) error {
 }
 
 func (te *TestExecutor) iCreateARandomList() error {
-	l := &lists.List{
-		Name: randomString(),
+	name, err := randomString()
+	if err != nil {
+		return err
 	}
 
-	err := te.createList(l)
+	l := &lists.List{
+		Name: name,
+	}
+
+	err = te.createList(l)
 
 	if err != nil {
 		return err
@@ -437,12 +363,113 @@ func (te *TestExecutor) theHeaderEquals(header, value string) error {
 	return nil
 }
 
-func randomEmail() string {
-	return fmt.Sprintf("%s@crounch.me", util.RandString(10))
+func (te *TestExecutor) theStatusCodeIs(code int) error {
+	if te.Response.StatusCode != code {
+		return fmt.Errorf("status codes are not the same: actual %d expected %d", te.Response.StatusCode, code)
+	}
+	return nil
 }
 
-func randomString() string {
-	return util.RandString(10)
+func (te *TestExecutor) isAStringEqualTo(path string, expected string) error {
+	var e strings.Builder
+	pattern, err := jsonpath.Compile(path)
+
+	if err != nil {
+		return err
+	}
+
+	var actualData interface{}
+	json.Unmarshal(te.ResponseBody, &actualData)
+	foundValue, _ := pattern.Lookup(actualData)
+
+	tmpl, err := template.New("body-string").Parse(expected)
+
+	if err != nil {
+		return err
+	}
+
+	err = tmpl.Execute(&e, te.Variables)
+
+	if err != nil {
+		return err
+	}
+
+	realExpected := e.String()
+
+	if foundValue != realExpected {
+		return fmt.Errorf("actual %s should be equal to expected %s", foundValue, realExpected)
+	}
+
+	return nil
+}
+
+func (te *TestExecutor) theBodyIsAnEmptyArray() error {
+	if string(te.ResponseBody) != "[]" {
+		return fmt.Errorf("the body is not an empty array, actual value \"%s\"", string(te.ResponseBody))
+	}
+	return nil
+}
+
+func (te *TestExecutor) isANonEmptyString(path string) error {
+	pattern, err := jsonpath.Compile(path)
+	if err != nil {
+		return err
+	}
+
+	var actualData interface{}
+	json.Unmarshal(te.ResponseBody, &actualData)
+	foundValue, _ := pattern.Lookup(actualData)
+
+	if foundValue == "" {
+		return fmt.Errorf("should not be empty")
+	}
+
+	return nil
+}
+
+func (te *TestExecutor) hasStringValue(path, expectedValue string) error {
+	foundValue, err := te.getValue(path)
+
+	if err != nil {
+		return err
+	}
+
+	if foundValue != expectedValue {
+		return fmt.Errorf("actual %s is not equal to expected %s", foundValue, expectedValue)
+	}
+
+	return nil
+}
+
+func (te *TestExecutor) hasBoolValue(path, expectedValue string) error {
+	foundValue, err := te.getValue(path)
+
+	if err != nil {
+		return err
+	}
+
+	expectedBoolValue, err := strconv.ParseBool(expectedValue)
+	if err != nil {
+		return err
+	}
+
+	if foundValue.(bool) != expectedBoolValue {
+		return fmt.Errorf("actual %s is not equal to expected %s for path %s", foundValue, expectedValue, path)
+	}
+
+	return nil
+}
+
+func randomEmail() (string, error) {
+	email, err := util.GenerateID()
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%s@crounch.me", email), nil
+}
+
+func randomString() (string, error) {
+	return util.GenerateID()
 }
 
 func FeatureContext(s *godog.Suite) {
@@ -455,6 +482,8 @@ func FeatureContext(s *godog.Suite) {
 
 	// Requests
 	s.Step(`^I use this body$`, te.iUseThisBody)
+	s.Step(`^I use an invalid body$`, te.iUseAnInvalidBody)
+	s.Step(`^I use an empty valid body$`, te.iUseAnEmptyValidBody)
 	s.Step(`^I send a "([^"]*)" request on "([^"]*)"$`, te.iSendARequestOn)
 
 	// Assertions
@@ -468,7 +497,7 @@ func FeatureContext(s *godog.Suite) {
 
 	// Authentication
 	s.Step(`^I\'m authenticated with this random user$`, te.imAuthenticatedWithThisRandomUSer)
-	s.Step(`^I create and authenticate with a random user$`, te.iCreateAndAuthenticateWithARandomUser)
+	s.Step(`^I authenticate with a random user$`, te.iCreateAndAuthenticateWithARandomUser)
 	s.Step(`^I create a random user$`, te.iCreateARandomUser)
 
 	// Users

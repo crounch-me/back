@@ -13,6 +13,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+const packageName = "postgres"
+
 // PostgresStorage handle postgres database connection
 type PostgresStorage struct {
 	session *sql.DB

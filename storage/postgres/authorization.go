@@ -16,7 +16,7 @@ func (s *PostgresStorage) CreateAuthorization(userID, token string) *domain.Erro
 	_, err := s.session.Exec(query, userID, token)
 
 	if err != nil {
-		return domain.NewErrorWithCause(domain.UnknownErrorCode, err)
+		return domain.NewError(domain.UnknownErrorCode).WithCause(err)
 	}
 
 	return nil

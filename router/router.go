@@ -104,7 +104,6 @@ func checkAccess(us users.Storage) gin.HandlerFunc {
 			return
 		}
 
-		log.WithField("token", token).Debug("Get user with token")
 		userID, err := us.GetUserIDByToken(token)
 
 		if err != nil {

@@ -23,19 +23,19 @@ func (g *GenerationImpl) GenerateToken() (string, *domain.Error) {
 }
 
 func (g *GenerationImpl) GenerateID() (string, *domain.Error) {
-	id, err := uuid.NewV4()
+	id, err := GenerateID()
 
 	if err != nil {
-		return "", domain.NewErrorWithCause(domain.UnknownErrorCode, err)
+		return "", domain.NewError(domain.UnknownErrorCode).WithCause(err)
 	}
 
-	return id.String(), nil
+	return id, nil
 }
 
 func (g *GenerationImpl) HashPassword(password string) (string, *domain.Error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		return "", domain.NewErrorWithCause(domain.UnknownErrorCode, err)
+		return "", domain.NewError(domain.UnknownErrorCode).WithCause(err)
 	}
 	return string(hashedPassword), nil
 }
@@ -43,6 +43,16 @@ func (g *GenerationImpl) HashPassword(password string) (string, *domain.Error) {
 func (g *GenerationImpl) ComparePassword(hashedPassword, givenPassword string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(givenPassword))
 	return err == nil
+}
+
+func GenerateID() (string, error) {
+	id, err := uuid.NewV4()
+
+	if err != nil {
+		return "", err
+	}
+
+	return id.String(), nil
 }
 
 func RandString(n int) string {

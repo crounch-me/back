@@ -55,15 +55,15 @@ func (hc *Context) GetOwnerLists(c *gin.Context) {
 
 // AddProductToList handles the request to add a product to a list
 func (hc *Context) AddProductToList(c *gin.Context) {
-	userID, domainErr := hc.GetUserIDFromContext(c)
-	if domainErr != nil {
-		hc.LogAndSendError(c, domainErr)
+	userID, err := hc.GetUserIDFromContext(c)
+	if err != nil {
+		hc.LogAndSendError(c, err)
 		return
 	}
 
 	listID := c.Param("listID")
 
-	err := hc.Validate.Var(listID, "uuid")
+	err = hc.Validator.Var("listID", listID, "uuid")
 	if err != nil {
 		hc.LogAndSendError(c, err)
 		return
@@ -71,15 +71,15 @@ func (hc *Context) AddProductToList(c *gin.Context) {
 
 	productID := c.Param("productID")
 
-	err = hc.Validate.Var(productID, "uuid")
+	err = hc.Validator.Var("productID", productID, "uuid")
 	if err != nil {
 		hc.LogAndSendError(c, err)
 		return
 	}
 
-	productInList, domainErr := hc.Services.List.AddProductToList(productID, listID, userID)
-	if domainErr != nil {
-		hc.LogAndSendError(c, domainErr)
+	productInList, err := hc.Services.List.AddProductToList(productID, listID, userID)
+	if err != nil {
+		hc.LogAndSendError(c, err)
 		return
 	}
 
@@ -87,22 +87,22 @@ func (hc *Context) AddProductToList(c *gin.Context) {
 }
 
 func (hc *Context) DeleteList(c *gin.Context) {
-	userID, domainErr := hc.GetUserIDFromContext(c)
-	if domainErr != nil {
-		hc.LogAndSendError(c, domainErr)
-		return
-	}
-
-	listID := c.Param("listID")
-	err := hc.Validate.Var(listID, "uuid")
+	userID, err := hc.GetUserIDFromContext(c)
 	if err != nil {
 		hc.LogAndSendError(c, err)
 		return
 	}
 
-	domainErr = hc.Services.List.DeleteList(listID, userID)
-	if domainErr != nil {
-		hc.LogAndSendError(c, domainErr)
+	listID := c.Param("listID")
+	err = hc.Validator.Var("listID", listID, "uuid")
+	if err != nil {
+		hc.LogAndSendError(c, err)
+		return
+	}
+
+	err = hc.Services.List.DeleteList(listID, userID)
+	if err != nil {
+		hc.LogAndSendError(c, err)
 		return
 	}
 

@@ -13,7 +13,7 @@ const (
 )
 
 type ProductSearchRequest struct {
-	Name string `json:"name"`
+	Name string `json:"name" validate:"gt=2,lt=16"`
 }
 
 func (hc *Context) CreateProduct(c *gin.Context) {
