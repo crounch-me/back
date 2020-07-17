@@ -1,6 +1,43 @@
 Feature: Add a product to a list
 
-  Scenario: OK
+  Scenario: OK - User product
+    Given I authenticate with a random user
+    And I create these lists
+      | name                           |
+      | Récupération listes de courses |
+    And I create these products
+      | name                |
+      | Mon premier produit |
+    And I use this body
+      """
+        {
+          "productId": "{{ .ProductID }}",
+          "listId": "{{ .ListID }}"
+        }
+      """
+    When I send a "POST" request on "/lists/{{ .ListID }}/products/{{ .ProductID }}"
+    Then the status code is 201
+    And "$.productId" is a string equal to "{{ .ProductID }}"
+    And "$.listId" is a string equal to "{{ .ListID }}"
+
+  Scenario: KO - Default product
+    Given I authenticate with a random user
+    And I create these lists
+      | name                           |
+      | Récupération listes de courses |
+    And I use this body
+      """
+        {
+          "productId": "a40a3f16-ae0d-4b2a-884d-c8a08bb13aa4",
+          "listId": "{{ .ListID }}"
+        }
+      """
+    When I send a "POST" request on "/lists/{{ .ListID }}/products/a40a3f16-ae0d-4b2a-884d-c8a08bb13aa4"
+    Then the status code is 201
+    And "$.productId" is a string equal to "a40a3f16-ae0d-4b2a-884d-c8a08bb13aa4"
+    And "$.listId" is a string equal to "{{ .ListID }}"
+
+  Scenario: KO - Product doesn't belong to user
     Given I authenticate with a random user
     And I create these lists
       | name                           |

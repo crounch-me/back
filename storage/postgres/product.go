@@ -88,13 +88,19 @@ func (s *PostgresStorage) SearchDefaults(name string, userID string) ([]*product
 			return nil, domain.NewError(domain.UnknownErrorCode).WithCause(err)
 		}
 
-		product := &products.Product{
-			Category: &categories.Category{},
-		}
+		product := &products.Product{}
+		var nullableCategoryID, nullableCategoryName sql.NullString
 
-		err = rows.Scan(&product.ID, &product.Name, &product.Category.ID, &product.Category.Name)
+		err = rows.Scan(&product.ID, &product.Name, &nullableCategoryID, &nullableCategoryName)
 		if err != nil {
 			return nil, domain.NewError(domain.UnknownErrorCode).WithCause(err)
+		}
+
+		if nullableCategoryName.Valid && nullableCategoryID.Valid {
+			product.Category = &categories.Category{
+				ID:   nullableCategoryID.String,
+				Name: nullableCategoryName.String,
+			}
 		}
 
 		productList = append(productList, product)
