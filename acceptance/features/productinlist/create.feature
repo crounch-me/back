@@ -20,6 +20,26 @@ Feature: Add a product to a list
     And "$.productId" is a string equal to "{{ .ProductID }}"
     And "$.listId" is a string equal to "{{ .ListID }}"
 
+  Scenario: KO - Product already in list
+    Given I authenticate with a random user
+    And I create these lists
+      | name                           |
+      | Récupération listes de courses |
+    And I create these products
+      | name                |
+      | Mon premier produit |
+    And I use this body
+      """
+        {
+          "productId": "{{ .ProductID }}",
+          "listId": "{{ .ListID }}"
+        }
+      """
+    And I send a "POST" request on "/lists/{{ .ListID }}/products/{{ .ProductID}}"
+    When I send a "POST" request on "/lists/{{ .ListID }}/products/{{ .ProductID}}"
+    Then the status code is 409
+    And "$.error" has string value "duplicate-product-in-list-error"
+
   Scenario: KO - List id is not an UUID
     Given I authenticate with a random user
     When I send a "POST" request on "/lists/a/products/00000000-0000-0000-0000-000000000000"
