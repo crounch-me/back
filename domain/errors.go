@@ -2,16 +2,22 @@ package domain
 
 import "fmt"
 
-type ErrorCallInfos struct {
+type CallError struct {
 	MethodName  string `json:"-"`
 	PackageName string `json:"-"`
 }
 
+type FieldError struct {
+	Name  string `json:"name"`
+	Error string `json:"error"`
+}
+
 // Error describes the possible errors
 type Error struct {
-	Cause     error           `json:"-"`
-	Code      string          `json:"error"`
-	CallInfos *ErrorCallInfos `json:"-"`
+	Cause  error         `json:"-"`
+	Code   string        `json:"error"`
+	Call   *CallError    `json:"-"`
+	Fields []*FieldError `json:"fields,omitempty"`
 }
 
 const (
@@ -29,30 +35,29 @@ func NewError(code string) *Error {
 	}
 }
 
-// NewErrorWithCause creates a new error from the domain with a cause error
-func NewErrorWithCause(code string, cause error) *Error {
-	return &Error{
-		Code:  code,
-		Cause: cause,
-	}
+func (e *Error) WithCause(cause error) *Error {
+	e.Cause = cause
+	return e
 }
 
-func NewErrorWithCallInfosAndCause(code, packageName, methodName string, cause error) *Error {
-	return &Error{
-		Code:  code,
-		Cause: cause,
-		CallInfos: &ErrorCallInfos{
-			MethodName:  methodName,
-			PackageName: packageName,
-		},
+func (e *Error) WithCall(packageName, methodName string) *Error {
+	e.Call = &CallError{
+		MethodName:  methodName,
+		PackageName: packageName,
 	}
+	return e
+}
+
+func (e *Error) WithFields(fields []*FieldError) *Error {
+	e.Fields = fields
+	return e
 }
 
 // NewErrorWithCallInfos creates a new error with a code and the call informations
 func NewErrorWithCallInfos(code, packageName, methodName string) *Error {
 	return &Error{
 		Code: code,
-		CallInfos: &ErrorCallInfos{
+		Call: &CallError{
 			MethodName:  methodName,
 			PackageName: packageName,
 		},
@@ -62,8 +67,8 @@ func NewErrorWithCallInfos(code, packageName, methodName string) *Error {
 func (de *Error) Error() string {
 	logString := fmt.Sprintf("'%s'", de.Code)
 
-	if de.CallInfos != nil {
-		logString += fmt.Sprintf(" appened in package '%s' and method '%s'", de.CallInfos.PackageName, de.CallInfos.MethodName)
+	if de.Call != nil {
+		logString += fmt.Sprintf(" appened in package '%s' and method '%s'", de.Call.PackageName, de.Call.MethodName)
 	}
 
 	if de.Cause != nil {

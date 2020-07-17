@@ -3,6 +3,7 @@ package postgres
 import (
 	"database/sql"
 	"fmt"
+	"strings"
 
 	"github.com/crounch-me/back/domain"
 	"github.com/crounch-me/back/domain/categories"
@@ -20,7 +21,7 @@ func (s *PostgresStorage) CreateProduct(id, name, ownerID string) *domain.Error 
 	_, err := s.session.Exec(query, id, name, ownerID)
 
 	if err != nil {
-		return domain.NewErrorWithCause(domain.UnknownErrorCode, err)
+		return domain.NewError(domain.UnknownErrorCode).WithCause(err)
 	}
 
 	return nil
@@ -50,7 +51,7 @@ func (s *PostgresStorage) GetProduct(id string) (*products.Product, *domain.Erro
 		return nil, domain.NewError(products.ProductNotFoundErrorCode)
 	}
 	if err != nil {
-		return nil, domain.NewErrorWithCallInfosAndCause(domain.UnknownErrorCode, "postgres", "GetProduct", err)
+		return nil, domain.NewError(domain.UnknownErrorCode)
 	}
 
 	if nullableCategoryName.Valid && nullableCategoryID.Valid {
@@ -63,7 +64,9 @@ func (s *PostgresStorage) GetProduct(id string) (*products.Product, *domain.Erro
 	return p, nil
 }
 
-func (s *PostgresStorage) SearchDefaults(lowerCasedName string, userID string) ([]*products.Product, *domain.Error) {
+func (s *PostgresStorage) SearchDefaults(name string, userID string) ([]*products.Product, *domain.Error) {
+	lowerCasedName := strings.ToLower(name)
+
 	query := fmt.Sprintf(`
     SELECT p.id as product_id, p.name as product_name, c.id as category_id, c.name as category_name
     FROM %s.product p
@@ -75,14 +78,14 @@ func (s *PostgresStorage) SearchDefaults(lowerCasedName string, userID string) (
 
 	rows, err := s.session.Query(query, lowerCasedName, userID)
 	if err != nil {
-		return nil, domain.NewErrorWithCause(domain.UnknownErrorCode, err)
+		return nil, domain.NewError(domain.UnknownErrorCode).WithCause(err)
 	}
 	defer rows.Close()
 
 	productList := make([]*products.Product, 0)
 	for rows.Next() {
 		if err = rows.Err(); err != nil {
-			return nil, domain.NewErrorWithCause(domain.UnknownErrorCode, err)
+			return nil, domain.NewError(domain.UnknownErrorCode).WithCause(err)
 		}
 
 		product := &products.Product{
@@ -91,7 +94,7 @@ func (s *PostgresStorage) SearchDefaults(lowerCasedName string, userID string) (
 
 		err = rows.Scan(&product.ID, &product.Name, &product.Category.ID, &product.Category.Name)
 		if err != nil {
-			return nil, domain.NewErrorWithCause(domain.UnknownErrorCode, err)
+			return nil, domain.NewError(domain.UnknownErrorCode).WithCause(err)
 		}
 
 		productList = append(productList, product)

@@ -20,13 +20,13 @@ func (s *PostgresStorage) CreateList(id, name, ownerID string, creationDate time
 	_, err := s.session.Exec(query, id, name, ownerID, creationDate)
 
 	if err != nil {
-		return domain.NewErrorWithCause(domain.UnknownErrorCode, err)
+		return domain.NewError(domain.UnknownErrorCode).WithCause(err)
 	}
 
 	return nil
 }
 
-// GetOwnerLists get all owner's lists
+// GetOwnersLists get all owner's lists
 func (s *PostgresStorage) GetOwnersLists(ownerID string) ([]*lists.List, *domain.Error) {
 	query := fmt.Sprintf(`
     SELECT l.id, l.name, l.creation_date
@@ -38,20 +38,20 @@ func (s *PostgresStorage) GetOwnersLists(ownerID string) ([]*lists.List, *domain
 	rows, err := s.session.Query(query, ownerID)
 	defer rows.Close()
 	if err != nil {
-		return nil, domain.NewErrorWithCause(domain.UnknownErrorCode, err)
+		return nil, domain.NewError(domain.UnknownErrorCode).WithCause(err)
 	}
 
 	ownersLists := make([]*lists.List, 0)
 	for rows.Next() {
 		if err = rows.Err(); err != nil {
-			return nil, domain.NewErrorWithCause(domain.UnknownErrorCode, err)
+			return nil, domain.NewError(domain.UnknownErrorCode).WithCause(err)
 		}
 
 		list := &lists.List{}
 
 		err = rows.Scan(&list.ID, &list.Name, &list.CreationDate)
 		if err != nil {
-			return nil, domain.NewErrorWithCause(domain.UnknownErrorCode, err)
+			return nil, domain.NewError(domain.UnknownErrorCode).WithCause(err)
 		}
 
 		ownersLists = append(ownersLists, list)
@@ -83,7 +83,7 @@ func (s *PostgresStorage) GetList(id string) (*lists.List, *domain.Error) {
 	}
 
 	if err != nil {
-		return nil, domain.NewErrorWithCause(domain.UnknownErrorCode, err)
+		return nil, domain.NewError(domain.UnknownErrorCode).WithCause(err)
 	}
 
 	return l, nil
@@ -106,7 +106,7 @@ func (s *PostgresStorage) GetProductInList(productID string, listID string) (*li
 		return nil, domain.NewError(lists.ProductInListNotFoundErrorCode)
 	}
 	if err != nil {
-		return nil, domain.NewErrorWithCause(domain.UnknownErrorCode, err)
+		return nil, domain.NewError(domain.UnknownErrorCode).WithCause(err)
 	}
 
 	return pil, nil
@@ -121,7 +121,7 @@ func (s *PostgresStorage) AddProductToList(productID string, listID string) *dom
 	_, err := s.session.Exec(query, productID, listID)
 
 	if err != nil {
-		return domain.NewErrorWithCause(domain.UnknownErrorCode, err)
+		return domain.NewError(domain.UnknownErrorCode).WithCause(err)
 	}
 
 	return nil
@@ -135,7 +135,7 @@ func (s *PostgresStorage) DeleteProductsFromList(listID string) *domain.Error {
 	_, err := s.session.Exec(deleteProductInListQuery, listID)
 
 	if err != nil {
-		return domain.NewErrorWithCause(domain.UnknownErrorCode, err)
+		return domain.NewError(domain.UnknownErrorCode).WithCause(err)
 	}
 
 	return nil
@@ -149,7 +149,7 @@ func (s *PostgresStorage) DeleteList(listID string) *domain.Error {
 	_, err := s.session.Exec(deleteProductInListQuery, listID)
 
 	if err != nil {
-		return domain.NewErrorWithCause(domain.UnknownErrorCode, err)
+		return domain.NewError(domain.UnknownErrorCode).WithCause(err)
 	}
 
 	return nil

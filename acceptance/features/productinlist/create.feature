@@ -1,7 +1,7 @@
 Feature: Add a product to a list
 
   Scenario: OK
-    Given I create and authenticate with a random user
+    Given I authenticate with a random user
     And I create these lists
       | name                           |
       | Récupération listes de courses |
@@ -19,3 +19,34 @@ Feature: Add a product to a list
     Then the status code is 201
     And "$.productId" is a string equal to "{{ .ProductID }}"
     And "$.listId" is a string equal to "{{ .ListID }}"
+
+  Scenario: KO - List id is not an UUID
+    Given I authenticate with a random user
+    When I send a "POST" request on "/lists/a/products/00000000-0000-0000-0000-000000000000"
+    Then the status code is 400
+    And "$.error" has string value "invalid-error"
+    And "$.fields[0].name" has string value "listID"
+    And "$.fields[0].error" has string value "uuid"
+
+  Scenario: KO - Product id is not an UUID
+    Given I authenticate with a random user
+    When I send a "POST" request on "/lists/00000000-0000-0000-0000-000000000000/products/a"
+    Then the status code is 400
+    And "$.error" has string value "invalid-error"
+    And "$.fields[0].name" has string value "productID"
+    And "$.fields[0].error" has string value "uuid"
+
+  Scenario: KO - List not found
+    Given I authenticate with a random user
+    When I send a "POST" request on "/lists/00000000-0000-0000-0000-000000000000/products/00000000-0000-0000-0000-000000000000"
+    Then the status code is 404
+    And "$.error" has string value "list-not-found-error"
+
+  Scenario: KO - Product not found
+    Given I authenticate with a random user
+    And I create these lists
+      | name                           |
+      | Récupération listes de courses |
+    When I send a "POST" request on "/lists/{{ .ListID }}/products/00000000-0000-0000-0000-000000000000"
+    Then the status code is 404
+    And "$.error" has string value "product-not-found-error"

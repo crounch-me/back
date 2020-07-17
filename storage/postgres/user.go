@@ -18,7 +18,7 @@ func (s *PostgresStorage) CreateUser(id, email, password string) *domain.Error {
 	_, err := s.session.Exec(query, id, email, password)
 
 	if err != nil {
-		return domain.NewErrorWithCause(domain.UnknownErrorCode, err)
+		return domain.NewError(domain.UnknownErrorCode).WithCause(err)
 	}
 
 	return nil
@@ -43,7 +43,7 @@ func (s *PostgresStorage) GetByEmail(email string) (*users.User, *domain.Error) 
 	}
 
 	if err != nil {
-		return nil, domain.NewErrorWithCause(domain.UnknownErrorCode, err)
+		return nil, domain.NewError(domain.UnknownErrorCode).WithCause(err)
 	}
 
 	return user, nil
@@ -69,7 +69,7 @@ func (s *PostgresStorage) GetUserIDByToken(token string) (*string, *domain.Error
 	}
 
 	if err != nil {
-		return nil, domain.NewErrorWithCause(domain.UnknownErrorCode, err)
+		return nil, domain.NewError(domain.UnknownErrorCode).WithCause(err)
 	}
 
 	return id, nil
@@ -95,7 +95,7 @@ func (s *PostgresStorage) GetByToken(token string) (*users.User, *domain.Error) 
 	}
 
 	if err != nil {
-		return nil, domain.NewErrorWithCause(domain.UnknownErrorCode, err)
+		return nil, domain.NewError(domain.UnknownErrorCode).WithCause(err)
 	}
 
 	return user, nil
