@@ -66,5 +66,7 @@ func (hc *Context) Me(c *gin.Context) {
 		return
 	}
 
+	user.Password = nil
+
 	c.JSON(http.StatusOK, user)
 }

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/crounch-me/back/domain"
+	"github.com/crounch-me/back/domain/products"
 	"github.com/crounch-me/back/domain/users"
 	"github.com/stretchr/testify/assert"
 )
@@ -47,7 +48,7 @@ func TestGetListUnauthorized(t *testing.T) {
 	assert.Equal(t, domain.ForbiddenErrorCode, err.Code)
 }
 
-func TestGetListOK(t *testing.T) {
+func TestGetListGetProductsOfListError(t *testing.T) {
 	listID := "list-id"
 	userID := "user-id"
 	list := &List{
@@ -59,6 +60,40 @@ func TestGetListOK(t *testing.T) {
 	storageMock := &StorageMock{}
 
 	storageMock.On("GetList", listID).Return(list, nil)
+	storageMock.On("GetProductsOfList", listID).Return(nil, domain.NewError(domain.UnknownErrorCode))
+
+	listService := &ListService{
+		ListStorage: storageMock,
+	}
+	result, err := listService.GetList(listID, userID)
+
+	storageMock.AssertCalled(t, "GetList", listID)
+	assert.Empty(t, result)
+	assert.Equal(t, domain.UnknownErrorCode, err.Code)
+}
+
+func TestGetListOK(t *testing.T) {
+	listID := "list-id"
+	userID := "user-id"
+	productID := "product-id"
+	productName := "product-name"
+	listProducts := []*products.Product{
+		{
+			ID:   productID,
+			Name: productName,
+		},
+	}
+	list := &List{
+		ID: listID,
+		Owner: &users.User{
+			ID: userID,
+		},
+		Products: listProducts,
+	}
+	storageMock := &StorageMock{}
+
+	storageMock.On("GetList", listID).Return(list, nil)
+	storageMock.On("GetProductsOfList", listID).Return(listProducts, nil)
 
 	listService := &ListService{
 		ListStorage: storageMock,

@@ -59,6 +59,11 @@ func (ls *ListService) GetList(listID, userID string) (*List, *domain.Error) {
 		return nil, domain.NewError(domain.ForbiddenErrorCode)
 	}
 
+	list.Products, err = ls.ListStorage.GetProductsOfList(listID)
+	if err != nil {
+		return nil, err
+	}
+
 	return list, err
 }
 

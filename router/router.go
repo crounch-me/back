@@ -79,6 +79,7 @@ func ConfigureRoutes(r *gin.Engine, hc *handler.Context) {
 	r.GET(listPath, checkAccess(hc.Storage), hc.GetOwnerLists)
 	r.OPTIONS(listPath, optionsHandler([]string{http.MethodPost, http.MethodGet}))
 
+	r.GET(listWithIDPath, checkAccess(hc.Storage), hc.GetList)
 	r.DELETE(listWithIDPath, checkAccess(hc.Storage), hc.DeleteList)
 	r.OPTIONS(listWithIDPath, optionsHandler([]string{http.MethodDelete}))
 

@@ -52,7 +52,7 @@ func (te *TestExecutor) iUseAnEmptyValidBody() error {
 	return nil
 }
 
-func (te *TestExecutor) getValue(path string) (interface{}, error) {
+func (te *TestExecutor) getValueFromBody(path string) (interface{}, error) {
 	pattern, err := jsonpath.Compile(path)
 
 	if err != nil {
@@ -71,9 +71,25 @@ func (te *TestExecutor) getValue(path string) (interface{}, error) {
 	return foundValue, nil
 }
 
+func (te *TestExecutor) getValueFromDataTableRow(row *messages.PickleStepArgument_PickleTable_PickleTableRow, index int) string {
+	return strings.TrimSpace(row.Cells[index].Value)
+}
+
+func (te *TestExecutor) getValueFromVariables(toParse string) (string, error) {
+	var result strings.Builder
+	tmpl, err := template.New("template").Parse(toParse)
+	if err != nil {
+		return "", err
+	}
+
+	err = tmpl.Execute(&result, te.Variables)
+	if err != nil {
+		return "", err
+	}
+	return result.String(), nil
+}
+
 func (te *TestExecutor) iSendARequestOn(method, path string) error {
-	var b strings.Builder
-	var u strings.Builder
 	if method != http.MethodPost &&
 		method != http.MethodPut &&
 		method != http.MethodPatch &&
@@ -83,37 +99,19 @@ func (te *TestExecutor) iSendARequestOn(method, path string) error {
 		return fmt.Errorf("unknown http method %s", method)
 	}
 
-	tmpl, err := template.New("body").Parse(te.RequestBody)
-
+	replacedBody, err := te.getValueFromVariables(te.RequestBody)
 	if err != nil {
 		return err
 	}
 
-	err = tmpl.Execute(&b, te.Variables)
-
-	if err != nil {
-		return err
-	}
-
-	replacedBody := b.String()
 	body := *strings.NewReader(replacedBody)
 
-	tmpl, err = template.New("url").Parse(path)
-
+	url, err := te.getValueFromVariables(path)
 	if err != nil {
 		return err
 	}
-
-	err = tmpl.Execute(&u, te.Variables)
-
-	if err != nil {
-		return err
-	}
-
-	url := u.String()
 
 	req, err := http.NewRequest(method, BaseURL+url, &body)
-
 	if err != nil {
 		return err
 	}
@@ -138,7 +136,7 @@ func (te *TestExecutor) iSendARequestOn(method, path string) error {
 	return nil
 }
 
-func (te *TestExecutor) imAuthenticatedWithThisRandomUSer() error {
+func (te *TestExecutor) imAuthenticatedWithThisRandomUser() error {
 	te.RequestBody = fmt.Sprintf(`
     {
       "email": "%s",
@@ -153,21 +151,16 @@ func (te *TestExecutor) imAuthenticatedWithThisRandomUSer() error {
 	}
 
 	err = te.theStatusCodeIs(http.StatusCreated)
-
 	if err != nil {
 		return err
 	}
 
-	pattern, err := jsonpath.Compile("$.accessToken")
+	accessToken, err := te.getValueFromBody("$.accessToken")
 	if err != nil {
 		return err
 	}
 
-	var actualData interface{}
-	json.Unmarshal(te.ResponseBody, &actualData)
-	foundValue, _ := pattern.Lookup(actualData)
-
-	te.UserToken = foundValue.(string)
+	te.UserToken = accessToken.(string)
 
 	return nil
 }
@@ -236,14 +229,11 @@ func (te *TestExecutor) iCreateARandomUser() error {
 
 func (te *TestExecutor) iCreateAndAuthenticateWithARandomUser() error {
 	err := te.iCreateARandomUser()
-
 	if err != nil {
 		return err
 	}
 
-	err = te.imAuthenticatedWithThisRandomUSer()
-
-	return err
+	return te.imAuthenticatedWithThisRandomUser()
 }
 
 func (te *TestExecutor) createList(l *lists.List) error {
@@ -252,19 +242,18 @@ func (te *TestExecutor) createList(l *lists.List) error {
       "name": "%s"
     }
   `, l.Name)
+
 	err := te.iSendARequestOn(http.MethodPost, "/lists")
 	if err != nil {
 		return err
 	}
 
 	err = te.theStatusCodeIs(http.StatusCreated)
-
 	if err != nil {
 		return err
 	}
 
-	id, err := te.getValue("$.id")
-
+	id, err := te.getValueFromBody("$.id")
 	if err != nil {
 		return err
 	}
@@ -281,6 +270,7 @@ func (te *TestExecutor) iCreateTheseLists(listDataTable *messages.PickleStepArgu
 			l := &lists.List{
 				Name: name,
 			}
+
 			err := te.createList(l)
 			if err != nil {
 				return err
@@ -297,6 +287,7 @@ func (te *TestExecutor) iCreateTheseProducts(productDataTable *messages.PickleSt
 			p := &products.Product{
 				Name: name,
 			}
+
 			err := te.createProduct(p)
 			if err != nil {
 				return err
@@ -318,13 +309,11 @@ func (te *TestExecutor) createProduct(p *products.Product) error {
 	}
 
 	err = te.theStatusCodeIs(http.StatusCreated)
-
 	if err != nil {
 		return err
 	}
 
-	id, err := te.getValue("$.id")
-
+	id, err := te.getValueFromBody("$.id")
 	if err != nil {
 		return err
 	}
@@ -345,7 +334,6 @@ func (te *TestExecutor) iCreateARandomList() error {
 	}
 
 	err = te.createList(l)
-
 	if err != nil {
 		return err
 	}
@@ -371,33 +359,18 @@ func (te *TestExecutor) theStatusCodeIs(code int) error {
 }
 
 func (te *TestExecutor) isAStringEqualTo(path string, expected string) error {
-	var e strings.Builder
-	pattern, err := jsonpath.Compile(path)
-
+	value, err := te.getValueFromBody(path)
 	if err != nil {
 		return err
 	}
 
-	var actualData interface{}
-	json.Unmarshal(te.ResponseBody, &actualData)
-	foundValue, _ := pattern.Lookup(actualData)
-
-	tmpl, err := template.New("body-string").Parse(expected)
-
+	expectedValue, err := te.getValueFromVariables(expected)
 	if err != nil {
 		return err
 	}
 
-	err = tmpl.Execute(&e, te.Variables)
-
-	if err != nil {
-		return err
-	}
-
-	realExpected := e.String()
-
-	if foundValue != realExpected {
-		return fmt.Errorf("actual %s should be equal to expected %s", foundValue, realExpected)
+	if value != expectedValue {
+		return fmt.Errorf("actual %s should be equal to expected %s", value, expectedValue)
 	}
 
 	return nil
@@ -411,16 +384,12 @@ func (te *TestExecutor) theBodyIsAnEmptyArray() error {
 }
 
 func (te *TestExecutor) isANonEmptyString(path string) error {
-	pattern, err := jsonpath.Compile(path)
+	value, err := te.getValueFromBody(path)
 	if err != nil {
 		return err
 	}
 
-	var actualData interface{}
-	json.Unmarshal(te.ResponseBody, &actualData)
-	foundValue, _ := pattern.Lookup(actualData)
-
-	if foundValue == "" {
+	if value == "" {
 		return fmt.Errorf("should not be empty")
 	}
 
@@ -428,7 +397,7 @@ func (te *TestExecutor) isANonEmptyString(path string) error {
 }
 
 func (te *TestExecutor) hasStringValue(path, expectedValue string) error {
-	foundValue, err := te.getValue(path)
+	foundValue, err := te.getValueFromBody(path)
 
 	if err != nil {
 		return err
@@ -442,8 +411,7 @@ func (te *TestExecutor) hasStringValue(path, expectedValue string) error {
 }
 
 func (te *TestExecutor) hasBoolValue(path, expectedValue string) error {
-	foundValue, err := te.getValue(path)
-
+	value, err := te.getValueFromBody(path)
 	if err != nil {
 		return err
 	}
@@ -453,8 +421,50 @@ func (te *TestExecutor) hasBoolValue(path, expectedValue string) error {
 		return err
 	}
 
-	if foundValue.(bool) != expectedBoolValue {
-		return fmt.Errorf("actual %s is not equal to expected %s for path %s", foundValue, expectedValue, path)
+	if value.(bool) != expectedBoolValue {
+		return fmt.Errorf("actual %s is not equal to expected %s for path %s", value, expectedValue, path)
+	}
+
+	return nil
+}
+
+func (te *TestExecutor) theReturnedProductsFromListAre(productsDataTable *messages.PickleStepArgument_PickleTable) error {
+	var list *lists.List
+	err := json.Unmarshal(te.ResponseBody, &list)
+	if err != nil {
+		return err
+	}
+
+	productsMap := make(map[string]*products.Product)
+
+	for _, product := range list.Products {
+		productsMap[product.ID] = product
+	}
+
+	for i, row := range productsDataTable.Rows {
+		if i != 0 {
+			expectedID := te.getValueFromDataTableRow(row, 0)
+			expectedName := te.getValueFromDataTableRow(row, 1)
+			expectedCategoryName := te.getValueFromDataTableRow(row, 2)
+
+			expectedID, err = te.getValueFromVariables(expectedID)
+			if err != nil {
+				return err
+			}
+
+			product, ok := productsMap[expectedID]
+			if !ok {
+				return fmt.Errorf("product %s was not found", expectedID)
+			}
+
+			if product.Name != expectedName {
+				return fmt.Errorf("product name %s was not expected %s", product.Name, expectedName)
+			}
+
+			if product.Category != nil && product.Category.Name != expectedCategoryName {
+				return fmt.Errorf("product category name %s was not expected %s", product.Category.Name, expectedCategoryName)
+			}
+		}
 	}
 
 	return nil
@@ -496,7 +506,7 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`^the body is an empty array$`, te.theBodyIsAnEmptyArray)
 
 	// Authentication
-	s.Step(`^I\'m authenticated with this random user$`, te.imAuthenticatedWithThisRandomUSer)
+	s.Step(`^I\'m authenticated with this random user$`, te.imAuthenticatedWithThisRandomUser)
 	s.Step(`^I authenticate with a random user$`, te.iCreateAndAuthenticateWithARandomUser)
 	s.Step(`^I create a random user$`, te.iCreateARandomUser)
 
@@ -506,6 +516,7 @@ func FeatureContext(s *godog.Suite) {
 	// Lists
 	s.Step(`^I create these lists$`, te.iCreateTheseLists)
 	s.Step(`^I create a random list$`, te.iCreateARandomList)
+	s.Step(`^the returned products from list are$`, te.theReturnedProductsFromListAre)
 
 	// Products
 	s.Step(`^I create these products$`, te.iCreateTheseProducts)

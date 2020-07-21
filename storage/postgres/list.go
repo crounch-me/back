@@ -6,7 +6,9 @@ import (
 	"time"
 
 	"github.com/crounch-me/back/domain"
+	"github.com/crounch-me/back/domain/categories"
 	"github.com/crounch-me/back/domain/lists"
+	"github.com/crounch-me/back/domain/products"
 	"github.com/crounch-me/back/domain/users"
 )
 
@@ -63,7 +65,7 @@ func (s *PostgresStorage) GetOwnersLists(ownerID string) ([]*lists.List, *domain
 // GetList retrieves a list with its id
 func (s *PostgresStorage) GetList(id string) (*lists.List, *domain.Error) {
 	query := fmt.Sprintf(`
-    SELECT l.id, l.name, u.id
+    SELECT l.id, l.name, l.creation_date, u.id
     FROM %s.list l
     LEFT JOIN %s.user u
     ON l.user_id = u.id
@@ -76,7 +78,7 @@ func (s *PostgresStorage) GetList(id string) (*lists.List, *domain.Error) {
 		Owner: &users.User{},
 	}
 
-	err := row.Scan(&l.ID, &l.Name, &l.Owner.ID)
+	err := row.Scan(&l.ID, &l.Name, &l.CreationDate, &l.Owner.ID)
 
 	if err == sql.ErrNoRows {
 		return nil, domain.NewError(lists.ListNotFoundErrorCode)
@@ -110,6 +112,49 @@ func (s *PostgresStorage) GetProductInList(productID string, listID string) (*li
 	}
 
 	return pil, nil
+}
+
+func (s *PostgresStorage) GetProductsOfList(listID string) ([]*products.Product, *domain.Error) {
+	query := fmt.Sprintf(`
+    SELECT p.id, p.name, c.id, c.name
+    FROM %s.product p
+    LEFT JOIN %s.product_in_list pil ON pil.product_id = p.id
+    LEFT JOIN %s.list l ON pil.list_id = l.id
+    LEFT JOIN %s.category c ON c.id = p.category_id
+    WHERE l.id = $1
+  `, s.schema, s.schema, s.schema, s.schema)
+
+	rows, err := s.session.Query(query, listID)
+	defer rows.Close()
+	if err != nil {
+		return nil, domain.NewError(domain.UnknownErrorCode).WithCause(err)
+	}
+
+	productsOfList := make([]*products.Product, 0)
+	for rows.Next() {
+		if err = rows.Err(); err != nil {
+			return nil, domain.NewError(domain.UnknownErrorCode).WithCause(err)
+		}
+
+		product := &products.Product{}
+		var nullableCategoryID, nullableCategoryName sql.NullString
+
+		err = rows.Scan(&product.ID, &product.Name, &nullableCategoryID, &nullableCategoryName)
+		if err != nil {
+			return nil, domain.NewError(domain.UnknownErrorCode).WithCause(err)
+		}
+
+		if nullableCategoryID.Valid && nullableCategoryName.Valid {
+			product.Category = &categories.Category{
+				ID:   nullableCategoryID.String,
+				Name: nullableCategoryName.String,
+			}
+		}
+
+		productsOfList = append(productsOfList, product)
+	}
+
+	return productsOfList, nil
 }
 
 func (s *PostgresStorage) AddProductToList(productID string, listID string) *domain.Error {
