@@ -108,3 +108,26 @@ func (hc *Context) DeleteList(c *gin.Context) {
 
 	c.Status(http.StatusNoContent)
 }
+
+func (hc *Context) GetList(c *gin.Context) {
+	userID, err := hc.GetUserIDFromContext(c)
+	if err != nil {
+		hc.LogAndSendError(c, err)
+		return
+	}
+
+	listID := c.Param("listID")
+	err = hc.Validator.Var("listID", listID, "uuid")
+	if err != nil {
+		hc.LogAndSendError(c, err)
+		return
+	}
+
+	list, err := hc.Services.List.GetList(listID, userID)
+	if err != nil {
+		hc.LogAndSendError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, list)
+}

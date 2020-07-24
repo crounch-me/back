@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/crounch-me/back/domain"
+	"github.com/crounch-me/back/domain/products"
 )
 
 // ListStorage defines every data functions that we need
@@ -15,4 +16,5 @@ type Storage interface {
 	AddProductToList(productID string, listID string) *domain.Error
 	DeleteList(listID string) *domain.Error
 	DeleteProductsFromList(listID string) *domain.Error
+	GetProductsOfList(listID string) ([]*products.Product, *domain.Error)
 }

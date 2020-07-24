@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/crounch-me/back/domain"
+	"github.com/crounch-me/back/domain/products"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -73,4 +74,13 @@ func (sm *StorageMock) DeleteList(listID string) *domain.Error {
 		return nil
 	}
 	return err.(*domain.Error)
+}
+
+func (sm *StorageMock) GetProductsOfList(listID string) ([]*products.Product, *domain.Error) {
+	args := sm.Called(listID)
+	err := args.Error(1)
+	if err != nil {
+		return nil, err.(*domain.Error)
+	}
+	return args.Get(0).([]*products.Product), nil
 }
