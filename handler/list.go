@@ -62,7 +62,6 @@ func (hc *Context) AddProductToList(c *gin.Context) {
 	}
 
 	listID := c.Param("listID")
-
 	err = hc.Validator.Var("listID", listID, "uuid")
 	if err != nil {
 		hc.LogAndSendError(c, err)
@@ -70,7 +69,6 @@ func (hc *Context) AddProductToList(c *gin.Context) {
 	}
 
 	productID := c.Param("productID")
-
 	err = hc.Validator.Var("productID", productID, "uuid")
 	if err != nil {
 		hc.LogAndSendError(c, err)
@@ -84,6 +82,37 @@ func (hc *Context) AddProductToList(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, productInList)
+}
+
+// DeleteProductFromList removes the product from the list
+func (hc *Context) DeleteProductFromList(c *gin.Context) {
+	userID, err := hc.GetUserIDFromContext(c)
+	if err != nil {
+		hc.LogAndSendError(c, err)
+		return
+	}
+
+	listID := c.Param("listID")
+	err = hc.Validator.Var("listID", listID, "uuid")
+	if err != nil {
+		hc.LogAndSendError(c, err)
+		return
+	}
+
+	productID := c.Param("productID")
+	err = hc.Validator.Var("productID", productID, "uuid")
+	if err != nil {
+		hc.LogAndSendError(c, err)
+		return
+	}
+
+	err = hc.Services.List.DeleteProductFromList(productID, listID, userID)
+	if err != nil {
+		hc.LogAndSendError(c, err)
+		return
+	}
+
+	c.Status(http.StatusNoContent)
 }
 
 func (hc *Context) DeleteList(c *gin.Context) {

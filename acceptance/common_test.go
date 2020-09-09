@@ -441,6 +441,13 @@ func (te *TestExecutor) theReturnedProductsFromListAre(productsDataTable *messag
 		productsMap[product.ID] = product
 	}
 
+	expectedProductsLength := len(productsDataTable.Rows) - 1
+	actualProductsLength := len(productsMap)
+
+	if expectedProductsLength != actualProductsLength {
+		return fmt.Errorf("list must contains %d products, actually contains %d", expectedProductsLength, actualProductsLength)
+	}
+
 	for i, row := range productsDataTable.Rows {
 		if i != 0 {
 			expectedID := te.getValueFromDataTableRow(row, 0)

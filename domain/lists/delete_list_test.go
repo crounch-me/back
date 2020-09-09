@@ -26,6 +26,7 @@ func TestDeleteListGetListError(t *testing.T) {
 	listStorageMock.AssertNotCalled(t, "DeleteList")
 	assert.Equal(t, ListNotFoundErrorCode, err.Code)
 }
+
 func TestDeleteListUnauthorized(t *testing.T) {
 	userID := "user-id"
 	anotherUserID := "another-user-id"
@@ -51,6 +52,7 @@ func TestDeleteListUnauthorized(t *testing.T) {
 	listStorageMock.AssertNotCalled(t, "DeleteList")
 	assert.Equal(t, domain.ForbiddenErrorCode, err.Code)
 }
+
 func TestDeleteListDeleteProductsFromListError(t *testing.T) {
 	userID := "user-id"
 	listID := "list-id"

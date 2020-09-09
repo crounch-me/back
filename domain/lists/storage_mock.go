@@ -67,6 +67,15 @@ func (sm *StorageMock) DeleteProductsFromList(listID string) *domain.Error {
 	return err.(*domain.Error)
 }
 
+func (ps *StorageMock) DeleteProductFromList(productID string, listID string) *domain.Error {
+	args := ps.Called(productID, listID)
+	err := args.Error(0)
+	if err == nil {
+		return nil
+	}
+	return err.(*domain.Error)
+}
+
 func (sm *StorageMock) DeleteList(listID string) *domain.Error {
 	args := sm.Called(listID)
 	err := args.Error(0)

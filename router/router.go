@@ -44,7 +44,7 @@ func Start(config *configuration.Config) {
 	corsConfig := cors.DefaultConfig()
 	corsConfig.AllowAllOrigins = true
 
-	ConfigureRoutes(r, hc)
+	configureRoutes(r, hc)
 
 	r.Use(cors.New(corsConfig))
 	r.Use(gin.Recovery())
@@ -59,7 +59,7 @@ func Start(config *configuration.Config) {
 
 func emptyHandler(c *gin.Context) {}
 
-func ConfigureRoutes(r *gin.Engine, hc *handler.Context) {
+func configureRoutes(r *gin.Engine, hc *handler.Context) {
 	r.Use(otherMethodsHandler())
 
 	// Health routes
@@ -92,6 +92,7 @@ func ConfigureRoutes(r *gin.Engine, hc *handler.Context) {
 
 	// List product routes
 	r.POST(listProductPath, checkAccess(hc.Storage), hc.AddProductToList)
+	r.DELETE(listProductPath, checkAccess(hc.Storage), hc.DeleteProductFromList)
 	r.OPTIONS(listProductPath, optionsHandler([]string{http.MethodPost}))
 }
 
