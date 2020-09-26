@@ -84,6 +84,45 @@ func (hc *Context) AddProductToList(c *gin.Context) {
 	c.JSON(http.StatusCreated, productInList)
 }
 
+// UpdateProductInList updates the product in list partially
+func (hc *Context) UpdateProductInList(c *gin.Context) {
+	userID, err := hc.GetUserIDFromContext(c)
+	if err != nil {
+		hc.LogAndSendError(c, err)
+		return
+	}
+
+	listID := c.Param("listID")
+	err = hc.Validator.Var("listID", listID, "uuid")
+	if err != nil {
+		hc.LogAndSendError(c, err)
+		return
+	}
+
+	productID := c.Param("productID")
+	err = hc.Validator.Var("productID", productID, "uuid")
+	if err != nil {
+		hc.LogAndSendError(c, err)
+		return
+	}
+
+	updateProductInList := &lists.UpdateProductInList{}
+
+	err = hc.UnmarshalAndValidate(c, updateProductInList)
+	if err != nil {
+		hc.LogAndSendError(c, err)
+		return
+	}
+
+	productInListLink, err := hc.Services.List.UpdateProductInList(updateProductInList, productID, listID, userID)
+	if err != nil {
+		hc.LogAndSendError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, productInListLink)
+}
+
 // DeleteProductFromList removes the product from the list
 func (hc *Context) DeleteProductFromList(c *gin.Context) {
 	userID, err := hc.GetUserIDFromContext(c)

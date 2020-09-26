@@ -435,7 +435,7 @@ func (te *TestExecutor) theReturnedProductsFromListAre(productsDataTable *messag
 		return err
 	}
 
-	productsMap := make(map[string]*products.Product)
+	productsMap := make(map[string]*lists.ProductInListResponse)
 
 	for _, product := range list.Products {
 		productsMap[product.ID] = product

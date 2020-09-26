@@ -191,7 +191,7 @@ func TestAddProductToListDuplicatedProductInListError(t *testing.T) {
 			ID: userID,
 		},
 	}
-	productInList := &ProductInList{
+	productInList := &ProductInListLink{
 		ListID:    listID,
 		ProductID: productID,
 	}
@@ -294,7 +294,7 @@ func TestAddProductToListOK(t *testing.T) {
 	listStorageMock.AssertCalled(t, "AddProductToList", productID, listID)
 	productStorageMock.AssertCalled(t, "GetProduct", productID)
 
-	expectedProductInList := &ProductInList{
+	expectedProductInList := &ProductInListLink{
 		ListID:    listID,
 		ProductID: productID,
 	}

@@ -49,6 +49,24 @@ func (ls *ListService) GetOwnersLists(ownerID string) ([]*List, *domain.Error) {
 	return lists, nil
 }
 
+func (ls *ListService) UpdateProductInList(updateProductInList *UpdateProductInList, productID, listID, userID string) (*ProductInListLink, *domain.Error) {
+	list, err := ls.ListStorage.GetList(listID)
+	if err != nil {
+		return nil, err
+	}
+
+	if !IsUserAuthorized(list, userID) {
+		return nil, domain.NewError(domain.ForbiddenErrorCode)
+	}
+
+	productInListLink, err := ls.ListStorage.UpdateProductInList(updateProductInList, productID, listID)
+	if err != nil {
+		return nil, err
+	}
+
+	return productInListLink, nil
+}
+
 func (ls *ListService) GetList(listID, userID string) (*List, *domain.Error) {
 	list, err := ls.ListStorage.GetList(listID)
 	if err != nil {
@@ -85,7 +103,7 @@ func (ls *ListService) DeleteProductFromList(productID, listID, userID string) *
 	return ls.ListStorage.DeleteProductFromList(productID, listID)
 }
 
-func (ls *ListService) AddProductToList(productID, listID, userID string) (*ProductInList, *domain.Error) {
+func (ls *ListService) AddProductToList(productID, listID, userID string) (*ProductInListLink, *domain.Error) {
 	list, err := ls.ListStorage.GetList(listID)
 	if err != nil {
 		return nil, err
@@ -116,7 +134,7 @@ func (ls *ListService) AddProductToList(productID, listID, userID string) (*Prod
 		return nil, err
 	}
 
-	productInList = &ProductInList{
+	productInList = &ProductInListLink{
 		ProductID: productID,
 		ListID:    listID,
 	}

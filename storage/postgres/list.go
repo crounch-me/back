@@ -91,7 +91,28 @@ func (s *PostgresStorage) GetList(id string) (*lists.List, *domain.Error) {
 	return l, nil
 }
 
-func (s *PostgresStorage) GetProductInList(productID string, listID string) (*lists.ProductInList, *domain.Error) {
+func (s *PostgresStorage) UpdateProductInList(updateProductInList *lists.UpdateProductInList, productID, listID string) (*lists.ProductInListLink, *domain.Error) {
+	query := fmt.Sprintf(`
+    UPDATE %s.product_in_list
+    SET buyed = $1
+    WHERE product_id = $2
+    AND list_id = $3
+    RETURNING product_id, list_id, buyed
+  `, s.schema)
+
+	row := s.session.QueryRow(query, updateProductInList.Buyed, productID, listID)
+
+	pil := &lists.ProductInListLink{}
+
+	err := row.Scan(&pil.ProductID, &pil.ListID, &pil.Buyed)
+	if err == sql.ErrNoRows {
+		return nil, domain.NewError(lists.ProductInListNotFoundErrorCode)
+	}
+
+	return pil, nil
+}
+
+func (s *PostgresStorage) GetProductInList(productID string, listID string) (*lists.ProductInListLink, *domain.Error) {
 	query := fmt.Sprintf(`
     SELECT product_id, list_id
     FROM %s.product_in_list
@@ -101,7 +122,7 @@ func (s *PostgresStorage) GetProductInList(productID string, listID string) (*li
 
 	row := s.session.QueryRow(query, productID, listID)
 
-	pil := &lists.ProductInList{}
+	pil := &lists.ProductInListLink{}
 
 	err := row.Scan(&pil.ProductID, &pil.ListID)
 	if err == sql.ErrNoRows {
@@ -114,9 +135,9 @@ func (s *PostgresStorage) GetProductInList(productID string, listID string) (*li
 	return pil, nil
 }
 
-func (s *PostgresStorage) GetProductsOfList(listID string) ([]*products.Product, *domain.Error) {
+func (s *PostgresStorage) GetProductsOfList(listID string) ([]*lists.ProductInListResponse, *domain.Error) {
 	query := fmt.Sprintf(`
-    SELECT p.id, p.name, c.id, c.name
+    SELECT p.id, p.name, pil.buyed, c.id, c.name
     FROM %s.product p
     LEFT JOIN %s.product_in_list pil ON pil.product_id = p.id
     LEFT JOIN %s.list l ON pil.list_id = l.id
@@ -130,28 +151,30 @@ func (s *PostgresStorage) GetProductsOfList(listID string) ([]*products.Product,
 		return nil, domain.NewError(domain.UnknownErrorCode).WithCause(err)
 	}
 
-	productsOfList := make([]*products.Product, 0)
+	productsOfList := make([]*lists.ProductInListResponse, 0)
 	for rows.Next() {
 		if err = rows.Err(); err != nil {
 			return nil, domain.NewError(domain.UnknownErrorCode).WithCause(err)
 		}
 
-		product := &products.Product{}
+		productOfList := &lists.ProductInListResponse{
+			Product: &products.Product{},
+		}
 		var nullableCategoryID, nullableCategoryName sql.NullString
 
-		err = rows.Scan(&product.ID, &product.Name, &nullableCategoryID, &nullableCategoryName)
+		err = rows.Scan(&productOfList.ID, &productOfList.Name, &productOfList.Buyed, &nullableCategoryID, &nullableCategoryName)
 		if err != nil {
 			return nil, domain.NewError(domain.UnknownErrorCode).WithCause(err)
 		}
 
 		if nullableCategoryID.Valid && nullableCategoryName.Valid {
-			product.Category = &categories.Category{
+			productOfList.Category = &categories.Category{
 				ID:   nullableCategoryID.String,
 				Name: nullableCategoryName.String,
 			}
 		}
 
-		productsOfList = append(productsOfList, product)
+		productsOfList = append(productsOfList, productOfList)
 	}
 
 	return productsOfList, nil
