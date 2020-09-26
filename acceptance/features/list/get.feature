@@ -3,10 +3,10 @@ Feature: Get List by id
   Scenario: OK - List contains products with their categories
     Given I authenticate with a random user
     And I create these lists
-      | name    |
+      | Name    |
       | Courses |
     And I create these products
-      | name    |
+      | Name    |
       | Caviar  |
     And I use this body
       """

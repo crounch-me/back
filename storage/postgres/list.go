@@ -164,7 +164,21 @@ func (s *PostgresStorage) AddProductToList(productID string, listID string) *dom
   `, s.schema)
 
 	_, err := s.session.Exec(query, productID, listID)
+	if err != nil {
+		return domain.NewError(domain.UnknownErrorCode).WithCause(err)
+	}
 
+	return nil
+}
+
+func (s *PostgresStorage) DeleteProductFromList(productID string, listID string) *domain.Error {
+	query := fmt.Sprintf(`
+    DELETE FROM %s.product_in_list
+    WHERE product_id = $1
+    AND list_id = $2
+  `, s.schema)
+
+	_, err := s.session.Exec(query, productID, listID)
 	if err != nil {
 		return domain.NewError(domain.UnknownErrorCode).WithCause(err)
 	}
@@ -178,7 +192,6 @@ func (s *PostgresStorage) DeleteProductsFromList(listID string) *domain.Error {
   `, s.schema)
 
 	_, err := s.session.Exec(deleteProductInListQuery, listID)
-
 	if err != nil {
 		return domain.NewError(domain.UnknownErrorCode).WithCause(err)
 	}
@@ -192,7 +205,6 @@ func (s *PostgresStorage) DeleteList(listID string) *domain.Error {
   `, s.schema)
 
 	_, err := s.session.Exec(deleteProductInListQuery, listID)
-
 	if err != nil {
 		return domain.NewError(domain.UnknownErrorCode).WithCause(err)
 	}

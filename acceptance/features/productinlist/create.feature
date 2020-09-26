@@ -20,7 +20,7 @@ Feature: Add a product to a list
     And "$.productId" is a string equal to "{{ .ProductID }}"
     And "$.listId" is a string equal to "{{ .ListID }}"
 
-  Scenario: KO - Default product
+  Scenario: OK - Default product
     Given I authenticate with a random user
     And I create these lists
       | name                           |
@@ -37,11 +37,12 @@ Feature: Add a product to a list
     And "$.productId" is a string equal to "a40a3f16-ae0d-4b2a-884d-c8a08bb13aa4"
     And "$.listId" is a string equal to "{{ .ListID }}"
 
-  Scenario: KO - Product doesn't belong to user
+  Scenario: KO - List doesn't belong to user
     Given I authenticate with a random user
     And I create these lists
       | name                           |
       | Récupération listes de courses |
+    And I authenticate with a random user
     And I create these products
       | name                |
       | Mon premier produit |
@@ -53,9 +54,28 @@ Feature: Add a product to a list
         }
       """
     When I send a "POST" request on "/lists/{{ .ListID }}/products/{{ .ProductID }}"
-    Then the status code is 201
-    And "$.productId" is a string equal to "{{ .ProductID }}"
-    And "$.listId" is a string equal to "{{ .ListID }}"
+    Then the status code is 403
+    And "$.error" has string value "forbidden-error"
+
+  Scenario: KO - Product doesn't belong to user
+    Given I authenticate with a random user
+    And I create these products
+      | name                |
+      | Mon premier produit |
+    And I authenticate with a random user
+    And I create these lists
+      | name                           |
+      | Récupération listes de courses |
+    And I use this body
+      """
+        {
+          "productId": "{{ .ProductID }}",
+          "listId": "{{ .ListID }}"
+        }
+      """
+    When I send a "POST" request on "/lists/{{ .ListID }}/products/{{ .ProductID }}"
+    Then the status code is 403
+    And "$.error" has string value "forbidden-error"
 
   Scenario: KO - Product already in list
     Given I authenticate with a random user
