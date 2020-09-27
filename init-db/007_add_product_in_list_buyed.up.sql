@@ -1,0 +1,5 @@
+BEGIN;
+
+ALTER TABLE "product_in_list" ADD COLUMN buyed BOOLEAN DEFAULT FALSE;
+
+COMMIT;

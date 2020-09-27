@@ -93,7 +93,8 @@ func configureRoutes(r *gin.Engine, hc *handler.Context) {
 	// List product routes
 	r.POST(listProductPath, checkAccess(hc.Storage), hc.AddProductToList)
 	r.DELETE(listProductPath, checkAccess(hc.Storage), hc.DeleteProductFromList)
-	r.OPTIONS(listProductPath, optionsHandler([]string{http.MethodPost}))
+	r.PATCH(listProductPath, checkAccess(hc.Storage), hc.UpdateProductInList)
+	r.OPTIONS(listProductPath, optionsHandler([]string{http.MethodPost, http.MethodPatch, http.MethodDelete}))
 }
 
 func checkAccess(us users.Storage) gin.HandlerFunc {

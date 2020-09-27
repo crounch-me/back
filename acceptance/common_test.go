@@ -75,6 +75,12 @@ func (te *TestExecutor) getValueFromDataTableRow(row *messages.PickleStepArgumen
 	return strings.TrimSpace(row.Cells[index].Value)
 }
 
+func (te *TestExecutor) getBoolFromDataTableRow(row *messages.PickleStepArgument_PickleTable_PickleTableRow, index int) bool {
+	rowString := te.getValueFromDataTableRow(row, index)
+
+	return strings.ToUpper(rowString) == "YES"
+}
+
 func (te *TestExecutor) getValueFromVariables(toParse string) (string, error) {
 	var result strings.Builder
 	tmpl, err := template.New("template").Parse(toParse)
@@ -403,6 +409,11 @@ func (te *TestExecutor) hasStringValue(path, expectedValue string) error {
 		return err
 	}
 
+	expectedValue, err = te.getValueFromVariables(expectedValue)
+	if err != nil {
+		return err
+	}
+
 	if foundValue != expectedValue {
 		return fmt.Errorf("actual %s is not equal to expected %s", foundValue, expectedValue)
 	}
@@ -435,17 +446,17 @@ func (te *TestExecutor) theReturnedProductsFromListAre(productsDataTable *messag
 		return err
 	}
 
-	productsMap := make(map[string]*products.Product)
+	productsInListMap := make(map[string]*lists.ProductInListResponse)
 
-	for _, product := range list.Products {
-		productsMap[product.ID] = product
+	for _, productInList := range list.Products {
+		productsInListMap[productInList.ID] = productInList
 	}
 
-	expectedProductsLength := len(productsDataTable.Rows) - 1
-	actualProductsLength := len(productsMap)
+	expectedProductsInListLength := len(productsDataTable.Rows) - 1
+	actualProductsInListLength := len(productsInListMap)
 
-	if expectedProductsLength != actualProductsLength {
-		return fmt.Errorf("list must contains %d products, actually contains %d", expectedProductsLength, actualProductsLength)
+	if expectedProductsInListLength != actualProductsInListLength {
+		return fmt.Errorf("list must contains %d products, actually contains %d", expectedProductsInListLength, actualProductsInListLength)
 	}
 
 	for i, row := range productsDataTable.Rows {
@@ -453,23 +464,30 @@ func (te *TestExecutor) theReturnedProductsFromListAre(productsDataTable *messag
 			expectedID := te.getValueFromDataTableRow(row, 0)
 			expectedName := te.getValueFromDataTableRow(row, 1)
 			expectedCategoryName := te.getValueFromDataTableRow(row, 2)
+			expectedBuyed := te.getBoolFromDataTableRow(row, 3)
 
 			expectedID, err = te.getValueFromVariables(expectedID)
 			if err != nil {
 				return err
 			}
 
-			product, ok := productsMap[expectedID]
+			productInList, ok := productsInListMap[expectedID]
 			if !ok {
 				return fmt.Errorf("product %s was not found", expectedID)
 			}
 
-			if product.Name != expectedName {
-				return fmt.Errorf("product name %s was not expected %s", product.Name, expectedName)
+			if productInList.Name != expectedName {
+				return fmt.Errorf("product name %s was not expected %s", productInList.Name, expectedName)
 			}
 
-			if product.Category != nil && product.Category.Name != expectedCategoryName {
-				return fmt.Errorf("product category name %s was not expected %s", product.Category.Name, expectedCategoryName)
+			productMessage := fmt.Sprintf("for product %s", expectedName)
+
+			if productInList.Buyed != expectedBuyed {
+				return fmt.Errorf("product buyed %t was not expected %t %s", productInList.Buyed, expectedBuyed, productMessage)
+			}
+
+			if productInList.Category != nil && productInList.Category.Name != expectedCategoryName {
+				return fmt.Errorf("product category name %s was not expected %s %s", productInList.Category.Name, expectedCategoryName, productMessage)
 			}
 		}
 	}

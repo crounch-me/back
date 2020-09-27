@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/crounch-me/back/domain"
-	"github.com/crounch-me/back/domain/products"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -40,11 +39,11 @@ func (sm *StorageMock) GetList(id string) (*List, *domain.Error) {
 	}
 }
 
-func (sm *StorageMock) GetProductInList(productID string, listID string) (*ProductInList, *domain.Error) {
+func (sm *StorageMock) GetProductInList(productID string, listID string) (*ProductInListLink, *domain.Error) {
 	args := sm.Called(productID, listID)
 	err := args.Error(1)
 	if err == nil {
-		return args.Get(0).(*ProductInList), nil
+		return args.Get(0).(*ProductInListLink), nil
 	}
 	return nil, err.(*domain.Error)
 }
@@ -85,11 +84,21 @@ func (sm *StorageMock) DeleteList(listID string) *domain.Error {
 	return err.(*domain.Error)
 }
 
-func (sm *StorageMock) GetProductsOfList(listID string) ([]*products.Product, *domain.Error) {
+func (sm *StorageMock) GetProductsOfList(listID string) ([]*ProductInListResponse, *domain.Error) {
 	args := sm.Called(listID)
 	err := args.Error(1)
 	if err != nil {
 		return nil, err.(*domain.Error)
 	}
-	return args.Get(0).([]*products.Product), nil
+	return args.Get(0).([]*ProductInListResponse), nil
+}
+
+func (sm *StorageMock) UpdateProductInList(updateProductInList *UpdateProductInList, productID, listID string) (*ProductInListLink, *domain.Error) {
+	args := sm.Called(updateProductInList, productID, listID)
+	err := args.Error(1)
+
+	if err != nil {
+		return nil, err.(*domain.Error)
+	}
+	return args.Get(0).(*ProductInListLink), nil
 }

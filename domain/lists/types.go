@@ -9,15 +9,26 @@ import (
 
 // List represents a shopping list
 type List struct {
-	ID           string              `json:"id"`
-	Name         string              `json:"name" validate:"required,lt=61"`
-	CreationDate time.Time           `json:"creationDate"`
-	Owner        *users.User         `json:"owner,omitempty"`
-	Products     []*products.Product `json:"products,omitempty"`
+	ID           string                   `json:"id"`
+	Name         string                   `json:"name" validate:"required,lt=61"`
+	CreationDate time.Time                `json:"creationDate"`
+	Owner        *users.User              `json:"owner,omitempty"`
+	Products     []*ProductInListResponse `json:"products,omitempty"`
 }
 
-// ProductInList represents a product in a list
-type ProductInList struct {
+// ProductInListLink represents a product in a list
+type ProductInListLink struct {
 	ProductID string `json:"productId"`
 	ListID    string `json:"listId"`
+	Buyed     bool   `json:"buyed"`
+}
+
+type ProductInListResponse struct {
+	*products.Product
+	Buyed bool `json:"buyed"`
+}
+
+// UpdateProductInList represents the possible attributes to update in a product in a list
+type UpdateProductInList struct {
+	Buyed bool `json:"buyed"`
 }

@@ -30,6 +30,9 @@ func initializeErrorsMap() {
 	errorToStatus[lists.ListNotFoundErrorCode] = http.StatusNotFound
 	errorToStatus[lists.DuplicateProductInListErrorCode] = http.StatusConflict
 
+	// Product in list errors
+	errorToStatus[lists.ProductInListNotFoundErrorCode] = http.StatusNotFound
+
 	// Product errors
 	errorToStatus[products.ProductNotFoundErrorCode] = http.StatusNotFound
 
