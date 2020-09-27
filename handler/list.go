@@ -5,6 +5,7 @@ import (
 
 	"github.com/crounch-me/back/domain"
 	"github.com/crounch-me/back/domain/lists"
+	"github.com/crounch-me/back/util"
 	"github.com/gin-gonic/gin"
 )
 
@@ -86,8 +87,11 @@ func (hc *Context) AddProductToList(c *gin.Context) {
 
 // UpdateProductInList updates the product in list partially
 func (hc *Context) UpdateProductInList(c *gin.Context) {
+	logger := util.GetLogger()
 	userID, err := hc.GetUserIDFromContext(c)
+
 	if err != nil {
+		logger.WithError(err).Debug("error during user id retrieving")
 		hc.LogAndSendError(c, err)
 		return
 	}
@@ -95,6 +99,7 @@ func (hc *Context) UpdateProductInList(c *gin.Context) {
 	listID := c.Param("listID")
 	err = hc.Validator.Var("listID", listID, "uuid")
 	if err != nil {
+		logger.WithError(err).Debug("error during list id validation")
 		hc.LogAndSendError(c, err)
 		return
 	}
@@ -102,6 +107,7 @@ func (hc *Context) UpdateProductInList(c *gin.Context) {
 	productID := c.Param("productID")
 	err = hc.Validator.Var("productID", productID, "uuid")
 	if err != nil {
+		logger.WithError(err).Debug("error during product id validation")
 		hc.LogAndSendError(c, err)
 		return
 	}
@@ -110,15 +116,20 @@ func (hc *Context) UpdateProductInList(c *gin.Context) {
 
 	err = hc.UnmarshalAndValidate(c, updateProductInList)
 	if err != nil {
+		logger.WithError(err).Debug("error during product in list body validation")
 		hc.LogAndSendError(c, err)
 		return
 	}
 
 	productInListLink, err := hc.Services.List.UpdateProductInList(updateProductInList, productID, listID, userID)
 	if err != nil {
+		logger.WithError(err).Debug("error during product in list link update")
 		hc.LogAndSendError(c, err)
 		return
 	}
+
+	logger.WithField("productInListLink", productInListLink).
+		Debug("OK - Request succeeded")
 
 	c.JSON(http.StatusOK, productInListLink)
 }
@@ -155,6 +166,7 @@ func (hc *Context) DeleteProductFromList(c *gin.Context) {
 }
 
 func (hc *Context) DeleteList(c *gin.Context) {
+	logger := util.GetLogger()
 	userID, err := hc.GetUserIDFromContext(c)
 	if err != nil {
 		hc.LogAndSendError(c, err)
@@ -164,12 +176,14 @@ func (hc *Context) DeleteList(c *gin.Context) {
 	listID := c.Param("listID")
 	err = hc.Validator.Var("listID", listID, "uuid")
 	if err != nil {
+		logger.WithError(err).Debug("error during list id validation")
 		hc.LogAndSendError(c, err)
 		return
 	}
 
 	err = hc.Services.List.DeleteList(listID, userID)
 	if err != nil {
+		logger.WithError(err).Debug("error during list deletion")
 		hc.LogAndSendError(c, err)
 		return
 	}

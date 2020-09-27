@@ -59,6 +59,11 @@ func (ls *ListService) UpdateProductInList(updateProductInList *UpdateProductInL
 		return nil, domain.NewError(domain.ForbiddenErrorCode)
 	}
 
+	_, err = ls.ProductStorage.GetProduct(productID)
+	if err != nil {
+		return nil, err
+	}
+
 	productInListLink, err := ls.ListStorage.UpdateProductInList(updateProductInList, productID, listID)
 	if err != nil {
 		return nil, err

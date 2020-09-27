@@ -10,6 +10,7 @@ import (
 	"github.com/crounch-me/back/domain/lists"
 	"github.com/crounch-me/back/domain/products"
 	"github.com/crounch-me/back/domain/users"
+	"github.com/crounch-me/back/util"
 )
 
 // CreateList inserts a new list
@@ -106,6 +107,10 @@ func (s *PostgresStorage) UpdateProductInList(updateProductInList *lists.UpdateP
 
 	err := row.Scan(&pil.ProductID, &pil.ListID, &pil.Buyed)
 	if err == sql.ErrNoRows {
+		logger := util.GetLogger()
+		logger.WithError(err).
+			WithField("package", "postgres").
+			Debug("UpdateProductInList")
 		return nil, domain.NewError(lists.ProductInListNotFoundErrorCode)
 	}
 
