@@ -84,13 +84,13 @@ func (sm *StorageMock) DeleteList(listID string) *domain.Error {
 	return err.(*domain.Error)
 }
 
-func (sm *StorageMock) GetProductsOfList(listID string) ([]*ProductInListResponse, *domain.Error) {
+func (sm *StorageMock) GetProductsOfList(listID string) ([]*ProductInList, *domain.Error) {
 	args := sm.Called(listID)
 	err := args.Error(1)
 	if err != nil {
 		return nil, err.(*domain.Error)
 	}
-	return args.Get(0).([]*ProductInListResponse), nil
+	return args.Get(0).([]*ProductInList), nil
 }
 
 func (sm *StorageMock) UpdateProductInList(updateProductInList *UpdateProductInList, productID, listID string) (*ProductInListLink, *domain.Error) {

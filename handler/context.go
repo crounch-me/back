@@ -10,6 +10,7 @@ import (
 	"github.com/sirupsen/logrus"
 	validator "gopkg.in/go-playground/validator.v9"
 
+	"github.com/crounch-me/back/builders"
 	"github.com/crounch-me/back/configuration"
 	"github.com/crounch-me/back/domain"
 	"github.com/crounch-me/back/domain/authorization.go"
@@ -33,13 +34,18 @@ type Services struct {
 	User          *users.UserService
 }
 
+type Builders struct {
+  List *builders.ListBuilder
+}
+
 // Context holds everything to respond to requests
 type Context struct {
 	Generation domain.Generation
 	Storage    storage.Storage
 	Config     *configuration.Config
 	Validator  *util.Validator
-	Services   *Services
+  Services   *Services
+  Builders *Builders
 }
 
 // NewContext creates and initialize everything for the requests
@@ -56,7 +62,8 @@ func NewContext(config *configuration.Config) *Context {
 		Storage:   storage,
 		Config:    config,
 		Validator: validator,
-		Services:  NewServices(storage, generation),
+    Services:  NewServices(storage, generation),
+    Builders: NewBuilders(),
 	}
 }
 
@@ -139,6 +146,13 @@ func (hc *Context) UnmarshalAndValidate(c *gin.Context, i interface{}) *domain.E
 	}
 
 	return nil
+}
+
+// NewBuilders create an object which contains all necessary builders
+func NewBuilders() *Builders {
+  return &Builders{
+    List: &builders.ListBuilder{},
+  }
 }
 
 // NewServices create an object which contains all necessary services

@@ -1,5 +1,6 @@
 Feature: Get List by id
 
+  @val
   Scenario: OK - List contains products with their categories
     Given I authenticate with a random user
     And I create these lists

@@ -13,7 +13,7 @@ type List struct {
 	Name         string                   `json:"name" validate:"required,lt=61"`
 	CreationDate time.Time                `json:"creationDate"`
 	Owner        *users.User              `json:"owner,omitempty"`
-	Products     []*ProductInListResponse `json:"products,omitempty"`
+	Products     []*ProductInList `json:"products,omitempty"`
 }
 
 // ProductInListLink represents a product in a list
@@ -23,7 +23,7 @@ type ProductInListLink struct {
 	Buyed     bool   `json:"buyed"`
 }
 
-type ProductInListResponse struct {
+type ProductInList struct {
 	*products.Product
 	Buyed bool `json:"buyed"`
 }

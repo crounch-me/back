@@ -209,7 +209,9 @@ func (hc *Context) GetList(c *gin.Context) {
 	if err != nil {
 		hc.LogAndSendError(c, err)
 		return
-	}
+  }
 
-	c.JSON(http.StatusOK, list)
+  listResponse := hc.Builders.List.GetList(list)
+
+	c.JSON(http.StatusOK, listResponse)
 }

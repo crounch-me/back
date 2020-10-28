@@ -77,7 +77,7 @@ func TestGetListOK(t *testing.T) {
 	userID := "user-id"
 	productID := "product-id"
 	productName := "product-name"
-	listProducts := []*ProductInListResponse{
+	listProducts := []*ProductInList{
 		{
 			Product: &products.Product{
 				ID:   productID,
