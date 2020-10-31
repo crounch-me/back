@@ -10,6 +10,7 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/crounch-me/back/builders"
 	"github.com/crounch-me/back/domain/lists"
 	"github.com/crounch-me/back/domain/products"
 	"github.com/crounch-me/back/util"
@@ -440,16 +441,18 @@ func (te *TestExecutor) hasBoolValue(path, expectedValue string) error {
 }
 
 func (te *TestExecutor) theReturnedProductsFromListAre(productsDataTable *messages.PickleStepArgument_PickleTable) error {
-	var list *lists.List
+	var list *builders.GetListResponse
 	err := json.Unmarshal(te.ResponseBody, &list)
 	if err != nil {
 		return err
 	}
 
-	productsInListMap := make(map[string]*lists.ProductInListResponse)
+	productsInListMap := make(map[string]*builders.ProductInGetListResponse)
 
-	for _, productInList := range list.Products {
-		productsInListMap[productInList.ID] = productInList
+	for _, categoryInList := range list.Categories {
+    for _, productInList := range categoryInList.Products {
+      productsInListMap[productInList.ID] = productInList
+    }
 	}
 
 	expectedProductsInListLength := len(productsDataTable.Rows) - 1

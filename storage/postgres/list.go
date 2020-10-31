@@ -140,7 +140,7 @@ func (s *PostgresStorage) GetProductInList(productID string, listID string) (*li
 	return pil, nil
 }
 
-func (s *PostgresStorage) GetProductsOfList(listID string) ([]*lists.ProductInListResponse, *domain.Error) {
+func (s *PostgresStorage) GetProductsOfList(listID string) ([]*lists.ProductInList, *domain.Error) {
 	query := fmt.Sprintf(`
     SELECT p.id, p.name, pil.buyed, c.id, c.name
     FROM %s.product p
@@ -156,13 +156,13 @@ func (s *PostgresStorage) GetProductsOfList(listID string) ([]*lists.ProductInLi
 		return nil, domain.NewError(domain.UnknownErrorCode).WithCause(err)
 	}
 
-	productsOfList := make([]*lists.ProductInListResponse, 0)
+	productsOfList := make([]*lists.ProductInList, 0)
 	for rows.Next() {
 		if err = rows.Err(); err != nil {
 			return nil, domain.NewError(domain.UnknownErrorCode).WithCause(err)
 		}
 
-		productOfList := &lists.ProductInListResponse{
+		productOfList := &lists.ProductInList{
 			Product: &products.Product{},
 		}
 		var nullableCategoryID, nullableCategoryName sql.NullString
