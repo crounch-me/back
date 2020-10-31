@@ -9,6 +9,21 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type SignupRequest struct {
+  Email string `json:"email" validate:"required,email"`
+  Password string `json:"password" validate:"required,gt=3"`
+}
+
+// Signup creates a new user
+// @Summary Creates a new user
+// @ID signup
+// @Tags user
+// @Accept json
+// @Produce  json
+// @Param user body SignupRequest true "User to signup with"
+// @Success 200 {object} users.User
+// @Failure 500 {object} domain.Error
+// @Router /users/signup [post]
 func (hc *Context) Signup(c *gin.Context) {
 	u := &users.User{}
 
@@ -30,8 +45,8 @@ func (hc *Context) Signup(c *gin.Context) {
 }
 
 type LoginRequest struct {
-  Email string `json:"email" validate:"required"`
-  Password string `json:"name" validate:"required"`
+  Email string `json:"email" validate:"required,email"`
+  Password string `json:"password" validate:"required,gt=3"`
 }
 
 // Login creates a new user authorization if is found and password is good
@@ -43,7 +58,6 @@ type LoginRequest struct {
 // @Param user body LoginRequest true "User to login with"
 // @Success 200 {object} authorization.Authorization
 // @Failure 500 {object} domain.Error
-// @Security ApiKeyAuth
 // @Router /users/login [post]
 func (hc *Context) Login(c *gin.Context) {
 	u := &LoginRequest{}

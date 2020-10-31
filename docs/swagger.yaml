@@ -84,6 +84,8 @@ definitions:
     properties:
       name:
         type: string
+    required:
+    - name
     type: object
   handler.CreateProductRequest:
     properties:
@@ -96,16 +98,26 @@ definitions:
     properties:
       email:
         type: string
-      name:
+      password:
         type: string
     required:
     - email
-    - name
+    - password
     type: object
   handler.ProductSearchRequest:
     properties:
       name:
         type: string
+    type: object
+  handler.SignupRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
     type: object
   lists.List:
     properties:
@@ -495,9 +507,33 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/domain.Error'
-      security:
-      - ApiKeyAuth: []
       summary: Creates a new user authorization
+      tags:
+      - user
+  /users/signup:
+    post:
+      consumes:
+      - application/json
+      operationId: signup
+      parameters:
+      - description: User to signup with
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/handler.SignupRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/users.User'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.Error'
+      summary: Creates a new user
       tags:
       - user
 securityDefinitions:
