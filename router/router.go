@@ -20,7 +20,8 @@ const (
 
 	userPath  = "/users"
 	loginPath = "/users/login"
-	mePath    = "/me"
+  mePath    = "/me"
+  logoutPath = "/logout"
 
 	listPath       = "/lists"
 	listWithIDPath = "/lists/:listID"
@@ -72,7 +73,9 @@ func configureRoutes(r *gin.Engine, hc *handler.Context) {
 	r.POST(loginPath, hc.Login)
 	r.OPTIONS(loginPath, optionsHandler([]string{http.MethodPost}))
 	r.GET(mePath, checkAccess(hc.Storage), hc.Me)
-	r.OPTIONS(mePath, optionsHandler([]string{http.MethodGet}))
+  r.OPTIONS(mePath, optionsHandler([]string{http.MethodGet}))
+  r.POST(logoutPath, checkAccess(hc.Storage), hc.Logout)
+  r.OPTIONS(logoutPath, optionsHandler([]string{http.MethodPost}))
 
 	// List routes
 	r.POST(listPath, checkAccess(hc.Storage), hc.CreateList)

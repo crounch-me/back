@@ -47,6 +47,29 @@ func (hc *Context) Login(c *gin.Context) {
 	c.JSON(http.StatusCreated, authorization)
 }
 
+func (hc *Context) Logout(c *gin.Context) {
+	userID, err := hc.GetUserIDFromContext(c)
+	if err != nil {
+		hc.LogAndSendError(c, err)
+		return
+  }
+
+	token := c.GetHeader("Authorization")
+
+	if token == "" {
+		hc.LogAndSendError(c, domain.NewError(domain.UnauthorizedErrorCode))
+		return
+  }
+
+  err = hc.Services.Authorization.Logout(userID, token)
+  if err != nil {
+    hc.LogAndSendError(c, err)
+    return
+  }
+
+  c.Status(http.StatusNoContent)
+}
+
 func (hc *Context) Me(c *gin.Context) {
 	token := c.GetHeader("Authorization")
 

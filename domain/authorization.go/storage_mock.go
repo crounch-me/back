@@ -17,3 +17,12 @@ func (sm *StorageMock) CreateAuthorization(userID, token string) *domain.Error {
 	}
 	return err.(*domain.Error)
 }
+
+func (sm *StorageMock) DeleteAuthorization(userID, token string) *domain.Error {
+	args := sm.Called(userID, token)
+	err := args.Error(0)
+	if err == nil {
+		return nil
+	}
+	return err.(*domain.Error)
+}
