@@ -29,7 +29,7 @@ func (s *PostgresStorage) DeleteAuthorization(userID, token string) *domain.Erro
 
   _, err := s.session.Exec(query, userID, token)
 
-  if err !=nil {
+  if err != nil {
     return domain.NewError(domain.UnknownErrorCode).WithCause(err)
   }
 

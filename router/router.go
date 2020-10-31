@@ -74,7 +74,7 @@ func configureRoutes(r *gin.Engine, hc *handler.Context) {
 	r.OPTIONS(loginPath, optionsHandler([]string{http.MethodPost}))
 	r.GET(mePath, checkAccess(hc.Storage), hc.Me)
   r.OPTIONS(mePath, optionsHandler([]string{http.MethodGet}))
-  r.POST(logoutPath, checkAccess(hc.Storage), hc.Logout)
+  r.POST(logoutPath, hc.Logout)
   r.OPTIONS(logoutPath, optionsHandler([]string{http.MethodPost}))
 
 	// List routes

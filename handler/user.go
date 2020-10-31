@@ -48,12 +48,6 @@ func (hc *Context) Login(c *gin.Context) {
 }
 
 func (hc *Context) Logout(c *gin.Context) {
-	userID, err := hc.GetUserIDFromContext(c)
-	if err != nil {
-		hc.LogAndSendError(c, err)
-		return
-  }
-
 	token := c.GetHeader("Authorization")
 
 	if token == "" {
@@ -61,7 +55,7 @@ func (hc *Context) Logout(c *gin.Context) {
 		return
   }
 
-  err = hc.Services.Authorization.Logout(userID, token)
+  err := hc.Services.Authorization.Logout(token)
   if err != nil {
     hc.LogAndSendError(c, err)
     return

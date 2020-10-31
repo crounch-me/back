@@ -18,7 +18,7 @@ func TestLogoutDeleteAuthorizationError(t *testing.T) {
     AuthorizationStorage: authorizationStorageMock,
 	}
 
-	err := authorizationService.Logout(userID, token)
+	err := authorizationService.Logout(token)
 
 	authorizationStorageMock.AssertCalled(t, "DeleteAuthorization", userID, token)
 
@@ -36,7 +36,7 @@ func TestLogoutDeleteAuthorizationOK(t *testing.T) {
     AuthorizationStorage: authorizationStorageMock,
 	}
 
-	err := authorizationService.Logout(userID, token)
+	err := authorizationService.Logout(token)
 
 	authorizationStorageMock.AssertCalled(t, "DeleteAuthorization", userID, token)
 
