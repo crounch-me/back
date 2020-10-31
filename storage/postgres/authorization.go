@@ -21,3 +21,17 @@ func (s *PostgresStorage) CreateAuthorization(userID, token string) *domain.Erro
 
 	return nil
 }
+
+func (s *PostgresStorage) DeleteAuthorization(userID, token string) *domain.Error {
+  query := fmt.Sprintf(`
+    DELETE FROM %s.authorization WHERE user_id = $1 AND token = $2
+  `, s.schema)
+
+  _, err := s.session.Exec(query, userID, token)
+
+  if err !=nil {
+    return domain.NewError(domain.UnknownErrorCode).WithCause(err)
+  }
+
+  return nil
+}

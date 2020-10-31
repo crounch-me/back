@@ -42,3 +42,7 @@ func (as *AuthorizationService) CreateAuthorization(email, password string) (*Au
 
 	return authorization, nil
 }
+
+func (as *AuthorizationService) Logout(userID, token string) *domain.Error {
+  return as.AuthorizationStorage.DeleteAuthorization(userID, token)
+}
