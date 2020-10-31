@@ -30,7 +30,7 @@ Feature: Update a product in a list
     And I send a "GET" request on "/lists/{{ .ListID }}"
     And the returned products from list are
       | ID               | Name                | Category name | Buyed |
-      | {{ .ProductID }} | Mon premier produit |               | Yes   |
+      | {{ .ProductID }} | Mon premier produit | Divers        | Yes   |
 
   Scenario: KO - Invalid body
     Given I authenticate with a random user

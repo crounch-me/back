@@ -10,7 +10,7 @@ import (
 
 const (
   DefaultCategoryID = "00000000-0000-0000-0000-000000000000"
-  DefaultCategoryName = "default"
+  DefaultCategoryName = "Divers"
 )
 
 // ListBuilder is a builder for list responses
@@ -38,7 +38,7 @@ type GetListResponse struct {
 	Name         string                   `json:"name" validate:"required,lt=61"`
 	CreationDate time.Time                `json:"creationDate"`
   Owner        *users.User              `json:"owner,omitempty"`
-  Categories []*CategoryInGetListResponse `json:"categories,omitempty"`
+  Categories []*CategoryInGetListResponse `json:"categories"`
 }
 
 // GetList builds the response to GetList request from a regular List
@@ -50,7 +50,7 @@ func (lb *ListBuilder) GetList(list *lists.List) (*GetListResponse) {
     Owner: list.Owner,
   }
 
-  categories := make(map[string]*CategoryInGetListResponse, 0)
+  categoriesInGetListResponse := make(map[string]*CategoryInGetListResponse, 0)
 
   for _, product := range list.Products {
     productInGetListResponse := &ProductInGetListResponse{
@@ -68,10 +68,15 @@ func (lb *ListBuilder) GetList(list *lists.List) (*GetListResponse) {
       categoryName = product.Category.Name
     }
 
-    if category, ok := categories[categoryKey]; ok {
+    productInGetListResponse.Category = &categories.Category{
+      ID: categoryKey,
+      Name: categoryName,
+    }
+
+    if category, ok := categoriesInGetListResponse[categoryKey]; ok {
       category.Products = append(category.Products, productInGetListResponse)
     } else {
-      categories[categoryKey] = &CategoryInGetListResponse{
+      categoriesInGetListResponse[categoryKey] = &CategoryInGetListResponse{
         ID: categoryKey,
         Name: categoryName,
         Products: []*ProductInGetListResponse{
@@ -83,7 +88,7 @@ func (lb *ListBuilder) GetList(list *lists.List) (*GetListResponse) {
 
   listCategories := make([]*CategoryInGetListResponse, 0)
 
-  for _, category := range categories {
+  for _, category := range categoriesInGetListResponse {
     listCategories = append(listCategories, category)
   }
 

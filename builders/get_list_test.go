@@ -79,11 +79,19 @@ func TestGetList(t *testing.T) {
             ID: productID1,
             Name: productName1,
             Buyed: false,
+            Category: &categories.Category{
+              ID: categoryID,
+              Name: categoryName,
+            },
           },
           {
             ID: productID2,
             Name: productName2,
             Buyed: true,
+            Category: &categories.Category{
+              ID: categoryID,
+              Name: categoryName,
+            },
           },
         },
       },
