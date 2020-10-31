@@ -13,8 +13,23 @@ const (
 	ListNotFoundDescription = "The list was not found"
 )
 
+type CreateListRequest struct {
+  Name string `json:"name" validate:"required"`
+}
+
+// CreateList creates a new list
+// @Summary Create a list
+// @ID create-list
+// @Tags list
+// @Accept json
+// @Produce  json
+// @Param list body CreateListRequest true "List to create"
+// @Success 200 {object} lists.List
+// @Failure 500 {object} domain.Error
+// @Security ApiKeyAuth
+// @Router /lists [post]
 func (hc *Context) CreateList(c *gin.Context) {
-	list := &lists.List{}
+	list := &CreateListRequest{}
 
 	err := hc.UnmarshalAndValidate(c, list)
 	if err != nil {
@@ -28,16 +43,24 @@ func (hc *Context) CreateList(c *gin.Context) {
 		return
 	}
 
-	list, err = hc.Services.List.CreateList(list.Name, userID.(string))
+	createdList, err := hc.Services.List.CreateList(list.Name, userID.(string))
 	if err != nil {
 		hc.LogAndSendError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusCreated, list)
+	c.JSON(http.StatusCreated, createdList)
 }
 
 // GetOwnerLists handles the request to get the owner's lists
+// @Summary Get the lists of the owner
+// @ID get-owners-lists
+// @Tags list
+// @Produce  json
+// @Success 200 {object} []lists.List
+// @Failure 500 {object} domain.Error
+// @Security ApiKeyAuth
+// @Router /lists [get]
 func (hc *Context) GetOwnerLists(c *gin.Context) {
 	userID, exists := c.Get(ContextUserID)
 	if !exists {
@@ -55,6 +78,16 @@ func (hc *Context) GetOwnerLists(c *gin.Context) {
 }
 
 // AddProductToList handles the request to add a product to a list
+// @Summary Add the product to the list
+// @ID add-product-to-list
+// @Tags product-in-list
+// @Produce json
+// @Param listID path string true "List ID"
+// @Param productID path string true "Product ID"
+// @Success 200 {object} lists.ProductInListLink
+// @Failure 500 {object} domain.Error
+// @Security ApiKeyAuth
+// @Router /lists/{listID}/products/{productID} [post]
 func (hc *Context) AddProductToList(c *gin.Context) {
 	userID, err := hc.GetUserIDFromContext(c)
 	if err != nil {
@@ -86,6 +119,18 @@ func (hc *Context) AddProductToList(c *gin.Context) {
 }
 
 // UpdateProductInList updates the product in list partially
+// @Summary Update the product in the list partially
+// @ID update-product-in-list
+// @Tags product-in-list
+// @Accept json
+// @Produce json
+// @Param productInList body lists.UpdateProductInList true "Product in list"
+// @Param listID path string true "Product in list"
+// @Param productID path string true "Product in list"
+// @Success 200 {object} lists.ProductInListLink
+// @Failure 500 {object} domain.Error
+// @Security ApiKeyAuth
+// @Router /lists/{listID}/products/{productID} [patch]
 func (hc *Context) UpdateProductInList(c *gin.Context) {
 	logger := util.GetLogger()
 	userID, err := hc.GetUserIDFromContext(c)
@@ -135,6 +180,16 @@ func (hc *Context) UpdateProductInList(c *gin.Context) {
 }
 
 // DeleteProductFromList removes the product from the list
+// @Summary Delete the product from the list
+// @ID delete-product-from-list
+// @Tags product-in-list
+// @Produce json
+// @Param listID path string true "List ID"
+// @Param productID path string true "Product ID"
+// @Success 204
+// @Failure 500 {object} domain.Error
+// @Security ApiKeyAuth
+// @Router /lists/{listID}/products/{productID} [delete]
 func (hc *Context) DeleteProductFromList(c *gin.Context) {
 	userID, err := hc.GetUserIDFromContext(c)
 	if err != nil {
@@ -165,6 +220,16 @@ func (hc *Context) DeleteProductFromList(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+// DeleteList deletes a list and all its product links
+// @Summary Delete the entire list with its products
+// @ID delete-list
+// @Tags list
+// @Produce json
+// @Param listID path string true "List ID"
+// @Success 204
+// @Failure 500 {object} domain.Error
+// @Security ApiKeyAuth
+// @Router /lists/{listID} [delete]
 func (hc *Context) DeleteList(c *gin.Context) {
 	logger := util.GetLogger()
 	userID, err := hc.GetUserIDFromContext(c)
@@ -191,6 +256,16 @@ func (hc *Context) DeleteList(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+// GetList return a list with its products inside the categories
+// @Summary Reads a list with products in categories
+// @ID get-list
+// @Tags list
+// @Produce json
+// @Param listID path string true "List ID"
+// @Success 200 {object} builders.GetListResponse
+// @Failure 500 {object} domain.Error
+// @Security ApiKeyAuth
+// @Router /lists/{listID} [get]
 func (hc *Context) GetList(c *gin.Context) {
 	userID, err := hc.GetUserIDFromContext(c)
 	if err != nil {
