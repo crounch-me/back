@@ -13,6 +13,12 @@ import (
 var version string
 
 // Health handles to response to health endpoint (version and alive)
+// @Summary Return health of application
+// @ID get-health
+// @Produce  json
+// @Success 200 {object} domain.Health
+// @Failure 500 "Internal Server Error"
+// @Router /health [get]
 func (hc *Context) Health(c *gin.Context) {
 	if version == "" {
 		versionBytes, err := ioutil.ReadFile("VERSION")

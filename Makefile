@@ -72,6 +72,7 @@ run: run-dependencies sleep run-app
 .PHONY: run-app
 run-app:
 	@echo "+ $@"
+	swag init -g router/router.go
 	go run main.go serve --db-connection-uri postgresql://postgres:secretpassword@localhost/postgres?sslmode=disable --db-schema public
 
 .PHONY: run-dependencies

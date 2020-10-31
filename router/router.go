@@ -8,7 +8,11 @@ import (
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 
+	ginSwagger "github.com/swaggo/gin-swagger"
+	"github.com/swaggo/gin-swagger/swaggerFiles"
+
 	"github.com/crounch-me/back/configuration"
+	_ "github.com/crounch-me/back/docs"
 	"github.com/crounch-me/back/domain"
 	"github.com/crounch-me/back/domain/users"
 	"github.com/crounch-me/back/handler"
@@ -35,14 +39,25 @@ const (
 // Version represents the version of the application
 var Version string
 
+// @title Crounch Me API
+// @version 1.0
+// @description API serving the grocery application.
+
+// @host localhost:3000
+// @BasePath /
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
+
 // Start launches the router which handle connection and execute the right functions
 func Start(config *configuration.Config) {
 	gin.SetMode(gin.ReleaseMode)
 
 	r := gin.New()
 
-	hc := handler.NewContext(config)
-	corsConfig := cors.DefaultConfig()
+  hc := handler.NewContext(config)
+  corsConfig := cors.DefaultConfig()
 	corsConfig.AllowAllOrigins = true
 
 	configureRoutes(r, hc)
@@ -50,6 +65,10 @@ func Start(config *configuration.Config) {
 	r.Use(cors.New(corsConfig))
 	r.Use(gin.Recovery())
 	log.SetLevel(log.DebugLevel)
+
+  url := ginSwagger.URL("http://localhost:3000/swagger/doc.json")
+
+  r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
 
 	log.Info("Launching awesome server")
 	err := r.Run(":3000")
