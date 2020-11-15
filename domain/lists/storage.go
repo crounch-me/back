@@ -6,11 +6,11 @@ import (
 	"github.com/crounch-me/back/domain"
 )
 
-// ListStorage defines every data functions that we need
+// Storage defines every data functions that we need in lists domain
 type Storage interface {
 	// Lists
-	CreateList(id, name, ownerID string, creationDate time.Time) *domain.Error
-	GetOwnersLists(ownerID string) ([]*List, *domain.Error)
+	CreateList(id, name string, creationDate time.Time) *domain.Error
+	GetUsersLists(userID string) ([]*List, *domain.Error)
 	GetList(id string) (*List, *domain.Error)
 	DeleteList(listID string) *domain.Error
 

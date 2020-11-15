@@ -586,6 +586,12 @@
                         "$ref": "#/definitions/builders.CategoryInGetListResponse"
                     }
                 },
+                "contributors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/users.User"
+                    }
+                },
                 "creationDate": {
                     "type": "string"
                 },
@@ -594,9 +600,6 @@
                 },
                 "name": {
                     "type": "string"
-                },
-                "owner": {
-                    "$ref": "#/definitions/users.User"
                 }
             }
         },
@@ -736,6 +739,12 @@
                 "name"
             ],
             "properties": {
+                "contributors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/users.User"
+                    }
+                },
                 "creationDate": {
                     "type": "string"
                 },
@@ -744,9 +753,6 @@
                 },
                 "name": {
                     "type": "string"
-                },
-                "owner": {
-                    "$ref": "#/definitions/users.User"
                 },
                 "products": {
                     "type": "array",

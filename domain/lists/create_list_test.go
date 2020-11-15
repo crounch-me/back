@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/crounch-me/back/domain"
+	"github.com/crounch-me/back/domain/contributors"
 	"github.com/crounch-me/back/domain/users"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -29,7 +30,7 @@ func TestGenerateIDError(t *testing.T) {
 	assert.Equal(t, err.Code, domain.UnknownErrorCode)
 }
 
-func TestServiceCreateListError(t *testing.T) {
+func TestCreateListCreateListError(t *testing.T) {
 	id := "id"
 	name := "name"
 	userID := "user-id"
@@ -37,7 +38,7 @@ func TestServiceCreateListError(t *testing.T) {
 	generationMock.On("GenerateID").Return(id, nil)
 
 	storageMock := &StorageMock{}
-	storageMock.On("CreateList", id, name, userID, mock.Anything).Return(domain.NewError(domain.UnknownErrorCode))
+	storageMock.On("CreateList", id, name, mock.Anything).Return(domain.NewError(domain.UnknownErrorCode))
 
 	listService := &ListService{
 		Generation:  generationMock,
@@ -47,12 +48,12 @@ func TestServiceCreateListError(t *testing.T) {
 	result, err := listService.CreateList(name, userID)
 
 	generationMock.AssertCalled(t, "GenerateID")
-	storageMock.AssertCalled(t, "CreateList", id, name, userID, mock.Anything)
+	storageMock.AssertCalled(t, "CreateList", id, name, mock.Anything)
 	assert.Empty(t, result)
 	assert.Equal(t, err.Code, domain.UnknownErrorCode)
 }
 
-func TestServiceCreateListOK(t *testing.T) {
+func TestCreateListCreateContributorError(t *testing.T) {
 	id := "id"
 	name := "name"
 	userID := "user-id"
@@ -60,11 +61,43 @@ func TestServiceCreateListOK(t *testing.T) {
 	generationMock.On("GenerateID").Return(id, nil)
 
 	storageMock := &StorageMock{}
-	storageMock.On("CreateList", id, name, userID, mock.Anything).Return(nil)
+	storageMock.On("CreateList", id, name, mock.Anything).Return(nil)
+
+  contributorStorageMock := &contributors.StorageMock{}
+  contributorStorageMock.On("CreateContributor", id, userID).Return(domain.NewError(domain.UnknownErrorCode))
 
 	listService := &ListService{
 		Generation:  generationMock,
-		ListStorage: storageMock,
+    ListStorage: storageMock,
+    ContributorStorage: contributorStorageMock,
+	}
+
+	result, err := listService.CreateList(name, userID)
+
+	generationMock.AssertCalled(t, "GenerateID")
+	storageMock.AssertCalled(t, "CreateList", id, name, mock.Anything)
+
+	assert.Empty(t, result)
+	assert.Equal(t, err.Code, domain.UnknownErrorCode)
+}
+
+func TestCreateListOK(t *testing.T) {
+	id := "id"
+	name := "name"
+	userID := "user-id"
+	generationMock := &domain.GenerationMock{}
+	generationMock.On("GenerateID").Return(id, nil)
+
+	storageMock := &StorageMock{}
+	storageMock.On("CreateList", id, name, mock.Anything).Return(nil)
+
+  contributorStorageMock := &contributors.StorageMock{}
+  contributorStorageMock.On("CreateContributor", id, userID).Return(nil)
+
+	listService := &ListService{
+		Generation:  generationMock,
+    ListStorage: storageMock,
+    ContributorStorage: contributorStorageMock,
 	}
 
 	result, err := listService.CreateList(name, userID)
@@ -72,14 +105,16 @@ func TestServiceCreateListOK(t *testing.T) {
 	expectedList := &List{
 		ID:   id,
 		Name: name,
-		Owner: &users.User{
-			ID: userID,
-		},
-		CreationDate: fakeCreationDate,
+    CreationDate: fakeCreationDate,
+    Contributors: []*users.User{
+      {
+        ID: userID,
+      },
+    },
 	}
 
 	generationMock.AssertCalled(t, "GenerateID")
-	storageMock.AssertCalled(t, "CreateList", id, name, userID, mock.Anything)
+	storageMock.AssertCalled(t, "CreateList", id, name, mock.Anything)
 
 	result.CreationDate = fakeCreationDate
 

@@ -98,7 +98,7 @@ func configureRoutes(r *gin.Engine, hc *handler.Context) {
 
 	// List routes
 	r.POST(listPath, checkAccess(hc.Storage), hc.CreateList)
-	r.GET(listPath, checkAccess(hc.Storage), hc.GetOwnerLists)
+	r.GET(listPath, checkAccess(hc.Storage), hc.GetUsersLists)
 	r.OPTIONS(listPath, optionsHandler([]string{http.MethodPost, http.MethodGet}))
 
 	r.GET(listWithIDPath, checkAccess(hc.Storage), hc.GetList)

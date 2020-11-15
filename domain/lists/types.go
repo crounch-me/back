@@ -9,10 +9,10 @@ import (
 
 // List represents a shopping list
 type List struct {
-	ID           string                   `json:"id"`
-	Name         string                   `json:"name" validate:"required,lt=61"`
-	CreationDate time.Time                `json:"creationDate"`
-	Owner        *users.User              `json:"owner,omitempty"`
+	ID           string           `json:"id"`
+	Name         string           `json:"name" validate:"required,lt=61"`
+	CreationDate time.Time        `json:"creationDate"`
+	Contributors []*users.User    `json:"contributors,omitempty"`
 	Products     []*ProductInList `json:"products,omitempty"`
 }
 

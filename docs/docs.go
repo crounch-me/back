@@ -601,6 +601,12 @@ var doc = `{
                         "$ref": "#/definitions/builders.CategoryInGetListResponse"
                     }
                 },
+                "contributors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/users.User"
+                    }
+                },
                 "creationDate": {
                     "type": "string"
                 },
@@ -609,9 +615,6 @@ var doc = `{
                 },
                 "name": {
                     "type": "string"
-                },
-                "owner": {
-                    "$ref": "#/definitions/users.User"
                 }
             }
         },
@@ -751,6 +754,12 @@ var doc = `{
                 "name"
             ],
             "properties": {
+                "contributors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/users.User"
+                    }
+                },
                 "creationDate": {
                     "type": "string"
                 },
@@ -759,9 +768,6 @@ var doc = `{
                 },
                 "name": {
                     "type": "string"
-                },
-                "owner": {
-                    "$ref": "#/definitions/users.User"
                 },
                 "products": {
                     "type": "array",

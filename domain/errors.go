@@ -40,6 +40,11 @@ func (e *Error) WithCause(cause error) *Error {
 	return e
 }
 
+func (e *Error) WithCallError(callError *CallError) *Error {
+  e.Call = callError
+  return e
+}
+
 func (e *Error) WithCall(packageName, methodName string) *Error {
 	e.Call = &CallError{
 		MethodName:  methodName,

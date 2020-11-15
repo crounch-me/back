@@ -28,9 +28,11 @@ func NewStorage(connectionURI, schema string) storage.Storage {
 		log.WithError(err).Fatal("Unable to connect to postgres database")
 	}
 	err = db.Ping()
-	if err != nil {
+
+  if err != nil {
 		log.WithError(err).Fatal("Unable to ping postgres database")
-	}
+  }
+
 	return &PostgresStorage{
 		session: db,
 		schema:  schema,

@@ -24,14 +24,16 @@ definitions:
         items:
           $ref: '#/definitions/builders.CategoryInGetListResponse'
         type: array
+      contributors:
+        items:
+          $ref: '#/definitions/users.User'
+        type: array
       creationDate:
         type: string
       id:
         type: string
       name:
         type: string
-      owner:
-        $ref: '#/definitions/users.User'
     required:
     - name
     type: object
@@ -121,14 +123,16 @@ definitions:
     type: object
   lists.List:
     properties:
+      contributors:
+        items:
+          $ref: '#/definitions/users.User'
+        type: array
       creationDate:
         type: string
       id:
         type: string
       name:
         type: string
-      owner:
-        $ref: '#/definitions/users.User'
       products:
         items:
           $ref: '#/definitions/lists.ProductInList'

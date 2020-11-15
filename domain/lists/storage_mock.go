@@ -11,8 +11,8 @@ type StorageMock struct {
 	mock.Mock
 }
 
-func (sm *StorageMock) CreateList(id, name, ownerID string, creationDate time.Time) *domain.Error {
-	args := sm.Called(id, name, ownerID, creationDate)
+func (sm *StorageMock) CreateList(id, name string, creationDate time.Time) *domain.Error {
+	args := sm.Called(id, name, creationDate)
 	err := args.Error(0)
 	if err == nil {
 		return nil
@@ -20,7 +20,7 @@ func (sm *StorageMock) CreateList(id, name, ownerID string, creationDate time.Ti
 	return err.(*domain.Error)
 }
 
-func (sm *StorageMock) GetOwnersLists(ownerID string) ([]*List, *domain.Error) {
+func (sm *StorageMock) GetUsersLists(ownerID string) ([]*List, *domain.Error) {
 	args := sm.Called(ownerID)
 	err := args.Error(1)
 	if err == nil {
