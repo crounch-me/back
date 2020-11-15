@@ -751,6 +751,9 @@ var doc = `{
                 "name"
             ],
             "properties": {
+                "archivationDate": {
+                    "type": "string"
+                },
                 "contributors": {
                     "type": "array",
                     "items": {

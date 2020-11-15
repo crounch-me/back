@@ -121,6 +121,8 @@ definitions:
     type: object
   lists.List:
     properties:
+      archivationDate:
+        type: string
       contributors:
         items:
           $ref: '#/definitions/users.User'
