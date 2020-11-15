@@ -9,18 +9,17 @@ import (
 	"github.com/crounch-me/back/domain/categories"
 	"github.com/crounch-me/back/domain/lists"
 	"github.com/crounch-me/back/domain/products"
-	"github.com/crounch-me/back/domain/users"
 	"github.com/crounch-me/back/util"
 )
 
 // CreateList inserts a new list
-func (s *PostgresStorage) CreateList(id, name, ownerID string, creationDate time.Time) *domain.Error {
+func (s *PostgresStorage) CreateList(id, name string, creationDate time.Time) *domain.Error {
 	query := fmt.Sprintf(`
-		INSERT INTO %s."list"(id, name, user_id, creation_date)
-		VALUES ($1, $2, $3, $4)
+		INSERT INTO %s."list"(id, name, creation_date)
+		VALUES ($1, $2, $3)
 	`, s.schema)
 
-	_, err := s.session.Exec(query, id, name, ownerID, creationDate)
+	_, err := s.session.Exec(query, id, name, creationDate)
 
 	if err != nil {
 		return domain.NewError(domain.UnknownErrorCode).WithCause(err)
@@ -29,16 +28,16 @@ func (s *PostgresStorage) CreateList(id, name, ownerID string, creationDate time
 	return nil
 }
 
-// GetOwnersLists get all owner's lists
-func (s *PostgresStorage) GetOwnersLists(ownerID string) ([]*lists.List, *domain.Error) {
+// GetUsersLists get all user's lists
+func (s *PostgresStorage) GetUsersLists(userID string) ([]*lists.List, *domain.Error) {
 	query := fmt.Sprintf(`
     SELECT l.id, l.name, l.creation_date
     FROM %s.list l
-    LEFT JOIN %s.user u ON u.id = l.user_id
-    WHERE u.id = $1
+    LEFT JOIN %s.contributor c ON c.list_id = l.id
+    WHERE c.user_id = $1
   `, s.schema, s.schema)
 
-	rows, err := s.session.Query(query, ownerID)
+	rows, err := s.session.Query(query, userID)
 	defer rows.Close()
 	if err != nil {
 		return nil, domain.NewError(domain.UnknownErrorCode).WithCause(err)
@@ -66,32 +65,33 @@ func (s *PostgresStorage) GetOwnersLists(ownerID string) ([]*lists.List, *domain
 // GetList retrieves a list with its id
 func (s *PostgresStorage) GetList(id string) (*lists.List, *domain.Error) {
 	query := fmt.Sprintf(`
-    SELECT l.id, l.name, l.creation_date, u.id
+    SELECT l.id, l.name, l.creation_date
     FROM %s.list l
-    LEFT JOIN %s.user u
-    ON l.user_id = u.id
     WHERE l.id = $1
-  `, s.schema, s.schema)
+  `, s.schema)
+
+  callError := &domain.CallError{
+    PackageName: "postgres",
+    MethodName: "GetList",
+  }
 
 	row := s.session.QueryRow(query, id)
 
-	l := &lists.List{
-		Owner: &users.User{},
-	}
-
-	err := row.Scan(&l.ID, &l.Name, &l.CreationDate, &l.Owner.ID)
+	l := &lists.List{}
+	err := row.Scan(&l.ID, &l.Name, &l.CreationDate)
 
 	if err == sql.ErrNoRows {
-		return nil, domain.NewError(lists.ListNotFoundErrorCode)
+		return nil, domain.NewError(lists.ListNotFoundErrorCode).WithCallError(callError)
 	}
 
 	if err != nil {
-		return nil, domain.NewError(domain.UnknownErrorCode).WithCause(err)
+		return nil, domain.NewError(domain.UnknownErrorCode).WithCallError(callError).WithCause(err)
 	}
 
 	return l, nil
 }
 
+// UpdateProductInList updates the buyed value in product in list
 func (s *PostgresStorage) UpdateProductInList(updateProductInList *lists.UpdateProductInList, productID, listID string) (*lists.ProductInListLink, *domain.Error) {
 	query := fmt.Sprintf(`
     UPDATE %s.product_in_list

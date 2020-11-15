@@ -37,7 +37,7 @@ type GetListResponse struct {
   ID           string                   `json:"id"`
 	Name         string                   `json:"name" validate:"required,lt=61"`
 	CreationDate time.Time                `json:"creationDate"`
-  Owner        *users.User              `json:"owner,omitempty"`
+  Contributors        []*users.User              `json:"contributors,omitempty"`
   Categories []*CategoryInGetListResponse `json:"categories"`
 }
 
@@ -47,7 +47,7 @@ func (lb *ListBuilder) GetList(list *lists.List) (*GetListResponse) {
     ID: list.ID,
     Name: list.Name,
     CreationDate: list.CreationDate,
-    Owner: list.Owner,
+    Contributors: list.Contributors,
   }
 
   categoriesInGetListResponse := make(map[string]*CategoryInGetListResponse, 0)

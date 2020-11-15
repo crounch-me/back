@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/crounch-me/back/domain"
+	"github.com/crounch-me/back/domain/contributors"
 	"github.com/crounch-me/back/domain/products"
-	"github.com/crounch-me/back/domain/users"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -38,6 +38,41 @@ func TestUpdateProductInListGetListError(t *testing.T) {
 	assert.Equal(t, err.Code, ListNotFoundErrorCode)
 }
 
+func TestUpdateProductInListGetContributorsIDsError(t *testing.T) {
+	listID := "listID"
+	productID := "productID"
+	userID := "userID"
+
+	updateProductInList := &UpdateProductInList{
+		Buyed: true,
+	}
+
+	list := &List{}
+
+	storageMock := &StorageMock{}
+	storageMock.On("GetList", listID).Return(list, nil)
+
+	contributorStorageMock := &contributors.StorageMock{}
+	contributorStorageMock.On("GetContributorsIDs", listID).Return([]string{}, domain.NewError(domain.UnknownErrorCode))
+
+	productStorageMock := &products.StorageMock{}
+	productStorageMock.On("GetProduct", productID).Return(nil, domain.NewError(products.ProductNotFoundErrorCode))
+
+	listService := &ListService{
+		ListStorage:        storageMock,
+		ProductStorage:     productStorageMock,
+		ContributorStorage: contributorStorageMock,
+	}
+
+	result, err := listService.UpdateProductInList(updateProductInList, productID, listID, userID)
+
+	storageMock.AssertCalled(t, "GetList", listID)
+	storageMock.AssertNotCalled(t, "UpdateProductInList")
+	productStorageMock.AssertNotCalled(t, "GetProduct")
+	assert.Empty(t, result)
+	assert.Equal(t, err.Code, domain.UnknownErrorCode)
+}
+
 func TestUpdateProductInListUserNotAuthorized(t *testing.T) {
 	listID := "listID"
 	productID := "productID"
@@ -48,21 +83,21 @@ func TestUpdateProductInListUserNotAuthorized(t *testing.T) {
 		Buyed: true,
 	}
 
-	list := &List{
-		Owner: &users.User{
-			ID: anotherUserID,
-		},
-	}
+	list := &List{}
 
 	storageMock := &StorageMock{}
 	storageMock.On("GetList", listID).Return(list, nil)
+
+	contributorStorageMock := &contributors.StorageMock{}
+	contributorStorageMock.On("GetContributorsIDs", listID).Return([]string{anotherUserID}, nil)
 
 	productStorageMock := &products.StorageMock{}
 	productStorageMock.On("GetProduct", productID).Return(nil, domain.NewError(products.ProductNotFoundErrorCode))
 
 	listService := &ListService{
-		ListStorage:    storageMock,
-		ProductStorage: productStorageMock,
+		ListStorage:        storageMock,
+		ProductStorage:     productStorageMock,
+		ContributorStorage: contributorStorageMock,
 	}
 
 	result, err := listService.UpdateProductInList(updateProductInList, productID, listID, userID)
@@ -83,21 +118,21 @@ func TestUpdateProductInListGetProductError(t *testing.T) {
 		Buyed: true,
 	}
 
-	list := &List{
-		Owner: &users.User{
-			ID: userID,
-		},
-	}
+	list := &List{}
 
 	storageMock := &StorageMock{}
 	storageMock.On("GetList", listID).Return(list, nil)
+
+	contributorStorageMock := &contributors.StorageMock{}
+	contributorStorageMock.On("GetContributorsIDs", listID).Return([]string{userID}, nil)
 
 	productStorageMock := &products.StorageMock{}
 	productStorageMock.On("GetProduct", productID).Return(nil, domain.NewError(products.ProductNotFoundErrorCode))
 
 	listService := &ListService{
-		ListStorage:    storageMock,
-		ProductStorage: productStorageMock,
+		ListStorage:        storageMock,
+		ProductStorage:     productStorageMock,
+		ContributorStorage: contributorStorageMock,
 	}
 
 	result, err := listService.UpdateProductInList(updateProductInList, productID, listID, userID)
@@ -118,11 +153,7 @@ func TestUpdateProductInListUpdateProductInListError(t *testing.T) {
 		Buyed: true,
 	}
 
-	list := &List{
-		Owner: &users.User{
-			ID: userID,
-		},
-	}
+	list := &List{}
 
 	product := &products.Product{}
 
@@ -130,12 +161,16 @@ func TestUpdateProductInListUpdateProductInListError(t *testing.T) {
 	storageMock.On("GetList", listID).Return(list, nil)
 	storageMock.On("UpdateProductInList", updateProductInList, productID, listID).Return(nil, domain.NewError(ProductInListNotFoundErrorCode))
 
+	contributorStorageMock := &contributors.StorageMock{}
+	contributorStorageMock.On("GetContributorsIDs", listID).Return([]string{userID}, nil)
+
 	productStorageMock := &products.StorageMock{}
 	productStorageMock.On("GetProduct", productID).Return(product, nil)
 
 	listService := &ListService{
-		ListStorage:    storageMock,
-		ProductStorage: productStorageMock,
+		ListStorage:        storageMock,
+		ProductStorage:     productStorageMock,
+		ContributorStorage: contributorStorageMock,
 	}
 
 	result, err := listService.UpdateProductInList(updateProductInList, productID, listID, userID)
@@ -157,11 +192,7 @@ func TestUpdateProductInListOK(t *testing.T) {
 		Buyed: buyed,
 	}
 
-	list := &List{
-		Owner: &users.User{
-			ID: userID,
-		},
-	}
+	list := &List{}
 
 	product := &products.Product{}
 
@@ -175,12 +206,16 @@ func TestUpdateProductInListOK(t *testing.T) {
 	storageMock.On("GetList", listID).Return(list, nil)
 	storageMock.On("UpdateProductInList", updateProductInList, productID, listID).Return(productInList, nil)
 
+	contributorStorageMock := &contributors.StorageMock{}
+	contributorStorageMock.On("GetContributorsIDs", listID).Return([]string{userID}, nil)
+
 	productStorageMock := &products.StorageMock{}
 	productStorageMock.On("GetProduct", productID).Return(product, nil)
 
 	listService := &ListService{
 		ListStorage:    storageMock,
 		ProductStorage: productStorageMock,
+		ContributorStorage: contributorStorageMock,
 	}
 
 	result, err := listService.UpdateProductInList(updateProductInList, productID, listID, userID)

@@ -61,14 +61,14 @@ func (hc *Context) CreateList(c *gin.Context) {
 // @Failure 500 {object} domain.Error
 // @Security ApiKeyAuth
 // @Router /lists [get]
-func (hc *Context) GetOwnerLists(c *gin.Context) {
+func (hc *Context) GetUsersLists(c *gin.Context) {
 	userID, exists := c.Get(ContextUserID)
 	if !exists {
 		hc.LogAndSendError(c, domain.NewError(domain.UnknownErrorCode))
 		return
 	}
 
-	lists, err := hc.Services.List.GetOwnersLists(userID.(string))
+	lists, err := hc.Services.List.GetUsersLists(userID.(string))
 	if err != nil {
 		hc.LogAndSendError(c, err)
 		return
@@ -248,7 +248,6 @@ func (hc *Context) DeleteList(c *gin.Context) {
 
 	err = hc.Services.List.DeleteList(listID, userID)
 	if err != nil {
-		logger.WithError(err).Debug("error during list deletion")
 		hc.LogAndSendError(c, err)
 		return
 	}

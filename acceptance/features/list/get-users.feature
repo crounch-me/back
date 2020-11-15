@@ -1,4 +1,4 @@
-Feature: Get owner's Lists
+Feature: Get users's Lists
 
   Scenario: OK
     Given I authenticate with a random user

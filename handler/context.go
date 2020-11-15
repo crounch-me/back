@@ -165,7 +165,8 @@ func NewServices(storage storage.Storage, generation domain.Generation) *Service
 		},
 		List: &lists.ListService{
 			ListStorage:    storage,
-			ProductStorage: storage,
+      ProductStorage: storage,
+      ContributorStorage: storage,
 			Generation:     generation,
 		},
 		Product: &products.ProductService{

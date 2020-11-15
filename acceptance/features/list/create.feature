@@ -12,6 +12,7 @@ Feature: Create List
     Then the status code is 201
     And "$.name" is a string equal to "Courses"
     And "$.id" is a non empty string
+    And "$.contributors[0].id" is a non empty string
 
   Scenario: KO - Invalid body
     Given I authenticate with a random user
@@ -21,7 +22,8 @@ Feature: Create List
     And "$.error" has string value "unmarshal-error"
 
   Scenario: KO - Missing fields
-    Given I use an empty valid body
+    Given I authenticate with a random user
+    And I use an empty valid body
     And I send a "POST" request on "/lists"
     Then the status code is 400
     And "$.error" has string value "invalid-error"

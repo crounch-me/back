@@ -11,7 +11,7 @@ import (
 	"gotest.tools/assert"
 )
 
-func TestGetList(t *testing.T) {
+func TestGetListOK(t *testing.T) {
   builder := &ListBuilder{}
 
   productID1 := "productID1"
@@ -38,7 +38,9 @@ func TestGetList(t *testing.T) {
     ID: listID,
     Name: listName,
     CreationDate: creationDate,
-    Owner: user,
+    Contributors: []*users.User{
+      user,
+    },
     Products: []*lists.ProductInList{
       {
         Product: &products.Product{
@@ -69,7 +71,9 @@ func TestGetList(t *testing.T) {
     ID: listID,
     Name: listName,
     CreationDate: creationDate,
-    Owner: user,
+    Contributors: []*users.User{
+      user,
+    },
     Categories: []*CategoryInGetListResponse{
       {
         ID: categoryID,

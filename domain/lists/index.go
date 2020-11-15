@@ -4,13 +4,15 @@ import (
 	"time"
 
 	"github.com/crounch-me/back/domain"
+	"github.com/crounch-me/back/domain/contributors"
 	"github.com/crounch-me/back/domain/products"
 	"github.com/crounch-me/back/domain/users"
 )
 
 type ListService struct {
 	ListStorage    Storage
-	ProductStorage products.Storage
+  ProductStorage products.Storage
+  ContributorStorage contributors.Storage
 	Generation     domain.Generation
 }
 
@@ -21,17 +23,24 @@ func (ls *ListService) CreateList(name, userID string) (*List, *domain.Error) {
 	}
 
 	creationDate := time.Now()
-	err = ls.ListStorage.CreateList(id, name, userID, creationDate)
+	err = ls.ListStorage.CreateList(id, name, creationDate)
 
 	if err != nil {
 		return nil, err
-	}
+  }
+
+  err = ls.ContributorStorage.CreateContributor(id, userID)
+  if err != nil {
+    return nil, err
+  }
 
 	list := &List{
 		ID:   id,
 		Name: name,
-		Owner: &users.User{
-			ID: userID,
+		Contributors: []*users.User{
+      {
+        ID: userID,
+      },
 		},
 		CreationDate: creationDate,
 	}
@@ -39,8 +48,8 @@ func (ls *ListService) CreateList(name, userID string) (*List, *domain.Error) {
 	return list, nil
 }
 
-func (ls *ListService) GetOwnersLists(ownerID string) ([]*List, *domain.Error) {
-	lists, err := ls.ListStorage.GetOwnersLists(ownerID)
+func (ls *ListService) GetUsersLists(userID string) ([]*List, *domain.Error) {
+	lists, err := ls.ListStorage.GetUsersLists(userID)
 
 	if err != nil {
 		return nil, err
@@ -50,12 +59,17 @@ func (ls *ListService) GetOwnersLists(ownerID string) ([]*List, *domain.Error) {
 }
 
 func (ls *ListService) UpdateProductInList(updateProductInList *UpdateProductInList, productID, listID, userID string) (*ProductInListLink, *domain.Error) {
-	list, err := ls.ListStorage.GetList(listID)
+	_, err := ls.ListStorage.GetList(listID)
 	if err != nil {
 		return nil, err
-	}
+  }
 
-	if !IsUserAuthorized(list, userID) {
+  isUserAuthorized, err := ls.isUserAuthorized(listID, userID)
+  if err != nil {
+    return nil, err
+  }
+
+	if !isUserAuthorized {
 		return nil, domain.NewError(domain.ForbiddenErrorCode)
 	}
 
@@ -76,9 +90,14 @@ func (ls *ListService) GetList(listID, userID string) (*List, *domain.Error) {
 	list, err := ls.ListStorage.GetList(listID)
 	if err != nil {
 		return nil, err
-	}
+  }
 
-	if !IsUserAuthorized(list, userID) {
+  isUserAuthorized, err := ls.isUserAuthorized(listID, userID)
+  if err != nil {
+    return nil, err
+  }
+
+	if !isUserAuthorized {
 		return nil, domain.NewError(domain.ForbiddenErrorCode)
 	}
 
@@ -91,12 +110,17 @@ func (ls *ListService) GetList(listID, userID string) (*List, *domain.Error) {
 }
 
 func (ls *ListService) DeleteProductFromList(productID, listID, userID string) *domain.Error {
-	list, err := ls.ListStorage.GetList(listID)
+	_, err := ls.ListStorage.GetList(listID)
 	if err != nil {
 		return err
 	}
 
-	if !IsUserAuthorized(list, userID) {
+  isUserAuthorized, err := ls.isUserAuthorized(listID, userID)
+  if err != nil {
+    return err
+  }
+
+	if !isUserAuthorized {
 		return domain.NewError(domain.ForbiddenErrorCode)
 	}
 
@@ -109,12 +133,17 @@ func (ls *ListService) DeleteProductFromList(productID, listID, userID string) *
 }
 
 func (ls *ListService) AddProductToList(productID, listID, userID string) (*ProductInListLink, *domain.Error) {
-	list, err := ls.ListStorage.GetList(listID)
+	_, err := ls.ListStorage.GetList(listID)
 	if err != nil {
 		return nil, err
 	}
 
-	if !IsUserAuthorized(list, userID) {
+  isUserAuthorized, err := ls.isUserAuthorized(listID, userID)
+  if err != nil {
+    return nil, err
+  }
+
+	if !isUserAuthorized {
 		return nil, domain.NewError(domain.ForbiddenErrorCode)
 	}
 
@@ -148,12 +177,17 @@ func (ls *ListService) AddProductToList(productID, listID, userID string) (*Prod
 }
 
 func (ls *ListService) DeleteList(listID, userID string) *domain.Error {
-	list, err := ls.ListStorage.GetList(listID)
+	_, err := ls.ListStorage.GetList(listID)
 	if err != nil {
 		return err
-	}
+  }
 
-	if list.Owner.ID != userID {
+  isUserAuthorized, err := ls.isUserAuthorized(listID, userID)
+  if err != nil {
+    return  err
+  }
+
+	if !isUserAuthorized {
 		return domain.NewError(domain.ForbiddenErrorCode)
 	}
 
