@@ -12,6 +12,7 @@ import (
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 
 	"github.com/crounch-me/back/configuration"
+	// Import documentations for swagger endpoint
 	_ "github.com/crounch-me/back/docs"
 	"github.com/crounch-me/back/domain"
 	"github.com/crounch-me/back/domain/users"
@@ -35,9 +36,6 @@ const (
 	productPath       = "/products"
 	productSearchPath = "/products/search"
 )
-
-// Version represents the version of the application
-var Version string
 
 // @title Crounch Me API
 // @version 1.0

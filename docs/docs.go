@@ -682,9 +682,6 @@ var doc = `{
             "properties": {
                 "alive": {
                     "type": "boolean"
-                },
-                "version": {
-                    "type": "string"
                 }
             }
         },

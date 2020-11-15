@@ -79,8 +79,6 @@ definitions:
     properties:
       alive:
         type: boolean
-      version:
-        type: string
     type: object
   handler.CreateListRequest:
     properties:
