@@ -447,7 +447,7 @@ var doc = `{
                 "tags": [
                     "product"
                 ],
-                "summary": "Search a product by its name in default products",
+                "summary": "Search a product by its name in default products, it removes accentuated characters and is case insensitive",
                 "operationId": "search-default-products",
                 "parameters": [
                     {

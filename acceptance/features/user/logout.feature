@@ -1,6 +1,5 @@
 Feature: Login
 
-  @val
   Scenario: OK
     Given I authenticate with a random user
     When I send a "POST" request on "/logout"
