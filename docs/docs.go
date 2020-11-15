@@ -595,6 +595,9 @@ var doc = `{
                 "name"
             ],
             "properties": {
+                "archivationDate": {
+                    "type": "string"
+                },
                 "categories": {
                     "type": "array",
                     "items": {
@@ -682,9 +685,6 @@ var doc = `{
             "properties": {
                 "alive": {
                     "type": "boolean"
-                },
-                "version": {
-                    "type": "string"
                 }
             }
         },
@@ -754,6 +754,9 @@ var doc = `{
                 "name"
             ],
             "properties": {
+                "archivationDate": {
+                    "type": "string"
+                },
                 "contributors": {
                     "type": "array",
                     "items": {

@@ -580,6 +580,9 @@
                 "name"
             ],
             "properties": {
+                "archivationDate": {
+                    "type": "string"
+                },
                 "categories": {
                     "type": "array",
                     "items": {
@@ -667,9 +670,6 @@
             "properties": {
                 "alive": {
                     "type": "boolean"
-                },
-                "version": {
-                    "type": "string"
                 }
             }
         },
@@ -739,6 +739,9 @@
                 "name"
             ],
             "properties": {
+                "archivationDate": {
+                    "type": "string"
+                },
                 "contributors": {
                     "type": "array",
                     "items": {

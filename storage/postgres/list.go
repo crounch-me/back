@@ -28,10 +28,26 @@ func (s *PostgresStorage) CreateList(id, name string, creationDate time.Time) *d
 	return nil
 }
 
+// ArchiveList sets the archivation date into the list table
+func (s *PostgresStorage) ArchiveList(listID string, archivationDate time.Time) *domain.Error {
+	query := fmt.Sprintf(`
+    UPDATE %s.list
+    SET archivation_date = $1
+    WHERE id = $2
+  `, s.schema)
+
+	_, err := s.session.Exec(query, archivationDate, listID)
+	if err != nil {
+		return domain.NewError(domain.UnknownErrorCode).WithCause(err)
+	}
+
+	return nil
+}
+
 // GetUsersLists get all user's lists
 func (s *PostgresStorage) GetUsersLists(userID string) ([]*lists.List, *domain.Error) {
 	query := fmt.Sprintf(`
-    SELECT l.id, l.name, l.creation_date
+    SELECT l.id, l.name, l.creation_date, l.archivation_date
     FROM %s.list l
     LEFT JOIN %s.contributor c ON c.list_id = l.id
     WHERE c.user_id = $1
@@ -51,7 +67,7 @@ func (s *PostgresStorage) GetUsersLists(userID string) ([]*lists.List, *domain.E
 
 		list := &lists.List{}
 
-		err = rows.Scan(&list.ID, &list.Name, &list.CreationDate)
+		err = rows.Scan(&list.ID, &list.Name, &list.CreationDate, &list.ArchivationDate)
 		if err != nil {
 			return nil, domain.NewError(domain.UnknownErrorCode).WithCause(err)
 		}
@@ -65,20 +81,20 @@ func (s *PostgresStorage) GetUsersLists(userID string) ([]*lists.List, *domain.E
 // GetList retrieves a list with its id
 func (s *PostgresStorage) GetList(id string) (*lists.List, *domain.Error) {
 	query := fmt.Sprintf(`
-    SELECT l.id, l.name, l.creation_date
+    SELECT l.id, l.name, l.creation_date, l.archivation_date
     FROM %s.list l
     WHERE l.id = $1
   `, s.schema)
 
-  callError := &domain.CallError{
-    PackageName: "postgres",
-    MethodName: "GetList",
-  }
+	callError := &domain.CallError{
+		PackageName: "postgres",
+		MethodName:  "GetList",
+	}
 
 	row := s.session.QueryRow(query, id)
 
 	l := &lists.List{}
-	err := row.Scan(&l.ID, &l.Name, &l.CreationDate)
+	err := row.Scan(&l.ID, &l.Name, &l.CreationDate, &l.ArchivationDate)
 
 	if err == sql.ErrNoRows {
 		return nil, domain.NewError(lists.ListNotFoundErrorCode).WithCallError(callError)

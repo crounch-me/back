@@ -20,12 +20,23 @@ func (sm *StorageMock) CreateList(id, name string, creationDate time.Time) *doma
 	return err.(*domain.Error)
 }
 
+func (sm *StorageMock) ArchiveList(listID string, archivationDate time.Time) *domain.Error {
+	args := sm.Called(listID, archivationDate)
+	err := args.Error(0)
+	if err != nil {
+		return err.(*domain.Error)
+	}
+
+	return nil
+}
+
 func (sm *StorageMock) GetUsersLists(ownerID string) ([]*List, *domain.Error) {
 	args := sm.Called(ownerID)
 	err := args.Error(1)
 	if err == nil {
 		return args.Get(0).([]*List), nil
 	}
+
 	return nil, err.(*domain.Error)
 }
 
@@ -34,9 +45,9 @@ func (sm *StorageMock) GetList(id string) (*List, *domain.Error) {
 	list := args.Get(0)
 	if list == nil {
 		return nil, args.Error(1).(*domain.Error)
-	} else {
-		return list.(*List), nil
 	}
+
+	return list.(*List), nil
 }
 
 func (sm *StorageMock) GetProductInList(productID string, listID string) (*ProductInListLink, *domain.Error) {
@@ -45,6 +56,7 @@ func (sm *StorageMock) GetProductInList(productID string, listID string) (*Produ
 	if err == nil {
 		return args.Get(0).(*ProductInListLink), nil
 	}
+
 	return nil, err.(*domain.Error)
 }
 
@@ -54,6 +66,7 @@ func (sm *StorageMock) AddProductToList(productID string, listID string) *domain
 	if err == nil {
 		return nil
 	}
+
 	return err.(*domain.Error)
 }
 
@@ -63,6 +76,7 @@ func (sm *StorageMock) DeleteProductsFromList(listID string) *domain.Error {
 	if err == nil {
 		return nil
 	}
+
 	return err.(*domain.Error)
 }
 
@@ -72,6 +86,7 @@ func (ps *StorageMock) DeleteProductFromList(productID string, listID string) *d
 	if err == nil {
 		return nil
 	}
+
 	return err.(*domain.Error)
 }
 
@@ -81,6 +96,7 @@ func (sm *StorageMock) DeleteList(listID string) *domain.Error {
 	if err == nil {
 		return nil
 	}
+
 	return err.(*domain.Error)
 }
 
@@ -90,6 +106,7 @@ func (sm *StorageMock) GetProductsOfList(listID string) ([]*ProductInList, *doma
 	if err != nil {
 		return nil, err.(*domain.Error)
 	}
+
 	return args.Get(0).([]*ProductInList), nil
 }
 
@@ -100,5 +117,6 @@ func (sm *StorageMock) UpdateProductInList(updateProductInList *UpdateProductInL
 	if err != nil {
 		return nil, err.(*domain.Error)
 	}
+
 	return args.Get(0).(*ProductInListLink), nil
 }

@@ -1,35 +1,14 @@
 DATABASE_PORT := 5432
 
-VERSION := $(shell head -n 1 VERSION)
-
 APP_NAME := crounch-back
-BUILDER_IMAGE_NAME := $(APP_NAME)-builder:$(VERSION)
-TEST_IMAGE_NAME := $(APP_NAME)-test-$(VERSION)
+BUILDER_IMAGE_NAME := $(APP_NAME)-builder
+TEST_IMAGE_NAME := $(APP_NAME)-test
 DOCKER_USER := sehsyha
 
 TAG_FLAG :=
 ifneq ($(TAG),)
 	TAG_FLAG:=--tags=$(TAG)
 endif
-
-.PHONY: bump-version
-bump-version:
-	@echo "+ $@"
-	git checkout master
-	git fetch --tags
-	echo '{"version": "$(VERSION)"}' > ./package.json
-	npm i -g standard-version@4.2.0
-	standard-version --skip.commit true --skip.tag true
-	NEW_VERSION=`jq -r ".version" package.json`; \
-		echo $$NEW_VERSION > VERSION; \
-		git add CHANGELOG.md; \
-		git add VERSION; \
-		git commit -m "build: bump to version $$NEW_VERSION [skip ci]"; \
-		git tag $$NEW_VERSION; \
-		git remote rm origin; \
-		git remote add origin https://$(DOCKER_USER):$(GH_TOKEN)@github.com/crounch-me/back.git; \
-		git push origin master; \
-		git push --tags
 
 .PHONY: build
 build:
@@ -39,21 +18,12 @@ build:
 .PHONY: build-image
 build-image: build-builder-image
 	@echo "+ $@"
-	docker build -f containers/Dockerfile -t $(APP_NAME):$(VERSION) --build-arg BUILDER_IMAGE=$(BUILDER_IMAGE_NAME) .
-	docker tag $(APP_NAME):$(VERSION) $(DOCKER_USER)/$(APP_NAME):$(VERSION)
-	docker tag $(APP_NAME):$(VERSION) $(DOCKER_USER)/$(APP_NAME):latest
+	docker build -f containers/Dockerfile -t $(APP_NAME) --build-arg BUILDER_IMAGE=$(BUILDER_IMAGE_NAME) .
 
 .PHONY: build-builder-image
 build-builder-image:
 	@echo "+ $@"
 	docker build -t $(BUILDER_IMAGE_NAME) -f containers/Dockerfile.builder .
-
-.PHONY: publish-image
-publish-image:
-	@echo "+ $@"
-	docker login -u $(DOCKER_USER) -p $(DOCKER_PASSWORD)
-	docker push $(DOCKER_USER)/crounch-back:$(VERSION)
-	docker push $(DOCKER_USER)/crounch-back:latest
 
 .PHONY: acceptance-test
 acceptance-test:
