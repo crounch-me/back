@@ -20,6 +20,8 @@ definitions:
     type: object
   builders.GetListResponse:
     properties:
+      archivationDate:
+        type: string
       categories:
         items:
           $ref: '#/definitions/builders.CategoryInGetListResponse'

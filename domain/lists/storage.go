@@ -13,6 +13,7 @@ type Storage interface {
 	GetUsersLists(userID string) ([]*List, *domain.Error)
 	GetList(id string) (*List, *domain.Error)
 	DeleteList(listID string) *domain.Error
+	ArchiveList(listID string, archivationDate time.Time) *domain.Error
 
 	// Products in list
 	GetProductInList(productID string, listID string) (*ProductInListLink, *domain.Error)

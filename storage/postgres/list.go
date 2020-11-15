@@ -28,6 +28,22 @@ func (s *PostgresStorage) CreateList(id, name string, creationDate time.Time) *d
 	return nil
 }
 
+// ArchiveList sets the archivation date into the list table
+func (s *PostgresStorage) ArchiveList(listID string, archivationDate time.Time) *domain.Error {
+	query := fmt.Sprintf(`
+    UPDATE %s.list
+    SET archivation_date = $1
+    WHERE id = $2
+  `, s.schema)
+
+	_, err := s.session.Exec(query, archivationDate, listID)
+	if err != nil {
+		return domain.NewError(domain.UnknownErrorCode).WithCause(err)
+	}
+
+	return nil
+}
+
 // GetUsersLists get all user's lists
 func (s *PostgresStorage) GetUsersLists(userID string) ([]*lists.List, *domain.Error) {
 	query := fmt.Sprintf(`

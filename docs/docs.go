@@ -595,6 +595,9 @@ var doc = `{
                 "name"
             ],
             "properties": {
+                "archivationDate": {
+                    "type": "string"
+                },
                 "categories": {
                     "type": "array",
                     "items": {

@@ -14,7 +14,7 @@ const (
 )
 
 type CreateListRequest struct {
-  Name string `json:"name" validate:"required"`
+	Name string `json:"name" validate:"required"`
 }
 
 // CreateList creates a new list
@@ -255,6 +255,41 @@ func (hc *Context) DeleteList(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+// ArchiveList archives a list, it will be marked as readonly
+// @Summary Setup archivation date for the list
+// @ID update-list
+// @Tag list
+// @Produce json
+// @Param listID path string true "List ID"
+// @Success 200 {object} builders.GetListResponse
+// @Failure 400 {object} domain.Error
+// @Failure 404 {object} domain.Error
+// @Failure 500 {object} domain.Error
+func (hc *Context) ArchiveList(c *gin.Context) {
+	userID, err := hc.GetUserIDFromContext(c)
+	if err != nil {
+		hc.LogAndSendError(c, err)
+		return
+	}
+
+	listID := c.Param("listID")
+	err = hc.Validator.Var("listID", listID, "uuid")
+	if err != nil {
+		hc.LogAndSendError(c, err)
+		return
+	}
+
+	list, err := hc.Services.List.ArchiveList(listID, userID)
+	if err != nil {
+		hc.LogAndSendError(c, err)
+		return
+	}
+
+	listResponse := hc.Builders.List.GetList(list)
+
+	c.JSON(http.StatusOK, listResponse)
+}
+
 // GetList return a list with its products inside the categories
 // @Summary Reads a list with products in categories
 // @ID get-list
@@ -283,9 +318,9 @@ func (hc *Context) GetList(c *gin.Context) {
 	if err != nil {
 		hc.LogAndSendError(c, err)
 		return
-  }
+	}
 
-  listResponse := hc.Builders.List.GetList(list)
+	listResponse := hc.Builders.List.GetList(list)
 
 	c.JSON(http.StatusOK, listResponse)
 }

@@ -23,13 +23,14 @@ import (
 const (
 	healthPath = "/health"
 
-	userPath  = "/users"
-	loginPath = "/users/login"
-  mePath    = "/me"
-  logoutPath = "/logout"
+	userPath   = "/users"
+	loginPath  = "/users/login"
+	mePath     = "/me"
+	logoutPath = "/logout"
 
-	listPath       = "/lists"
-	listWithIDPath = "/lists/:listID"
+	listPath        = "/lists"
+	listWithIDPath  = "/lists/:listID"
+	archiveListPath = "/lists/:listID/archive"
 
 	listProductPath = "/lists/:listID/products/:productID"
 
@@ -54,8 +55,8 @@ func Start(config *configuration.Config) {
 
 	r := gin.New()
 
-  hc := handler.NewContext(config)
-  corsConfig := cors.DefaultConfig()
+	hc := handler.NewContext(config)
+	corsConfig := cors.DefaultConfig()
 	corsConfig.AllowAllOrigins = true
 
 	configureRoutes(r, hc)
@@ -64,9 +65,9 @@ func Start(config *configuration.Config) {
 	r.Use(gin.Recovery())
 	log.SetLevel(log.DebugLevel)
 
-  url := ginSwagger.URL("http://localhost:3000/swagger/doc.json")
+	url := ginSwagger.URL("http://localhost:3000/swagger/doc.json")
 
-  r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
 
 	log.Info("Launching awesome server")
 	err := r.Run(":3000")
@@ -90,9 +91,9 @@ func configureRoutes(r *gin.Engine, hc *handler.Context) {
 	r.POST(loginPath, hc.Login)
 	r.OPTIONS(loginPath, optionsHandler([]string{http.MethodPost}))
 	r.GET(mePath, checkAccess(hc.Storage), hc.Me)
-  r.OPTIONS(mePath, optionsHandler([]string{http.MethodGet}))
-  r.POST(logoutPath, hc.Logout)
-  r.OPTIONS(logoutPath, optionsHandler([]string{http.MethodPost}))
+	r.OPTIONS(mePath, optionsHandler([]string{http.MethodGet}))
+	r.POST(logoutPath, hc.Logout)
+	r.OPTIONS(logoutPath, optionsHandler([]string{http.MethodPost}))
 
 	// List routes
 	r.POST(listPath, checkAccess(hc.Storage), hc.CreateList)
@@ -101,7 +102,10 @@ func configureRoutes(r *gin.Engine, hc *handler.Context) {
 
 	r.GET(listWithIDPath, checkAccess(hc.Storage), hc.GetList)
 	r.DELETE(listWithIDPath, checkAccess(hc.Storage), hc.DeleteList)
-	r.OPTIONS(listWithIDPath, optionsHandler([]string{http.MethodDelete}))
+	r.OPTIONS(listWithIDPath, optionsHandler([]string{http.MethodGet, http.MethodDelete}))
+
+	r.POST(archiveListPath, checkAccess(hc.Storage), hc.ArchiveList)
+	r.OPTIONS(archiveListPath, optionsHandler([]string{http.MethodPost}))
 
 	// Product routes
 	r.POST(productPath, checkAccess(hc.Storage), hc.CreateProduct)
