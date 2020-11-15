@@ -72,7 +72,7 @@ func (s *PostgresStorage) SearchDefaults(name string, userID string) ([]*product
     FROM %s.product p
     LEFT JOIN %s.user u ON u.id = p.user_id
     LEFT JOIN %s.category c ON c.id = p.category_id
-    WHERE LOWER(p.name) SIMILAR TO '(' || $1 || '%%|%% ' || $1 || '%%)'
+    WHERE LOWER(unaccent(p.name)) SIMILAR TO '(' || unaccent($1) || '%%|%% ' || unaccent($1) || '%%)'
     AND u.id = $2
   `, s.schema, s.schema, s.schema)
 

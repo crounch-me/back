@@ -481,7 +481,7 @@ paths:
             $ref: '#/definitions/domain.Error'
       security:
       - ApiKeyAuth: []
-      summary: Search a product by its name in default products
+      summary: Search a product by its name in default products, it removes accentuated characters and is case insensitive
       tags:
       - product
   /users/login:

@@ -55,7 +55,7 @@ type ProductSearchRequest struct {
 }
 
 // SearchDefaultProducts search and return default products
-// @Summary Search a product by its name in default products
+// @Summary Search a product by its name in default products, it removes accentuated characters and is case insensitive
 // @ID search-default-products
 // @Tags product
 // @Produce json
