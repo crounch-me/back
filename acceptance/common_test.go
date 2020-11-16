@@ -450,9 +450,9 @@ func (te *TestExecutor) theReturnedProductsFromListAre(productsDataTable *messag
 	productsInListMap := make(map[string]*builders.ProductInGetListResponse)
 
 	for _, categoryInList := range list.Categories {
-    for _, productInList := range categoryInList.Products {
-      productsInListMap[productInList.ID] = productInList
-    }
+		for _, productInList := range categoryInList.Products {
+			productsInListMap[productInList.ID] = productInList
+		}
 	}
 
 	expectedProductsInListLength := len(productsDataTable.Rows) - 1
@@ -486,7 +486,7 @@ func (te *TestExecutor) theReturnedProductsFromListAre(productsDataTable *messag
 			productMessage := fmt.Sprintf("for product %s", expectedName)
 
 			if productInList.Buyed != expectedBuyed {
-				return fmt.Errorf("product buyed %t was not expected %t %s", productInList.Buyed, expectedBuyed, productMessage)
+				return fmt.Errorf("product bought %t was not expected %t %s", productInList.Buyed, expectedBuyed, productMessage)
 			}
 
 			if productInList.Category != nil && productInList.Category.Name != expectedCategoryName {

@@ -186,10 +186,10 @@ func TestUpdateProductInListOK(t *testing.T) {
 	listID := "listID"
 	productID := "productID"
 	userID := "userID"
-	buyed := true
+	bought := true
 
 	updateProductInList := &UpdateProductInList{
-		Buyed: buyed,
+		Buyed: bought,
 	}
 
 	list := &List{}
@@ -199,7 +199,7 @@ func TestUpdateProductInListOK(t *testing.T) {
 	productInList := &ProductInListLink{
 		ListID:    listID,
 		ProductID: productID,
-		Buyed:     buyed,
+		Buyed:     bought,
 	}
 
 	storageMock := &StorageMock{}
@@ -213,8 +213,8 @@ func TestUpdateProductInListOK(t *testing.T) {
 	productStorageMock.On("GetProduct", productID).Return(product, nil)
 
 	listService := &ListService{
-		ListStorage:    storageMock,
-		ProductStorage: productStorageMock,
+		ListStorage:        storageMock,
+		ProductStorage:     productStorageMock,
 		ContributorStorage: contributorStorageMock,
 	}
 

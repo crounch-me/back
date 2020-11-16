@@ -28,7 +28,7 @@ type ProductInGetListResponse struct {
 	ID       string               `json:"id"`
 	Name     string               `json:"name" validate:"required,lt=61"`
 	Owner    *users.User          `json:"owner,omitempty"`
-	Buyed    bool                 `json:"buyed"`
+	Buyed    bool                 `json:"bought"`
 	Category *categories.Category `json:"category,omitempty"`
 }
 

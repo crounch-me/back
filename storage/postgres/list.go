@@ -107,14 +107,14 @@ func (s *PostgresStorage) GetList(id string) (*lists.List, *domain.Error) {
 	return l, nil
 }
 
-// UpdateProductInList updates the buyed value in product in list
+// UpdateProductInList updates the bought value in product in list
 func (s *PostgresStorage) UpdateProductInList(updateProductInList *lists.UpdateProductInList, productID, listID string) (*lists.ProductInListLink, *domain.Error) {
 	query := fmt.Sprintf(`
     UPDATE %s.product_in_list
-    SET buyed = $1
+    SET bought = $1
     WHERE product_id = $2
     AND list_id = $3
-    RETURNING product_id, list_id, buyed
+    RETURNING product_id, list_id, bought
   `, s.schema)
 
 	row := s.session.QueryRow(query, updateProductInList.Buyed, productID, listID)
@@ -158,7 +158,7 @@ func (s *PostgresStorage) GetProductInList(productID string, listID string) (*li
 
 func (s *PostgresStorage) GetProductsOfList(listID string) ([]*lists.ProductInList, *domain.Error) {
 	query := fmt.Sprintf(`
-    SELECT p.id, p.name, pil.buyed, c.id, c.name
+    SELECT p.id, p.name, pil.bought, c.id, c.name
     FROM %s.product p
     LEFT JOIN %s.product_in_list pil ON pil.product_id = p.id
     LEFT JOIN %s.list l ON pil.list_id = l.id

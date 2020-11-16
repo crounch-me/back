@@ -21,15 +21,15 @@ type List struct {
 type ProductInListLink struct {
 	ProductID string `json:"productId"`
 	ListID    string `json:"listId"`
-	Buyed     bool   `json:"buyed"`
+	Buyed     bool   `json:"bought"`
 }
 
 type ProductInList struct {
 	*products.Product
-	Buyed bool `json:"buyed"`
+	Buyed bool `json:"bought"`
 }
 
 // UpdateProductInList represents the possible attributes to update in a product in a list
 type UpdateProductInList struct {
-	Buyed bool `json:"buyed"`
+	Buyed bool `json:"bought"`
 }

@@ -5,7 +5,7 @@ definitions:
       accessToken:
         type: string
       owner:
-        $ref: '#/definitions/users.User'
+        $ref: "#/definitions/users.User"
     type: object
   builders.CategoryInGetListResponse:
     properties:
@@ -15,7 +15,7 @@ definitions:
         type: string
       products:
         items:
-          $ref: '#/definitions/builders.ProductInGetListResponse'
+          $ref: "#/definitions/builders.ProductInGetListResponse"
         type: array
     type: object
   builders.GetListResponse:
@@ -24,11 +24,11 @@ definitions:
         type: string
       categories:
         items:
-          $ref: '#/definitions/builders.CategoryInGetListResponse'
+          $ref: "#/definitions/builders.CategoryInGetListResponse"
         type: array
       contributors:
         items:
-          $ref: '#/definitions/users.User'
+          $ref: "#/definitions/users.User"
         type: array
       creationDate:
         type: string
@@ -37,22 +37,22 @@ definitions:
       name:
         type: string
     required:
-    - name
+      - name
     type: object
   builders.ProductInGetListResponse:
     properties:
-      buyed:
+      bought:
         type: boolean
       category:
-        $ref: '#/definitions/categories.Category'
+        $ref: "#/definitions/categories.Category"
       id:
         type: string
       name:
         type: string
       owner:
-        $ref: '#/definitions/users.User'
+        $ref: "#/definitions/users.User"
     required:
-    - name
+      - name
     type: object
   categories.Category:
     properties:
@@ -67,7 +67,7 @@ definitions:
         type: string
       fields:
         items:
-          $ref: '#/definitions/domain.FieldError'
+          $ref: "#/definitions/domain.FieldError"
         type: array
     type: object
   domain.FieldError:
@@ -87,14 +87,14 @@ definitions:
       name:
         type: string
     required:
-    - name
+      - name
     type: object
   handler.CreateProductRequest:
     properties:
       name:
         type: string
     required:
-    - name
+      - name
     type: object
   handler.LoginRequest:
     properties:
@@ -103,8 +103,8 @@ definitions:
       password:
         type: string
     required:
-    - email
-    - password
+      - email
+      - password
     type: object
   handler.ProductSearchRequest:
     properties:
@@ -118,8 +118,8 @@ definitions:
       password:
         type: string
     required:
-    - email
-    - password
+      - email
+      - password
     type: object
   lists.List:
     properties:
@@ -127,7 +127,7 @@ definitions:
         type: string
       contributors:
         items:
-          $ref: '#/definitions/users.User'
+          $ref: "#/definitions/users.User"
         type: array
       creationDate:
         type: string
@@ -137,29 +137,29 @@ definitions:
         type: string
       products:
         items:
-          $ref: '#/definitions/lists.ProductInList'
+          $ref: "#/definitions/lists.ProductInList"
         type: array
     required:
-    - name
+      - name
     type: object
   lists.ProductInList:
     properties:
-      buyed:
+      bought:
         type: boolean
       category:
-        $ref: '#/definitions/categories.Category'
+        $ref: "#/definitions/categories.Category"
       id:
         type: string
       name:
         type: string
       owner:
-        $ref: '#/definitions/users.User'
+        $ref: "#/definitions/users.User"
     required:
-    - name
+      - name
     type: object
   lists.ProductInListLink:
     properties:
-      buyed:
+      bought:
         type: boolean
       listId:
         type: string
@@ -168,21 +168,21 @@ definitions:
     type: object
   lists.UpdateProductInList:
     properties:
-      buyed:
+      bought:
         type: boolean
     type: object
   products.Product:
     properties:
       category:
-        $ref: '#/definitions/categories.Category'
+        $ref: "#/definitions/categories.Category"
       id:
         type: string
       name:
         type: string
       owner:
-        $ref: '#/definitions/users.User'
+        $ref: "#/definitions/users.User"
     required:
-    - name
+      - name
     type: object
   users.User:
     properties:
@@ -193,8 +193,8 @@ definitions:
       password:
         type: string
     required:
-    - email
-    - password
+      - email
+      - password
     type: object
 host: localhost:3000
 info:
@@ -207,12 +207,12 @@ paths:
     get:
       operationId: get-health
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/domain.Health'
+            $ref: "#/definitions/domain.Health"
         "500":
           description: Internal Server Error
       summary: Return health of application
@@ -220,189 +220,189 @@ paths:
     get:
       operationId: get-owners-lists
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
             items:
-              $ref: '#/definitions/lists.List'
+              $ref: "#/definitions/lists.List"
             type: array
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/domain.Error'
+            $ref: "#/definitions/domain.Error"
       security:
-      - ApiKeyAuth: []
+        - ApiKeyAuth: []
       summary: Get the lists of the owner
       tags:
-      - list
+        - list
     post:
       consumes:
-      - application/json
+        - application/json
       operationId: create-list
       parameters:
-      - description: List to create
-        in: body
-        name: list
-        required: true
-        schema:
-          $ref: '#/definitions/handler.CreateListRequest'
+        - description: List to create
+          in: body
+          name: list
+          required: true
+          schema:
+            $ref: "#/definitions/handler.CreateListRequest"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/lists.List'
+            $ref: "#/definitions/lists.List"
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/domain.Error'
+            $ref: "#/definitions/domain.Error"
       security:
-      - ApiKeyAuth: []
+        - ApiKeyAuth: []
       summary: Create a list
       tags:
-      - list
+        - list
   /lists/{listID}:
     delete:
       operationId: delete-list
       parameters:
-      - description: List ID
-        in: path
-        name: listID
-        required: true
-        type: string
+        - description: List ID
+          in: path
+          name: listID
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "204": {}
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/domain.Error'
+            $ref: "#/definitions/domain.Error"
       security:
-      - ApiKeyAuth: []
+        - ApiKeyAuth: []
       summary: Delete the entire list with its products
       tags:
-      - list
+        - list
     get:
       operationId: get-list
       parameters:
-      - description: List ID
-        in: path
-        name: listID
-        required: true
-        type: string
+        - description: List ID
+          in: path
+          name: listID
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/builders.GetListResponse'
+            $ref: "#/definitions/builders.GetListResponse"
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/domain.Error'
+            $ref: "#/definitions/domain.Error"
       security:
-      - ApiKeyAuth: []
+        - ApiKeyAuth: []
       summary: Reads a list with products in categories
       tags:
-      - list
+        - list
   /lists/{listID}/products/{productID}:
     delete:
       operationId: delete-product-from-list
       parameters:
-      - description: List ID
-        in: path
-        name: listID
-        required: true
-        type: string
-      - description: Product ID
-        in: path
-        name: productID
-        required: true
-        type: string
+        - description: List ID
+          in: path
+          name: listID
+          required: true
+          type: string
+        - description: Product ID
+          in: path
+          name: productID
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "204": {}
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/domain.Error'
+            $ref: "#/definitions/domain.Error"
       security:
-      - ApiKeyAuth: []
+        - ApiKeyAuth: []
       summary: Delete the product from the list
       tags:
-      - product-in-list
+        - product-in-list
     patch:
       consumes:
-      - application/json
+        - application/json
       operationId: update-product-in-list
       parameters:
-      - description: Product in list
-        in: body
-        name: productInList
-        required: true
-        schema:
-          $ref: '#/definitions/lists.UpdateProductInList'
-      - description: Product in list
-        in: path
-        name: listID
-        required: true
-        type: string
-      - description: Product in list
-        in: path
-        name: productID
-        required: true
-        type: string
+        - description: Product in list
+          in: body
+          name: productInList
+          required: true
+          schema:
+            $ref: "#/definitions/lists.UpdateProductInList"
+        - description: Product in list
+          in: path
+          name: listID
+          required: true
+          type: string
+        - description: Product in list
+          in: path
+          name: productID
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/lists.ProductInListLink'
+            $ref: "#/definitions/lists.ProductInListLink"
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/domain.Error'
+            $ref: "#/definitions/domain.Error"
       security:
-      - ApiKeyAuth: []
+        - ApiKeyAuth: []
       summary: Update the product in the list partially
       tags:
-      - product-in-list
+        - product-in-list
     post:
       operationId: add-product-to-list
       parameters:
-      - description: List ID
-        in: path
-        name: listID
-        required: true
-        type: string
-      - description: Product ID
-        in: path
-        name: productID
-        required: true
-        type: string
+        - description: List ID
+          in: path
+          name: listID
+          required: true
+          type: string
+        - description: Product ID
+          in: path
+          name: productID
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/lists.ProductInListLink'
+            $ref: "#/definitions/lists.ProductInListLink"
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/domain.Error'
+            $ref: "#/definitions/domain.Error"
       security:
-      - ApiKeyAuth: []
+        - ApiKeyAuth: []
       summary: Add the product to the list
       tags:
-      - product-in-list
+        - product-in-list
   /logout:
     post:
       operationId: logout
@@ -411,137 +411,137 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/domain.Error'
+            $ref: "#/definitions/domain.Error"
       security:
-      - ApiKeyAuth: []
+        - ApiKeyAuth: []
       summary: Removes an user authorization
       tags:
-      - user
+        - user
   /me:
     get:
       operationId: me
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/users.User'
+            $ref: "#/definitions/users.User"
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/domain.Error'
+            $ref: "#/definitions/domain.Error"
       security:
-      - ApiKeyAuth: []
+        - ApiKeyAuth: []
       summary: Removes an user authorization
       tags:
-      - user
+        - user
   /products:
     post:
       operationId: create-product
       parameters:
-      - description: Product to create
-        in: body
-        name: product
-        required: true
-        schema:
-          $ref: '#/definitions/handler.CreateProductRequest'
+        - description: Product to create
+          in: body
+          name: product
+          required: true
+          schema:
+            $ref: "#/definitions/handler.CreateProductRequest"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/products.Product'
+            $ref: "#/definitions/products.Product"
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/domain.Error'
+            $ref: "#/definitions/domain.Error"
       security:
-      - ApiKeyAuth: []
+        - ApiKeyAuth: []
       summary: Create a new product
       tags:
-      - product
+        - product
   /products/search:
     post:
       operationId: search-default-products
       parameters:
-      - description: Product search request
-        in: body
-        name: product
-        required: true
-        schema:
-          $ref: '#/definitions/handler.ProductSearchRequest'
+        - description: Product search request
+          in: body
+          name: product
+          required: true
+          schema:
+            $ref: "#/definitions/handler.ProductSearchRequest"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
             items:
-              $ref: '#/definitions/products.Product'
+              $ref: "#/definitions/products.Product"
             type: array
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/domain.Error'
+            $ref: "#/definitions/domain.Error"
       security:
-      - ApiKeyAuth: []
+        - ApiKeyAuth: []
       summary: Search a product by its name in default products, it removes accentuated characters and is case insensitive
       tags:
-      - product
+        - product
   /users/login:
     post:
       consumes:
-      - application/json
+        - application/json
       operationId: login
       parameters:
-      - description: User to login with
-        in: body
-        name: user
-        required: true
-        schema:
-          $ref: '#/definitions/handler.LoginRequest'
+        - description: User to login with
+          in: body
+          name: user
+          required: true
+          schema:
+            $ref: "#/definitions/handler.LoginRequest"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/authorization.Authorization'
+            $ref: "#/definitions/authorization.Authorization"
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/domain.Error'
+            $ref: "#/definitions/domain.Error"
       summary: Creates a new user authorization
       tags:
-      - user
+        - user
   /users/signup:
     post:
       consumes:
-      - application/json
+        - application/json
       operationId: signup
       parameters:
-      - description: User to signup with
-        in: body
-        name: user
-        required: true
-        schema:
-          $ref: '#/definitions/handler.SignupRequest'
+        - description: User to signup with
+          in: body
+          name: user
+          required: true
+          schema:
+            $ref: "#/definitions/handler.SignupRequest"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/users.User'
+            $ref: "#/definitions/users.User"
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/domain.Error'
+            $ref: "#/definitions/domain.Error"
       summary: Creates a new user
       tags:
-      - user
+        - user
 securityDefinitions:
   ApiKeyAuth:
     in: header

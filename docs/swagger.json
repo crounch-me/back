@@ -612,7 +612,7 @@
                 "name"
             ],
             "properties": {
-                "buyed": {
+                "bought": {
                     "type": "boolean"
                 },
                 "category": {
@@ -771,7 +771,7 @@
                 "name"
             ],
             "properties": {
-                "buyed": {
+                "bought": {
                     "type": "boolean"
                 },
                 "category": {
@@ -791,7 +791,7 @@
         "lists.ProductInListLink": {
             "type": "object",
             "properties": {
-                "buyed": {
+                "bought": {
                     "type": "boolean"
                 },
                 "listId": {
@@ -805,7 +805,7 @@
         "lists.UpdateProductInList": {
             "type": "object",
             "properties": {
-                "buyed": {
+                "bought": {
                     "type": "boolean"
                 }
             }
