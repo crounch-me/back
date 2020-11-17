@@ -28,7 +28,7 @@ type ProductInGetListResponse struct {
 	ID       string               `json:"id"`
 	Name     string               `json:"name" validate:"required,lt=61"`
 	Owner    *users.User          `json:"owner,omitempty"`
-	Buyed    bool                 `json:"bought"`
+	Bought   bool                 `json:"bought"`
 	Category *categories.Category `json:"category,omitempty"`
 }
 
@@ -56,10 +56,10 @@ func (lb *ListBuilder) GetList(list *lists.List) *GetListResponse {
 
 	for _, product := range list.Products {
 		productInGetListResponse := &ProductInGetListResponse{
-			ID:    product.ID,
-			Name:  product.Name,
-			Owner: product.Owner,
-			Buyed: product.Buyed,
+			ID:     product.ID,
+			Name:   product.Name,
+			Owner:  product.Owner,
+			Bought: product.Bought,
 		}
 
 		categoryKey := DefaultCategoryID

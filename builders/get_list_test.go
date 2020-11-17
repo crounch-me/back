@@ -53,7 +53,7 @@ func TestGetListOK(t *testing.T) {
 						Name: categoryName,
 					},
 				},
-				Buyed: false,
+				Bought: false,
 			},
 			{
 				Product: &products.Product{
@@ -64,7 +64,7 @@ func TestGetListOK(t *testing.T) {
 						Name: categoryName,
 					},
 				},
-				Buyed: true,
+				Bought: true,
 			},
 		},
 	}
@@ -83,18 +83,18 @@ func TestGetListOK(t *testing.T) {
 				Name: categoryName,
 				Products: []*ProductInGetListResponse{
 					{
-						ID:    productID1,
-						Name:  productName1,
-						Buyed: false,
+						ID:     productID1,
+						Name:   productName1,
+						Bought: false,
 						Category: &categories.Category{
 							ID:   categoryID,
 							Name: categoryName,
 						},
 					},
 					{
-						ID:    productID2,
-						Name:  productName2,
-						Buyed: true,
+						ID:     productID2,
+						Name:   productName2,
+						Bought: true,
 						Category: &categories.Category{
 							ID:   categoryID,
 							Name: categoryName,

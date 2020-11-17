@@ -467,7 +467,7 @@ func (te *TestExecutor) theReturnedProductsFromListAre(productsDataTable *messag
 			expectedID := te.getValueFromDataTableRow(row, 0)
 			expectedName := te.getValueFromDataTableRow(row, 1)
 			expectedCategoryName := te.getValueFromDataTableRow(row, 2)
-			expectedBuyed := te.getBoolFromDataTableRow(row, 3)
+			expectedBought := te.getBoolFromDataTableRow(row, 3)
 
 			expectedID, err = te.getValueFromVariables(expectedID)
 			if err != nil {
@@ -485,8 +485,8 @@ func (te *TestExecutor) theReturnedProductsFromListAre(productsDataTable *messag
 
 			productMessage := fmt.Sprintf("for product %s", expectedName)
 
-			if productInList.Buyed != expectedBuyed {
-				return fmt.Errorf("product bought %t was not expected %t %s", productInList.Buyed, expectedBuyed, productMessage)
+			if productInList.Bought != expectedBought {
+				return fmt.Errorf("product bought %t was not expected %t %s", productInList.Bought, expectedBought, productMessage)
 			}
 
 			if productInList.Category != nil && productInList.Category.Name != expectedCategoryName {

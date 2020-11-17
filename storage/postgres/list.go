@@ -117,11 +117,11 @@ func (s *PostgresStorage) UpdateProductInList(updateProductInList *lists.UpdateP
     RETURNING product_id, list_id, bought
   `, s.schema)
 
-	row := s.session.QueryRow(query, updateProductInList.Buyed, productID, listID)
+	row := s.session.QueryRow(query, updateProductInList.Bought, productID, listID)
 
 	pil := &lists.ProductInListLink{}
 
-	err := row.Scan(&pil.ProductID, &pil.ListID, &pil.Buyed)
+	err := row.Scan(&pil.ProductID, &pil.ListID, &pil.Bought)
 	if err == sql.ErrNoRows {
 		logger := util.GetLogger()
 		logger.WithError(err).
@@ -183,7 +183,7 @@ func (s *PostgresStorage) GetProductsOfList(listID string) ([]*lists.ProductInLi
 		}
 		var nullableCategoryID, nullableCategoryName sql.NullString
 
-		err = rows.Scan(&productOfList.ID, &productOfList.Name, &productOfList.Buyed, &nullableCategoryID, &nullableCategoryName)
+		err = rows.Scan(&productOfList.ID, &productOfList.Name, &productOfList.Bought, &nullableCategoryID, &nullableCategoryName)
 		if err != nil {
 			return nil, domain.NewError(domain.UnknownErrorCode).WithCause(err)
 		}
