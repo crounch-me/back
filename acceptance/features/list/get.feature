@@ -23,8 +23,8 @@ Feature: Get List by id
     And "$.id" is a non empty string
     And the returned products from list are
       | ID                                   | Name             | Category name | Bought |
-      | {{ .ProductID }}                     | Caviar           | Divers        | No    |
-      | 40fe3f75-703a-46d8-9520-0d27f7cf4bab | Saucisse à cuire | Boucherie     | No    |
+      | {{ .ProductID }}                     | Caviar           | Divers        | No     |
+      | 40fe3f75-703a-46d8-9520-0d27f7cf4bab | Saucisse à cuire | Boucherie     | No     |
 
   Scenario: KO - User is not the owner
     Given I authenticate with a random user
