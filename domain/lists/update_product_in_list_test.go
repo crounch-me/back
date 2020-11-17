@@ -15,7 +15,7 @@ func TestUpdateProductInListGetListError(t *testing.T) {
 	userID := "userID"
 
 	updateProductInList := &UpdateProductInList{
-		Buyed: true,
+		Bought: true,
 	}
 
 	storageMock := &StorageMock{}
@@ -44,7 +44,7 @@ func TestUpdateProductInListGetContributorsIDsError(t *testing.T) {
 	userID := "userID"
 
 	updateProductInList := &UpdateProductInList{
-		Buyed: true,
+		Bought: true,
 	}
 
 	list := &List{}
@@ -80,7 +80,7 @@ func TestUpdateProductInListUserNotAuthorized(t *testing.T) {
 	anotherUserID := "anotherUserID"
 
 	updateProductInList := &UpdateProductInList{
-		Buyed: true,
+		Bought: true,
 	}
 
 	list := &List{}
@@ -115,7 +115,7 @@ func TestUpdateProductInListGetProductError(t *testing.T) {
 	userID := "userID"
 
 	updateProductInList := &UpdateProductInList{
-		Buyed: true,
+		Bought: true,
 	}
 
 	list := &List{}
@@ -150,7 +150,7 @@ func TestUpdateProductInListUpdateProductInListError(t *testing.T) {
 	userID := "userID"
 
 	updateProductInList := &UpdateProductInList{
-		Buyed: true,
+		Bought: true,
 	}
 
 	list := &List{}
@@ -186,10 +186,10 @@ func TestUpdateProductInListOK(t *testing.T) {
 	listID := "listID"
 	productID := "productID"
 	userID := "userID"
-	buyed := true
+	bought := true
 
 	updateProductInList := &UpdateProductInList{
-		Buyed: buyed,
+		Bought: bought,
 	}
 
 	list := &List{}
@@ -199,7 +199,7 @@ func TestUpdateProductInListOK(t *testing.T) {
 	productInList := &ProductInListLink{
 		ListID:    listID,
 		ProductID: productID,
-		Buyed:     buyed,
+		Bought:    bought,
 	}
 
 	storageMock := &StorageMock{}
@@ -213,8 +213,8 @@ func TestUpdateProductInListOK(t *testing.T) {
 	productStorageMock.On("GetProduct", productID).Return(product, nil)
 
 	listService := &ListService{
-		ListStorage:    storageMock,
-		ProductStorage: productStorageMock,
+		ListStorage:        storageMock,
+		ProductStorage:     productStorageMock,
 		ContributorStorage: contributorStorageMock,
 	}
 

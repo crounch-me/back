@@ -19,18 +19,18 @@ Feature: Update a product in a list
     And I use this body
       """
         {
-          "buyed": true
+          "bought": true
         }
       """
     When I send a "PATCH" request on "/lists/{{ .ListID }}/products/{{ .ProductID }}"
     Then the status code is 200
     And "$.listId" has string value "{{ .ListID }}"
     And "$.productId" has string value "{{ .ProductID }}"
-    And "$.buyed" has bool value "true"
+    And "$.bought" has bool value "true"
     And I send a "GET" request on "/lists/{{ .ListID }}"
     And the returned products from list are
-      | ID               | Name                | Category name | Buyed |
-      | {{ .ProductID }} | Mon premier produit | Divers        | Yes   |
+      | ID               | Name                | Category name | Bought |
+      | {{ .ProductID }} | Mon premier produit | Divers        | Yes    |
 
   Scenario: KO - Invalid body
     Given I authenticate with a random user

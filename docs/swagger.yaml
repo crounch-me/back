@@ -41,7 +41,7 @@ definitions:
     type: object
   builders.ProductInGetListResponse:
     properties:
-      buyed:
+      bought:
         type: boolean
       category:
         $ref: '#/definitions/categories.Category'
@@ -144,7 +144,7 @@ definitions:
     type: object
   lists.ProductInList:
     properties:
-      buyed:
+      bought:
         type: boolean
       category:
         $ref: '#/definitions/categories.Category'
@@ -159,7 +159,7 @@ definitions:
     type: object
   lists.ProductInListLink:
     properties:
-      buyed:
+      bought:
         type: boolean
       listId:
         type: string
@@ -168,7 +168,7 @@ definitions:
     type: object
   lists.UpdateProductInList:
     properties:
-      buyed:
+      bought:
         type: boolean
     type: object
   products.Product:

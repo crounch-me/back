@@ -627,7 +627,7 @@ var doc = `{
                 "name"
             ],
             "properties": {
-                "buyed": {
+                "bought": {
                     "type": "boolean"
                 },
                 "category": {
@@ -786,7 +786,7 @@ var doc = `{
                 "name"
             ],
             "properties": {
-                "buyed": {
+                "bought": {
                     "type": "boolean"
                 },
                 "category": {
@@ -806,7 +806,7 @@ var doc = `{
         "lists.ProductInListLink": {
             "type": "object",
             "properties": {
-                "buyed": {
+                "bought": {
                     "type": "boolean"
                 },
                 "listId": {
@@ -820,7 +820,7 @@ var doc = `{
         "lists.UpdateProductInList": {
             "type": "object",
             "properties": {
-                "buyed": {
+                "bought": {
                     "type": "boolean"
                 }
             }

@@ -107,21 +107,21 @@ func (s *PostgresStorage) GetList(id string) (*lists.List, *domain.Error) {
 	return l, nil
 }
 
-// UpdateProductInList updates the buyed value in product in list
+// UpdateProductInList updates the bought value in product in list
 func (s *PostgresStorage) UpdateProductInList(updateProductInList *lists.UpdateProductInList, productID, listID string) (*lists.ProductInListLink, *domain.Error) {
 	query := fmt.Sprintf(`
     UPDATE %s.product_in_list
-    SET buyed = $1
+    SET bought = $1
     WHERE product_id = $2
     AND list_id = $3
-    RETURNING product_id, list_id, buyed
+    RETURNING product_id, list_id, bought
   `, s.schema)
 
-	row := s.session.QueryRow(query, updateProductInList.Buyed, productID, listID)
+	row := s.session.QueryRow(query, updateProductInList.Bought, productID, listID)
 
 	pil := &lists.ProductInListLink{}
 
-	err := row.Scan(&pil.ProductID, &pil.ListID, &pil.Buyed)
+	err := row.Scan(&pil.ProductID, &pil.ListID, &pil.Bought)
 	if err == sql.ErrNoRows {
 		logger := util.GetLogger()
 		logger.WithError(err).
@@ -158,7 +158,7 @@ func (s *PostgresStorage) GetProductInList(productID string, listID string) (*li
 
 func (s *PostgresStorage) GetProductsOfList(listID string) ([]*lists.ProductInList, *domain.Error) {
 	query := fmt.Sprintf(`
-    SELECT p.id, p.name, pil.buyed, c.id, c.name
+    SELECT p.id, p.name, pil.bought, c.id, c.name
     FROM %s.product p
     LEFT JOIN %s.product_in_list pil ON pil.product_id = p.id
     LEFT JOIN %s.list l ON pil.list_id = l.id
@@ -183,7 +183,7 @@ func (s *PostgresStorage) GetProductsOfList(listID string) ([]*lists.ProductInLi
 		}
 		var nullableCategoryID, nullableCategoryName sql.NullString
 
-		err = rows.Scan(&productOfList.ID, &productOfList.Name, &productOfList.Buyed, &nullableCategoryID, &nullableCategoryName)
+		err = rows.Scan(&productOfList.ID, &productOfList.Name, &productOfList.Bought, &nullableCategoryID, &nullableCategoryName)
 		if err != nil {
 			return nil, domain.NewError(domain.UnknownErrorCode).WithCause(err)
 		}
