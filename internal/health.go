@@ -1,5 +1,5 @@
-package domain
+package internal
 
 type Health struct {
-	Alive   bool   `json:"alive"`
+	Alive bool `json:"alive"`
 }

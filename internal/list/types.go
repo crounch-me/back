@@ -1,10 +1,10 @@
-package lists
+package list
 
 import (
 	"time"
 
-	"github.com/crounch-me/back/domain/products"
-	"github.com/crounch-me/back/domain/users"
+	"github.com/crounch-me/back/internal/products"
+	"github.com/crounch-me/back/internal/users"
 )
 
 // List represents a shopping list

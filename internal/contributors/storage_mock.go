@@ -1,7 +1,7 @@
 package contributors
 
 import (
-	"github.com/crounch-me/back/domain"
+	"github.com/crounch-me/back/internal"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -9,24 +9,24 @@ type StorageMock struct {
 	mock.Mock
 }
 
-func (sm *StorageMock) CreateContributor(listID, userID string) *domain.Error {
+func (sm *StorageMock) CreateContributor(listID, userID string) *internal.Error {
 	args := sm.Called(listID, userID)
 	err := args.Error(0)
 
-  if err == nil {
+	if err == nil {
 		return nil
-  }
+	}
 
-	return err.(*domain.Error)
+	return err.(*internal.Error)
 }
 
-func (sm *StorageMock) GetContributorsIDs(listID string) ([]string, *domain.Error)  {
-  args := sm.Called(listID)
-  err := args.Error(1)
+func (sm *StorageMock) GetContributorsIDs(listID string) ([]string, *internal.Error) {
+	args := sm.Called(listID)
+	err := args.Error(1)
 
-  if err != nil {
-    return []string{}, err.(*domain.Error)
-  }
+	if err != nil {
+		return []string{}, err.(*internal.Error)
+	}
 
-  return args.Get(0).([]string), nil
+	return args.Get(0).([]string), nil
 }

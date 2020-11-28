@@ -3,7 +3,7 @@ package util
 import (
 	"math/rand"
 
-	"github.com/crounch-me/back/domain"
+	"github.com/crounch-me/back/internal"
 	"github.com/gofrs/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -18,24 +18,24 @@ const (
 
 type GenerationImpl struct{}
 
-func (g *GenerationImpl) GenerateToken() (string, *domain.Error) {
+func (g *GenerationImpl) GenerateToken() (string, *internal.Error) {
 	return g.GenerateID()
 }
 
-func (g *GenerationImpl) GenerateID() (string, *domain.Error) {
+func (g *GenerationImpl) GenerateID() (string, *internal.Error) {
 	id, err := GenerateID()
 
 	if err != nil {
-		return "", domain.NewError(domain.UnknownErrorCode).WithCause(err)
+		return "", internal.NewError(internal.UnknownErrorCode).WithCause(err)
 	}
 
 	return id, nil
 }
 
-func (g *GenerationImpl) HashPassword(password string) (string, *domain.Error) {
+func (g *GenerationImpl) HashPassword(password string) (string, *internal.Error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		return "", domain.NewError(domain.UnknownErrorCode).WithCause(err)
+		return "", internal.NewError(internal.UnknownErrorCode).WithCause(err)
 	}
 	return string(hashedPassword), nil
 }

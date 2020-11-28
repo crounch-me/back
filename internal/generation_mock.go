@@ -1,4 +1,4 @@
-package domain
+package internal
 
 import (
 	"github.com/stretchr/testify/mock"

@@ -3,7 +3,7 @@ package users
 import (
 	"testing"
 
-	"github.com/crounch-me/back/domain"
+	"github.com/crounch-me/back/internal"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -11,8 +11,8 @@ func TestCreateUserHashPasswordError(t *testing.T) {
 	email := "email"
 	password := "password"
 
-	generationMock := &domain.GenerationMock{}
-	generationMock.On("HashPassword", password).Return("", domain.NewError(domain.UnknownErrorCode))
+	generationMock := &internal.GenerationMock{}
+	generationMock.On("HashPassword", password).Return("", internal.NewError(internal.UnknownErrorCode))
 
 	userService := &UserService{
 		Generation: generationMock,
@@ -20,7 +20,7 @@ func TestCreateUserHashPasswordError(t *testing.T) {
 	result, err := userService.CreateUser(email, password)
 
 	assert.Empty(t, result)
-	assert.Equal(t, domain.UnknownErrorCode, err.Code)
+	assert.Equal(t, internal.UnknownErrorCode, err.Code)
 }
 
 func TestCreateUserGenerateIDError(t *testing.T) {
@@ -28,9 +28,9 @@ func TestCreateUserGenerateIDError(t *testing.T) {
 	password := "password"
 	hashedPassword := "hashed-password"
 
-	generationMock := &domain.GenerationMock{}
+	generationMock := &internal.GenerationMock{}
 	generationMock.On("HashPassword", password).Return(hashedPassword, nil)
-	generationMock.On("GenerateID").Return("", domain.NewError(domain.UnknownErrorCode))
+	generationMock.On("GenerateID").Return("", internal.NewError(internal.UnknownErrorCode))
 
 	userService := &UserService{
 		Generation: generationMock,
@@ -38,7 +38,7 @@ func TestCreateUserGenerateIDError(t *testing.T) {
 	result, err := userService.CreateUser(email, password)
 
 	assert.Empty(t, result)
-	assert.Equal(t, domain.UnknownErrorCode, err.Code)
+	assert.Equal(t, internal.UnknownErrorCode, err.Code)
 }
 
 func TestCreateUserDuplicatedUserError(t *testing.T) {
@@ -49,7 +49,7 @@ func TestCreateUserDuplicatedUserError(t *testing.T) {
 
 	foundUser := &User{}
 
-	generationMock := &domain.GenerationMock{}
+	generationMock := &internal.GenerationMock{}
 	generationMock.On("HashPassword", password).Return(hashedPassword, nil)
 	generationMock.On("GenerateID").Return(generatedID, nil)
 
@@ -72,12 +72,12 @@ func TestCreateUserGetByEmailError(t *testing.T) {
 	hashedPassword := "hashed-password"
 	generatedID := "generated-id"
 
-	generationMock := &domain.GenerationMock{}
+	generationMock := &internal.GenerationMock{}
 	generationMock.On("HashPassword", password).Return(hashedPassword, nil)
 	generationMock.On("GenerateID").Return(generatedID, nil)
 
 	userStorageMock := &StorageMock{}
-	userStorageMock.On("GetByEmail", email).Return(nil, domain.NewError(domain.UnknownErrorCode))
+	userStorageMock.On("GetByEmail", email).Return(nil, internal.NewError(internal.UnknownErrorCode))
 
 	userService := &UserService{
 		Generation:  generationMock,
@@ -86,7 +86,7 @@ func TestCreateUserGetByEmailError(t *testing.T) {
 	result, err := userService.CreateUser(email, password)
 
 	assert.Empty(t, result)
-	assert.Equal(t, domain.UnknownErrorCode, err.Code)
+	assert.Equal(t, internal.UnknownErrorCode, err.Code)
 }
 
 func TestCreateUserCreateUserError(t *testing.T) {
@@ -95,13 +95,13 @@ func TestCreateUserCreateUserError(t *testing.T) {
 	hashedPassword := "hashed-password"
 	generatedID := "generated-id"
 
-	generationMock := &domain.GenerationMock{}
+	generationMock := &internal.GenerationMock{}
 	generationMock.On("HashPassword", password).Return(hashedPassword, nil)
 	generationMock.On("GenerateID").Return(generatedID, nil)
 
 	userStorageMock := &StorageMock{}
-	userStorageMock.On("GetByEmail", email).Return(nil, domain.NewError(UserNotFoundErrorCode))
-	userStorageMock.On("CreateUser", generatedID, email, hashedPassword).Return(domain.NewError(domain.UnknownErrorCode))
+	userStorageMock.On("GetByEmail", email).Return(nil, internal.NewError(UserNotFoundErrorCode))
+	userStorageMock.On("CreateUser", generatedID, email, hashedPassword).Return(internal.NewError(internal.UnknownErrorCode))
 
 	userService := &UserService{
 		Generation:  generationMock,
@@ -110,7 +110,7 @@ func TestCreateUserCreateUserError(t *testing.T) {
 	result, err := userService.CreateUser(email, password)
 
 	assert.Empty(t, result)
-	assert.Equal(t, domain.UnknownErrorCode, err.Code)
+	assert.Equal(t, internal.UnknownErrorCode, err.Code)
 }
 
 func TestCreateUserOK(t *testing.T) {
@@ -119,12 +119,12 @@ func TestCreateUserOK(t *testing.T) {
 	hashedPassword := "hashed-password"
 	generatedID := "generated-id"
 
-	generationMock := &domain.GenerationMock{}
+	generationMock := &internal.GenerationMock{}
 	generationMock.On("HashPassword", password).Return(hashedPassword, nil)
 	generationMock.On("GenerateID").Return(generatedID, nil)
 
 	userStorageMock := &StorageMock{}
-	userStorageMock.On("GetByEmail", email).Return(nil, domain.NewError(UserNotFoundErrorCode))
+	userStorageMock.On("GetByEmail", email).Return(nil, internal.NewError(UserNotFoundErrorCode))
 	userStorageMock.On("CreateUser", generatedID, email, hashedPassword).Return(nil)
 
 	userService := &UserService{

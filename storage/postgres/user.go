@@ -4,12 +4,12 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/crounch-me/back/domain"
-	"github.com/crounch-me/back/domain/users"
+	"github.com/crounch-me/back/internal"
+	"github.com/crounch-me/back/internal/users"
 )
 
 // CreateUser inserts a new user with hashed password
-func (s *PostgresStorage) CreateUser(id, email, password string) *domain.Error {
+func (s *PostgresStorage) CreateUser(id, email, password string) *internal.Error {
 	query := fmt.Sprintf(`
 		INSERT INTO %s."user"(id, email, password)
 		VALUES ($1, $2, $3)
@@ -18,14 +18,14 @@ func (s *PostgresStorage) CreateUser(id, email, password string) *domain.Error {
 	_, err := s.session.Exec(query, id, email, password)
 
 	if err != nil {
-		return domain.NewError(domain.UnknownErrorCode).WithCause(err)
+		return internal.NewError(internal.UnknownErrorCode).WithCause(err)
 	}
 
 	return nil
 }
 
 // GetByEmail find the user with his email
-func (s *PostgresStorage) GetByEmail(email string) (*users.User, *domain.Error) {
+func (s *PostgresStorage) GetByEmail(email string) (*users.User, *internal.Error) {
 	query := fmt.Sprintf(`
 		SELECT id, password
 		FROM %s."user"
@@ -39,18 +39,18 @@ func (s *PostgresStorage) GetByEmail(email string) (*users.User, *domain.Error) 
 	err := row.Scan(&user.ID, &user.Password)
 
 	if err == sql.ErrNoRows {
-		return nil, domain.NewError(users.UserNotFoundErrorCode)
+		return nil, internal.NewError(users.UserNotFoundErrorCode)
 	}
 
 	if err != nil {
-		return nil, domain.NewError(domain.UnknownErrorCode).WithCause(err)
+		return nil, internal.NewError(internal.UnknownErrorCode).WithCause(err)
 	}
 
 	return user, nil
 }
 
 // GetUserIDByToken find the user id with his token
-func (s *PostgresStorage) GetUserIDByToken(token string) (*string, *domain.Error) {
+func (s *PostgresStorage) GetUserIDByToken(token string) (*string, *internal.Error) {
 	query := fmt.Sprintf(`
 		SELECT id
     FROM %s."user"
@@ -65,18 +65,18 @@ func (s *PostgresStorage) GetUserIDByToken(token string) (*string, *domain.Error
 	err := row.Scan(&id)
 
 	if err == sql.ErrNoRows {
-		return nil, domain.NewError(users.UserNotFoundErrorCode)
+		return nil, internal.NewError(users.UserNotFoundErrorCode)
 	}
 
 	if err != nil {
-		return nil, domain.NewError(domain.UnknownErrorCode).WithCause(err)
+		return nil, internal.NewError(internal.UnknownErrorCode).WithCause(err)
 	}
 
 	return id, nil
 }
 
 // GetByToken find the user with his token
-func (s *PostgresStorage) GetByToken(token string) (*users.User, *domain.Error) {
+func (s *PostgresStorage) GetByToken(token string) (*users.User, *internal.Error) {
 	query := fmt.Sprintf(`
 		SELECT id, password, email
     FROM %s."user"
@@ -91,11 +91,11 @@ func (s *PostgresStorage) GetByToken(token string) (*users.User, *domain.Error) 
 	err := row.Scan(&user.ID, &user.Password, &user.Email)
 
 	if err == sql.ErrNoRows {
-		return nil, domain.NewError(users.UserNotFoundErrorCode)
+		return nil, internal.NewError(users.UserNotFoundErrorCode)
 	}
 
 	if err != nil {
-		return nil, domain.NewError(domain.UnknownErrorCode).WithCause(err)
+		return nil, internal.NewError(internal.UnknownErrorCode).WithCause(err)
 	}
 
 	return user, nil

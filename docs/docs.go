@@ -35,7 +35,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/domain.Health"
+                            "$ref": "#/definitions/internal.Health"
                         }
                     },
                     "500": {
@@ -65,14 +65,14 @@ var doc = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/lists.List"
+                                "$ref": "#/definitions/list.List"
                             }
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/domain.Error"
+                            "$ref": "#/definitions/internal.Error"
                         }
                     }
                 }
@@ -109,13 +109,13 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/lists.List"
+                            "$ref": "#/definitions/list.List"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/domain.Error"
+                            "$ref": "#/definitions/internal.Error"
                         }
                     }
                 }
@@ -155,7 +155,7 @@ var doc = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/domain.Error"
+                            "$ref": "#/definitions/internal.Error"
                         }
                     }
                 }
@@ -188,7 +188,7 @@ var doc = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/domain.Error"
+                            "$ref": "#/definitions/internal.Error"
                         }
                     }
                 }
@@ -229,13 +229,13 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/lists.ProductInListLink"
+                            "$ref": "#/definitions/list.ProductInListLink"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/domain.Error"
+                            "$ref": "#/definitions/internal.Error"
                         }
                     }
                 }
@@ -275,7 +275,7 @@ var doc = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/domain.Error"
+                            "$ref": "#/definitions/internal.Error"
                         }
                     }
                 }
@@ -304,7 +304,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/lists.UpdateProductInList"
+                            "$ref": "#/definitions/list.UpdateProductInList"
                         }
                     },
                     {
@@ -326,13 +326,13 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/lists.ProductInListLink"
+                            "$ref": "#/definitions/list.ProductInListLink"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/domain.Error"
+                            "$ref": "#/definitions/internal.Error"
                         }
                     }
                 }
@@ -355,7 +355,7 @@ var doc = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/domain.Error"
+                            "$ref": "#/definitions/internal.Error"
                         }
                     }
                 }
@@ -386,7 +386,7 @@ var doc = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/domain.Error"
+                            "$ref": "#/definitions/internal.Error"
                         }
                     }
                 }
@@ -428,7 +428,7 @@ var doc = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/domain.Error"
+                            "$ref": "#/definitions/internal.Error"
                         }
                     }
                 }
@@ -473,7 +473,7 @@ var doc = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/domain.Error"
+                            "$ref": "#/definitions/internal.Error"
                         }
                     }
                 }
@@ -513,7 +513,7 @@ var doc = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/domain.Error"
+                            "$ref": "#/definitions/internal.Error"
                         }
                     }
                 }
@@ -553,7 +553,7 @@ var doc = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/domain.Error"
+                            "$ref": "#/definitions/internal.Error"
                         }
                     }
                 }
@@ -655,39 +655,6 @@ var doc = `{
                 }
             }
         },
-        "domain.Error": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string"
-                },
-                "fields": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/domain.FieldError"
-                    }
-                }
-            }
-        },
-        "domain.FieldError": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "domain.Health": {
-            "type": "object",
-            "properties": {
-                "alive": {
-                    "type": "boolean"
-                }
-            }
-        },
         "handler.CreateListRequest": {
             "type": "object",
             "required": [
@@ -748,7 +715,40 @@ var doc = `{
                 }
             }
         },
-        "lists.List": {
+        "internal.Error": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "fields": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/internal.FieldError"
+                    }
+                }
+            }
+        },
+        "internal.FieldError": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal.Health": {
+            "type": "object",
+            "properties": {
+                "alive": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "list.List": {
             "type": "object",
             "required": [
                 "name"
@@ -775,12 +775,12 @@ var doc = `{
                 "products": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/lists.ProductInList"
+                        "$ref": "#/definitions/list.ProductInList"
                     }
                 }
             }
         },
-        "lists.ProductInList": {
+        "list.ProductInList": {
             "type": "object",
             "required": [
                 "name"
@@ -803,7 +803,7 @@ var doc = `{
                 }
             }
         },
-        "lists.ProductInListLink": {
+        "list.ProductInListLink": {
             "type": "object",
             "properties": {
                 "bought": {
@@ -817,7 +817,7 @@ var doc = `{
                 }
             }
         },
-        "lists.UpdateProductInList": {
+        "list.UpdateProductInList": {
             "type": "object",
             "properties": {
                 "bought": {

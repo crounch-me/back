@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/crounch-me/back/domain"
-	"github.com/crounch-me/back/domain/categories"
-	"github.com/crounch-me/back/domain/products"
-	"github.com/crounch-me/back/domain/users"
+	"github.com/crounch-me/back/internal"
+	"github.com/crounch-me/back/internal/categories"
+	"github.com/crounch-me/back/internal/products"
+	"github.com/crounch-me/back/internal/users"
 )
 
 // CreateProduct inserts a new product
-func (s *PostgresStorage) CreateProduct(id, name, ownerID string) *domain.Error {
+func (s *PostgresStorage) CreateProduct(id, name, ownerID string) *internal.Error {
 	query := fmt.Sprintf(`
 		INSERT INTO %s."product"(id, name, user_id)
 		VALUES ($1, $2, $3)
@@ -21,14 +21,14 @@ func (s *PostgresStorage) CreateProduct(id, name, ownerID string) *domain.Error 
 	_, err := s.session.Exec(query, id, name, ownerID)
 
 	if err != nil {
-		return domain.NewError(domain.UnknownErrorCode).WithCause(err)
+		return internal.NewError(internal.UnknownErrorCode).WithCause(err)
 	}
 
 	return nil
 }
 
 // GetProduct fetchs an existing product or return error
-func (s *PostgresStorage) GetProduct(id string) (*products.Product, *domain.Error) {
+func (s *PostgresStorage) GetProduct(id string) (*products.Product, *internal.Error) {
 	query := fmt.Sprintf(`
     SELECT p.id, p.name, u.id, c.id, c.name
     FROM %s.product p
@@ -48,10 +48,10 @@ func (s *PostgresStorage) GetProduct(id string) (*products.Product, *domain.Erro
 	err := row.Scan(&p.ID, &p.Name, &p.Owner.ID, &nullableCategoryID, &nullableCategoryName)
 
 	if err == sql.ErrNoRows {
-		return nil, domain.NewError(products.ProductNotFoundErrorCode)
+		return nil, internal.NewError(products.ProductNotFoundErrorCode)
 	}
 	if err != nil {
-		return nil, domain.NewError(domain.UnknownErrorCode)
+		return nil, internal.NewError(internal.UnknownErrorCode)
 	}
 
 	if nullableCategoryName.Valid && nullableCategoryID.Valid {
@@ -64,7 +64,7 @@ func (s *PostgresStorage) GetProduct(id string) (*products.Product, *domain.Erro
 	return p, nil
 }
 
-func (s *PostgresStorage) SearchDefaults(name string, userID string) ([]*products.Product, *domain.Error) {
+func (s *PostgresStorage) SearchDefaults(name string, userID string) ([]*products.Product, *internal.Error) {
 	lowerCasedName := strings.ToLower(name)
 
 	query := fmt.Sprintf(`
@@ -78,14 +78,14 @@ func (s *PostgresStorage) SearchDefaults(name string, userID string) ([]*product
 
 	rows, err := s.session.Query(query, lowerCasedName, userID)
 	if err != nil {
-		return nil, domain.NewError(domain.UnknownErrorCode).WithCause(err)
+		return nil, internal.NewError(internal.UnknownErrorCode).WithCause(err)
 	}
 	defer rows.Close()
 
 	productList := make([]*products.Product, 0)
 	for rows.Next() {
 		if err = rows.Err(); err != nil {
-			return nil, domain.NewError(domain.UnknownErrorCode).WithCause(err)
+			return nil, internal.NewError(internal.UnknownErrorCode).WithCause(err)
 		}
 
 		product := &products.Product{}
@@ -93,7 +93,7 @@ func (s *PostgresStorage) SearchDefaults(name string, userID string) ([]*product
 
 		err = rows.Scan(&product.ID, &product.Name, &nullableCategoryID, &nullableCategoryName)
 		if err != nil {
-			return nil, domain.NewError(domain.UnknownErrorCode).WithCause(err)
+			return nil, internal.NewError(internal.UnknownErrorCode).WithCause(err)
 		}
 
 		if nullableCategoryName.Valid && nullableCategoryID.Valid {

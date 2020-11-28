@@ -4,10 +4,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/crounch-me/back/domain/categories"
-	"github.com/crounch-me/back/domain/lists"
-	"github.com/crounch-me/back/domain/products"
-	"github.com/crounch-me/back/domain/users"
+	"github.com/crounch-me/back/internal/categories"
+	"github.com/crounch-me/back/internal/list"
+	"github.com/crounch-me/back/internal/products"
+	"github.com/crounch-me/back/internal/users"
 	"gotest.tools/assert"
 )
 
@@ -35,7 +35,7 @@ func TestGetListOK(t *testing.T) {
 		Email: email,
 	}
 
-	list := &lists.List{
+	list := &list.List{
 		ID:              listID,
 		Name:            listName,
 		CreationDate:    creationDate,
@@ -43,7 +43,7 @@ func TestGetListOK(t *testing.T) {
 		Contributors: []*users.User{
 			user,
 		},
-		Products: []*lists.ProductInList{
+		Products: []*list.ProductInList{
 			{
 				Product: &products.Product{
 					ID:   productID1,

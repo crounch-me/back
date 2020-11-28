@@ -3,14 +3,14 @@ package products
 import (
 	"testing"
 
-	"github.com/crounch-me/back/domain"
-	"github.com/crounch-me/back/domain/users"
+	"github.com/crounch-me/back/internal"
+	"github.com/crounch-me/back/internal/users"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCreateProductGenerateIDError(t *testing.T) {
-	generationMock := &domain.GenerationMock{}
-	generationMock.On("GenerateID").Return("", domain.NewError(domain.UnknownErrorCode))
+	generationMock := &internal.GenerationMock{}
+	generationMock.On("GenerateID").Return("", internal.NewError(internal.UnknownErrorCode))
 
 	productService := &ProductService{
 		Generation: generationMock,
@@ -19,7 +19,7 @@ func TestCreateProductGenerateIDError(t *testing.T) {
 	result, err := productService.CreateProduct("name", "user-id")
 
 	assert.Empty(t, result)
-	assert.Equal(t, domain.UnknownErrorCode, err.Code)
+	assert.Equal(t, internal.UnknownErrorCode, err.Code)
 }
 
 func TestCreateProductCreateProductError(t *testing.T) {
@@ -27,11 +27,11 @@ func TestCreateProductCreateProductError(t *testing.T) {
 	userID := "user-id"
 	productID := "product-id"
 
-	generationMock := &domain.GenerationMock{}
+	generationMock := &internal.GenerationMock{}
 	generationMock.On("GenerateID").Return(productID, nil)
 
 	productStorageMock := &StorageMock{}
-	productStorageMock.On("CreateProduct", productID, name, userID).Return(domain.NewError(domain.UnknownErrorCode))
+	productStorageMock.On("CreateProduct", productID, name, userID).Return(internal.NewError(internal.UnknownErrorCode))
 
 	productService := &ProductService{
 		Generation:     generationMock,
@@ -41,7 +41,7 @@ func TestCreateProductCreateProductError(t *testing.T) {
 	result, err := productService.CreateProduct(name, userID)
 
 	assert.Empty(t, result)
-	assert.Equal(t, domain.UnknownErrorCode, err.Code)
+	assert.Equal(t, internal.UnknownErrorCode, err.Code)
 }
 
 func TestCreateProductOK(t *testing.T) {
@@ -49,7 +49,7 @@ func TestCreateProductOK(t *testing.T) {
 	userID := "user-id"
 	productID := "product-id"
 
-	generationMock := &domain.GenerationMock{}
+	generationMock := &internal.GenerationMock{}
 	generationMock.On("GenerateID").Return(productID, nil)
 
 	productStorageMock := &StorageMock{}

@@ -1,4 +1,4 @@
-package domain
+package internal
 
 import "fmt"
 
@@ -28,7 +28,7 @@ const (
 	InvalidErrorCode      = "invalid-error"
 )
 
-// NewError creates a new error from the domain
+// NewError creates a new error from the /internal
 func NewError(code string) *Error {
 	return &Error{
 		Code: code,
@@ -41,8 +41,8 @@ func (e *Error) WithCause(cause error) *Error {
 }
 
 func (e *Error) WithCallError(callError *CallError) *Error {
-  e.Call = callError
-  return e
+	e.Call = callError
+	return e
 }
 
 func (e *Error) WithCall(packageName, methodName string) *Error {

@@ -3,25 +3,25 @@ package postgres
 import (
 	"fmt"
 
-	"github.com/crounch-me/back/domain"
+	"github.com/crounch-me/back/internal"
 )
 
-func (s *PostgresStorage) CreateContributor(listID, userID string) *domain.Error {
-  query := fmt.Sprintf(`
+func (s *PostgresStorage) CreateContributor(listID, userID string) *internal.Error {
+	query := fmt.Sprintf(`
     INSERT INTO %s."contributor" (list_id, user_id)
     VALUES ($1, $2)
   `, s.schema)
 
-  _, err := s.session.Exec(query, listID, userID)
+	_, err := s.session.Exec(query, listID, userID)
 
-  if err != nil {
-    return domain.NewError(domain.UnknownErrorCode).WithCause(err)
-  }
+	if err != nil {
+		return internal.NewError(internal.UnknownErrorCode).WithCause(err)
+	}
 
-  return nil
+	return nil
 }
 
-func (s *PostgresStorage) GetContributorsIDs(listID string) ([]string, *domain.Error) {
+func (s *PostgresStorage) GetContributorsIDs(listID string) ([]string, *internal.Error) {
 	query := fmt.Sprintf(`
     SELECT c.user_id
     FROM %s.contributor c
@@ -29,23 +29,23 @@ func (s *PostgresStorage) GetContributorsIDs(listID string) ([]string, *domain.E
   `, s.schema)
 
 	rows, err := s.session.Query(query, listID)
-  defer rows.Close()
+	defer rows.Close()
 
-  if err != nil {
-		return nil, domain.NewError(domain.UnknownErrorCode).WithCause(err)
+	if err != nil {
+		return nil, internal.NewError(internal.UnknownErrorCode).WithCause(err)
 	}
 
 	contributorIDs := make([]string, 0)
 	for rows.Next() {
 		if err = rows.Err(); err != nil {
-			return nil, domain.NewError(domain.UnknownErrorCode).WithCause(err)
+			return nil, internal.NewError(internal.UnknownErrorCode).WithCause(err)
 		}
 
 		contributorID := ""
 
 		err = rows.Scan(&contributorID)
 		if err != nil {
-			return nil, domain.NewError(domain.UnknownErrorCode).WithCause(err)
+			return nil, internal.NewError(internal.UnknownErrorCode).WithCause(err)
 		}
 
 		contributorIDs = append(contributorIDs, contributorID)

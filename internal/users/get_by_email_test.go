@@ -3,7 +3,7 @@ package users
 import (
 	"testing"
 
-	"github.com/crounch-me/back/domain"
+	"github.com/crounch-me/back/internal"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -11,7 +11,7 @@ func TestGetByEmailGetByEmailError(t *testing.T) {
 	email := "email"
 
 	userStorageMock := &StorageMock{}
-	userStorageMock.On("GetByEmail", email).Return(nil, domain.NewError(domain.UnknownErrorCode))
+	userStorageMock.On("GetByEmail", email).Return(nil, internal.NewError(internal.UnknownErrorCode))
 
 	userService := &UserService{
 		UserStorage: userStorageMock,
@@ -21,7 +21,7 @@ func TestGetByEmailGetByEmailError(t *testing.T) {
 
 	userStorageMock.AssertCalled(t, "GetByEmail", email)
 	assert.Empty(t, result)
-	assert.Equal(t, domain.UnknownErrorCode, err.Code)
+	assert.Equal(t, internal.UnknownErrorCode, err.Code)
 }
 
 func TestGetByEmailOK(t *testing.T) {

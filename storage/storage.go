@@ -1,18 +1,18 @@
 package storage
 
 import (
-	"github.com/crounch-me/back/domain/authorization.go"
-	"github.com/crounch-me/back/domain/contributors"
-	"github.com/crounch-me/back/domain/lists"
-	"github.com/crounch-me/back/domain/products"
-	"github.com/crounch-me/back/domain/users"
+	"github.com/crounch-me/back/internal/authorization.go"
+	"github.com/crounch-me/back/internal/contributors"
+	"github.com/crounch-me/back/internal/list"
+	"github.com/crounch-me/back/internal/products"
+	"github.com/crounch-me/back/internal/users"
 )
 
 // Storage defines every data functions that we need
 type Storage interface {
 	users.Storage
 	authorization.Storage
-	lists.Storage
-  products.Storage
-  contributors.Storage
+	list.Storage
+	products.Storage
+	contributors.Storage
 }

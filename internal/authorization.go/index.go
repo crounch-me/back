@@ -1,17 +1,17 @@
 package authorization
 
 import (
-	"github.com/crounch-me/back/domain"
-	"github.com/crounch-me/back/domain/users"
+	"github.com/crounch-me/back/internal"
+	"github.com/crounch-me/back/internal/users"
 )
 
 type AuthorizationService struct {
 	UserStorage          users.Storage
 	AuthorizationStorage Storage
-	Generation           domain.Generation
+	Generation           internal.Generation
 }
 
-func (as *AuthorizationService) CreateAuthorization(email, password string) (*Authorization, *domain.Error) {
+func (as *AuthorizationService) CreateAuthorization(email, password string) (*Authorization, *internal.Error) {
 	user, err := as.UserStorage.GetByEmail(email)
 	if err != nil {
 		return nil, err
@@ -19,7 +19,7 @@ func (as *AuthorizationService) CreateAuthorization(email, password string) (*Au
 
 	isPasswordEqual := as.Generation.ComparePassword(*user.Password, password)
 	if !isPasswordEqual {
-		return nil, domain.NewError(WrongPasswordErrorCode)
+		return nil, internal.NewError(WrongPasswordErrorCode)
 	}
 
 	token, err := as.Generation.GenerateToken()
@@ -43,12 +43,12 @@ func (as *AuthorizationService) CreateAuthorization(email, password string) (*Au
 	return authorization, nil
 }
 
-func (as *AuthorizationService) Logout(token string) *domain.Error {
-  user, err := as.UserStorage.GetByToken(token)
+func (as *AuthorizationService) Logout(token string) *internal.Error {
+	user, err := as.UserStorage.GetByToken(token)
 
-  if err != nil {
-    return err
-  }
+	if err != nil {
+		return err
+	}
 
-  return as.AuthorizationStorage.DeleteAuthorization(user.ID, token)
+	return as.AuthorizationStorage.DeleteAuthorization(user.ID, token)
 }

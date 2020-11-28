@@ -12,11 +12,11 @@ import (
 
 	"github.com/crounch-me/back/builders"
 	"github.com/crounch-me/back/configuration"
-	"github.com/crounch-me/back/domain"
-	"github.com/crounch-me/back/domain/authorization.go"
-	"github.com/crounch-me/back/domain/lists"
-	"github.com/crounch-me/back/domain/products"
-	"github.com/crounch-me/back/domain/users"
+	"github.com/crounch-me/back/internal"
+	"github.com/crounch-me/back/internal/authorization.go"
+	"github.com/crounch-me/back/internal/list"
+	"github.com/crounch-me/back/internal/products"
+	"github.com/crounch-me/back/internal/users"
 	"github.com/crounch-me/back/storage"
 	"github.com/crounch-me/back/storage/postgres"
 	"github.com/crounch-me/back/util"
@@ -29,23 +29,23 @@ const (
 
 type Services struct {
 	Authorization *authorization.AuthorizationService
-	List          *lists.ListService
+	List          *list.ListService
 	Product       *products.ProductService
 	User          *users.UserService
 }
 
 type Builders struct {
-  List *builders.ListBuilder
+	List *builders.ListBuilder
 }
 
 // Context holds everything to respond to requests
 type Context struct {
-	Generation domain.Generation
+	Generation internal.Generation
 	Storage    storage.Storage
 	Config     *configuration.Config
 	Validator  *util.Validator
-  Services   *Services
-  Builders *Builders
+	Services   *Services
+	Builders   *Builders
 }
 
 // NewContext creates and initialize everything for the requests
@@ -62,38 +62,38 @@ func NewContext(config *configuration.Config) *Context {
 		Storage:   storage,
 		Config:    config,
 		Validator: validator,
-    Services:  NewServices(storage, generation),
-    Builders: NewBuilders(),
+		Services:  NewServices(storage, generation),
+		Builders:  NewBuilders(),
 	}
 }
 
 // LogAndSendError logs and sends the error
 func (hc *Context) LogAndSendError(c *gin.Context, err error) {
 	var status int
-	if domainErr, ok := err.(*domain.Error); ok {
-		status = hc.ErrorCodeToHTTPStatus(domainErr.Code)
+	if internalErr, ok := err.(*internal.Error); ok {
+		status = hc.ErrorCodeToHTTPStatus(internalErr.Code)
 		logBuilder := logrus.WithTime(time.Now())
 
-		if domainErr.Call != nil {
+		if internalErr.Call != nil {
 			logBuilder = logBuilder.
-				WithField("method", domainErr.Call.MethodName).
-				WithField("package", domainErr.Call.PackageName)
+				WithField("method", internalErr.Call.MethodName).
+				WithField("package", internalErr.Call.PackageName)
 		}
 
-		if domainErr.Cause != nil {
-			logBuilder = logBuilder.WithError(domainErr.Cause)
+		if internalErr.Cause != nil {
+			logBuilder = logBuilder.WithError(internalErr.Cause)
 		}
 
 		if status < http.StatusBadRequest || status >= http.StatusInternalServerError {
-			logBuilder.Error(domainErr.Code)
+			logBuilder.Error(internalErr.Code)
 		} else {
-			if domainErr.Fields != nil {
-				for _, field := range domainErr.Fields {
+			if internalErr.Fields != nil {
+				for _, field := range internalErr.Fields {
 					logBuilder = logBuilder.WithField(field.Name, field.Error)
 				}
 			}
 
-			logBuilder.Debug(domainErr.Code)
+			logBuilder.Debug(internalErr.Code)
 		}
 	} else {
 		status = http.StatusInternalServerError
@@ -117,32 +117,32 @@ func (hc *Context) UnmarshalPayload(c *gin.Context, i interface{}) error {
 	return nil
 }
 
-func (hc *Context) GetUserIDFromContext(c *gin.Context) (string, *domain.Error) {
+func (hc *Context) GetUserIDFromContext(c *gin.Context) (string, *internal.Error) {
 	userID, exists := c.Get(ContextUserID)
 	if !exists {
-		return "", domain.NewError(domain.UnknownErrorCode).WithCall("handler", "GetUserIDFromContext")
+		return "", internal.NewError(internal.UnknownErrorCode).WithCall("handler", "GetUserIDFromContext")
 	}
 	return userID.(string), nil
 }
 
-func (hc *Context) UnmarshalAndValidate(c *gin.Context, i interface{}) *domain.Error {
+func (hc *Context) UnmarshalAndValidate(c *gin.Context, i interface{}) *internal.Error {
 	err := hc.UnmarshalPayload(c, i)
 
 	if err != nil {
-		return domain.NewError(domain.UnmarshalErrorCode).WithCause(err)
+		return internal.NewError(internal.UnmarshalErrorCode).WithCause(err)
 	}
 
 	err = hc.Validator.Struct(i)
 	if err != nil {
-		fields := make([]*domain.FieldError, 0)
+		fields := make([]*internal.FieldError, 0)
 		for _, e := range err.(validator.ValidationErrors) {
-			field := &domain.FieldError{
+			field := &internal.FieldError{
 				Error: e.Tag(),
 				Name:  e.Field(),
 			}
 			fields = append(fields, field)
 		}
-		return domain.NewError(domain.InvalidErrorCode).WithFields(fields)
+		return internal.NewError(internal.InvalidErrorCode).WithFields(fields)
 	}
 
 	return nil
@@ -150,24 +150,24 @@ func (hc *Context) UnmarshalAndValidate(c *gin.Context, i interface{}) *domain.E
 
 // NewBuilders create an object which contains all necessary builders
 func NewBuilders() *Builders {
-  return &Builders{
-    List: &builders.ListBuilder{},
-  }
+	return &Builders{
+		List: &builders.ListBuilder{},
+	}
 }
 
 // NewServices create an object which contains all necessary services
-func NewServices(storage storage.Storage, generation domain.Generation) *Services {
+func NewServices(storage storage.Storage, generation internal.Generation) *Services {
 	return &Services{
 		Authorization: &authorization.AuthorizationService{
 			AuthorizationStorage: storage,
 			UserStorage:          storage,
 			Generation:           generation,
 		},
-		List: &lists.ListService{
-			ListStorage:    storage,
-      ProductStorage: storage,
-      ContributorStorage: storage,
-			Generation:     generation,
+		List: &list.ListService{
+			ListStorage:        storage,
+			ProductStorage:     storage,
+			ContributorStorage: storage,
+			Generation:         generation,
 		},
 		Product: &products.ProductService{
 			ProductStorage: storage,

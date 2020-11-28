@@ -1,4 +1,4 @@
-package domain
+package internal
 
 type Generation interface {
 	GenerateToken() (string, *Error)

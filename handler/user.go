@@ -3,15 +3,15 @@ package handler
 import (
 	"net/http"
 
-	"github.com/crounch-me/back/domain"
-	"github.com/crounch-me/back/domain/users"
+	"github.com/crounch-me/back/internal"
+	"github.com/crounch-me/back/internal/users"
 
 	"github.com/gin-gonic/gin"
 )
 
 type SignupRequest struct {
-  Email string `json:"email" validate:"required,email"`
-  Password string `json:"password" validate:"required,gt=3"`
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required,gt=3"`
 }
 
 // Signup creates a new user
@@ -22,7 +22,7 @@ type SignupRequest struct {
 // @Produce  json
 // @Param user body SignupRequest true "User to signup with"
 // @Success 200 {object} users.User
-// @Failure 500 {object} domain.Error
+// @Failure 500 {object} internal.Error
 // @Router /users/signup [post]
 func (hc *Context) Signup(c *gin.Context) {
 	u := &users.User{}
@@ -45,8 +45,8 @@ func (hc *Context) Signup(c *gin.Context) {
 }
 
 type LoginRequest struct {
-  Email string `json:"email" validate:"required,email"`
-  Password string `json:"password" validate:"required,gt=3"`
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required,gt=3"`
 }
 
 // Login creates a new user authorization if is found and password is good
@@ -57,7 +57,7 @@ type LoginRequest struct {
 // @Produce  json
 // @Param user body LoginRequest true "User to login with"
 // @Success 200 {object} authorization.Authorization
-// @Failure 500 {object} domain.Error
+// @Failure 500 {object} internal.Error
 // @Router /users/login [post]
 func (hc *Context) Login(c *gin.Context) {
 	u := &LoginRequest{}
@@ -82,24 +82,24 @@ func (hc *Context) Login(c *gin.Context) {
 // @ID logout
 // @Tags user
 // @Success 204
-// @Failure 500 {object} domain.Error
+// @Failure 500 {object} internal.Error
 // @Security ApiKeyAuth
 // @Router /logout [post]
 func (hc *Context) Logout(c *gin.Context) {
 	token := c.GetHeader("Authorization")
 
 	if token == "" {
-		hc.LogAndSendError(c, domain.NewError(domain.UnauthorizedErrorCode))
+		hc.LogAndSendError(c, internal.NewError(internal.UnauthorizedErrorCode))
 		return
-  }
+	}
 
-  err := hc.Services.Authorization.Logout(token)
-  if err != nil {
-    hc.LogAndSendError(c, err)
-    return
-  }
+	err := hc.Services.Authorization.Logout(token)
+	if err != nil {
+		hc.LogAndSendError(c, err)
+		return
+	}
 
-  c.Status(http.StatusNoContent)
+	c.Status(http.StatusNoContent)
 }
 
 // Me returns user informations
@@ -108,14 +108,14 @@ func (hc *Context) Logout(c *gin.Context) {
 // @Tags user
 // @Produce json
 // @Success 200 {object} users.User
-// @Failure 500 {object} domain.Error
+// @Failure 500 {object} internal.Error
 // @Security ApiKeyAuth
 // @Router /me [get]
 func (hc *Context) Me(c *gin.Context) {
 	token := c.GetHeader("Authorization")
 
 	if token == "" {
-		hc.LogAndSendError(c, domain.NewError(domain.UnauthorizedErrorCode))
+		hc.LogAndSendError(c, internal.NewError(internal.UnauthorizedErrorCode))
 		return
 	}
 
@@ -123,7 +123,7 @@ func (hc *Context) Me(c *gin.Context) {
 
 	if err != nil {
 		if err.Code == users.UserNotFoundErrorCode {
-			hc.LogAndSendError(c, domain.NewError(domain.UnauthorizedErrorCode))
+			hc.LogAndSendError(c, internal.NewError(internal.UnauthorizedErrorCode))
 			return
 		}
 		hc.LogAndSendError(c, err)

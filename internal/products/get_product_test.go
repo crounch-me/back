@@ -3,8 +3,8 @@ package products
 import (
 	"testing"
 
-	"github.com/crounch-me/back/domain"
-	"github.com/crounch-me/back/domain/users"
+	"github.com/crounch-me/back/internal"
+	"github.com/crounch-me/back/internal/users"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -13,7 +13,7 @@ func TestGetProductGetProductError(t *testing.T) {
 	userID := "user-id"
 
 	productStorageMock := &StorageMock{}
-	productStorageMock.On("GetProduct", productID).Return(nil, domain.NewError(ProductNotFoundErrorCode))
+	productStorageMock.On("GetProduct", productID).Return(nil, internal.NewError(ProductNotFoundErrorCode))
 
 	productService := &ProductService{
 		ProductStorage: productStorageMock,
@@ -46,7 +46,7 @@ func TestGetProductUnauthorized(t *testing.T) {
 	result, err := productService.GetProduct(productID, userID)
 
 	assert.Empty(t, result)
-	assert.Equal(t, domain.ForbiddenErrorCode, err.Code)
+	assert.Equal(t, internal.ForbiddenErrorCode, err.Code)
 }
 
 func TestGetProductOK(t *testing.T) {

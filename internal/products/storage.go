@@ -1,11 +1,9 @@
 package products
 
-import (
-	"github.com/crounch-me/back/domain"
-)
+import "github.com/crounch-me/back/internal"
 
 type Storage interface {
-	CreateProduct(id, name, ownerID string) *domain.Error
-	GetProduct(id string) (*Product, *domain.Error)
-	SearchDefaults(name string, id string) ([]*Product, *domain.Error)
+	CreateProduct(id, name, ownerID string) *internal.Error
+	GetProduct(id string) (*Product, *internal.Error)
+	SearchDefaults(name string, id string) ([]*Product, *internal.Error)
 }

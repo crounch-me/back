@@ -14,9 +14,9 @@ import (
 	"github.com/crounch-me/back/configuration"
 	// Import documentations for swagger endpoint
 	_ "github.com/crounch-me/back/docs"
-	"github.com/crounch-me/back/domain"
-	"github.com/crounch-me/back/domain/users"
 	"github.com/crounch-me/back/handler"
+	"github.com/crounch-me/back/internal"
+	"github.com/crounch-me/back/internal/users"
 	"github.com/crounch-me/back/util"
 )
 
@@ -135,7 +135,7 @@ func checkAccess(us users.Storage) gin.HandlerFunc {
 
 		if err != nil {
 			if err.Code == users.UserNotFoundErrorCode {
-				c.AbortWithStatusJSON(http.StatusUnauthorized, domain.NewError(domain.UnauthorizedErrorCode))
+				c.AbortWithStatusJSON(http.StatusUnauthorized, internal.NewError(internal.UnauthorizedErrorCode))
 				return
 			}
 			log.WithError(err).Error("Unauthorized - Error while accessing database")

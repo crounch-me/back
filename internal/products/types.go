@@ -1,8 +1,8 @@
 package products
 
 import (
-	"github.com/crounch-me/back/domain/categories"
-	"github.com/crounch-me/back/domain/users"
+	"github.com/crounch-me/back/internal/categories"
+	"github.com/crounch-me/back/internal/users"
 )
 
 type Product struct {

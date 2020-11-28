@@ -3,7 +3,7 @@ package users
 import (
 	"testing"
 
-	"github.com/crounch-me/back/domain"
+	"github.com/crounch-me/back/internal"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -11,7 +11,7 @@ func TestGetByTokenGetByTokenError(t *testing.T) {
 	token := "token"
 
 	userStorageMock := &StorageMock{}
-	userStorageMock.On("GetByToken", token).Return(nil, domain.NewError(UserNotFoundErrorCode))
+	userStorageMock.On("GetByToken", token).Return(nil, internal.NewError(UserNotFoundErrorCode))
 
 	userService := &UserService{
 		UserStorage: userStorageMock,

@@ -1,6 +1,6 @@
 package authorization
 
-import "github.com/crounch-me/back/domain/users"
+import "github.com/crounch-me/back/internal/users"
 
 type Authorization struct {
 	AccessToken  string      `json:"accessToken"`

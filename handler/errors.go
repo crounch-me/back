@@ -3,11 +3,11 @@ package handler
 import (
 	"net/http"
 
-	"github.com/crounch-me/back/domain"
-	"github.com/crounch-me/back/domain/authorization.go"
-	"github.com/crounch-me/back/domain/lists"
-	"github.com/crounch-me/back/domain/products"
-	"github.com/crounch-me/back/domain/users"
+	"github.com/crounch-me/back/internal"
+	"github.com/crounch-me/back/internal/authorization.go"
+	"github.com/crounch-me/back/internal/list"
+	"github.com/crounch-me/back/internal/products"
+	"github.com/crounch-me/back/internal/users"
 )
 
 var errorToStatus map[string]int
@@ -15,23 +15,23 @@ var errorToStatus map[string]int
 func initializeErrorsMap() {
 	errorToStatus = make(map[string]int)
 
-	// Domain errors
-	errorToStatus[domain.UnmarshalErrorCode] = http.StatusBadRequest
-	errorToStatus[domain.InvalidErrorCode] = http.StatusBadRequest
-	errorToStatus[domain.ForbiddenErrorCode] = http.StatusForbidden
-	errorToStatus[domain.UnauthorizedErrorCode] = http.StatusUnauthorized
-	errorToStatus[domain.UnknownErrorCode] = http.StatusInternalServerError
+	// Internal errors
+	errorToStatus[internal.UnmarshalErrorCode] = http.StatusBadRequest
+	errorToStatus[internal.InvalidErrorCode] = http.StatusBadRequest
+	errorToStatus[internal.ForbiddenErrorCode] = http.StatusForbidden
+	errorToStatus[internal.UnauthorizedErrorCode] = http.StatusUnauthorized
+	errorToStatus[internal.UnknownErrorCode] = http.StatusInternalServerError
 
 	// User errors
 	errorToStatus[users.UserNotFoundErrorCode] = http.StatusNotFound
 	errorToStatus[users.DuplicateUserErrorCode] = http.StatusConflict
 
 	// List errors
-	errorToStatus[lists.ListNotFoundErrorCode] = http.StatusNotFound
-	errorToStatus[lists.DuplicateProductInListErrorCode] = http.StatusConflict
+	errorToStatus[list.ListNotFoundErrorCode] = http.StatusNotFound
+	errorToStatus[list.DuplicateProductInListErrorCode] = http.StatusConflict
 
 	// Product in list errors
-	errorToStatus[lists.ProductInListNotFoundErrorCode] = http.StatusNotFound
+	errorToStatus[list.ProductInListNotFoundErrorCode] = http.StatusNotFound
 
 	// Product errors
 	errorToStatus[products.ProductNotFoundErrorCode] = http.StatusNotFound

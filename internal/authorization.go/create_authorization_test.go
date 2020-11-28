@@ -3,8 +3,8 @@ package authorization
 import (
 	"testing"
 
-	"github.com/crounch-me/back/domain"
-	"github.com/crounch-me/back/domain/users"
+	"github.com/crounch-me/back/internal"
+	"github.com/crounch-me/back/internal/users"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -13,7 +13,7 @@ func TestCreateAuthorizationGetUserByEmailError(t *testing.T) {
 	password := "password"
 
 	userStorageMock := &users.StorageMock{}
-	userStorageMock.On("GetByEmail", email).Return(nil, domain.NewError(users.UserNotFoundErrorCode))
+	userStorageMock.On("GetByEmail", email).Return(nil, internal.NewError(users.UserNotFoundErrorCode))
 
 	authorizationService := &AuthorizationService{
 		UserStorage: userStorageMock,
@@ -35,7 +35,7 @@ func TestCreateAuthorizationWrongPassword(t *testing.T) {
 		Password: &userPassword,
 	}
 
-	generationMock := &domain.GenerationMock{}
+	generationMock := &internal.GenerationMock{}
 	generationMock.On("ComparePassword", userPassword, password).Return(false)
 
 	userStorageMock := &users.StorageMock{}
@@ -65,15 +65,15 @@ func TestCreateAuthorizationGenerateTokenError(t *testing.T) {
 		Password: &password,
 	}
 
-	generationMock := &domain.GenerationMock{}
+	generationMock := &internal.GenerationMock{}
 	generationMock.On("ComparePassword", password, password).Return(true)
-	generationMock.On("GenerateToken").Return("", domain.NewError(domain.UnknownErrorCode))
+	generationMock.On("GenerateToken").Return("", internal.NewError(internal.UnknownErrorCode))
 
 	userStorageMock := &users.StorageMock{}
 	userStorageMock.On("GetByEmail", email).Return(user, nil)
 
 	authorizationStorageMock := &StorageMock{}
-	authorizationStorageMock.On("CreateAuthorization", userID, token).Return(domain.NewError(domain.UnknownErrorCode))
+	authorizationStorageMock.On("CreateAuthorization", userID, token).Return(internal.NewError(internal.UnknownErrorCode))
 
 	authorizationService := &AuthorizationService{
 		AuthorizationStorage: authorizationStorageMock,
@@ -88,7 +88,7 @@ func TestCreateAuthorizationGenerateTokenError(t *testing.T) {
 	userStorageMock.AssertCalled(t, "GetByEmail", email)
 	authorizationStorageMock.AssertNotCalled(t, "CreateAuthorization")
 	assert.Empty(t, result)
-	assert.Equal(t, domain.UnknownErrorCode, err.Code)
+	assert.Equal(t, internal.UnknownErrorCode, err.Code)
 }
 func TestCreateAuthorizationCreateAuthorizationError(t *testing.T) {
 	email := "email"
@@ -100,7 +100,7 @@ func TestCreateAuthorizationCreateAuthorizationError(t *testing.T) {
 		Password: &password,
 	}
 
-	generationMock := &domain.GenerationMock{}
+	generationMock := &internal.GenerationMock{}
 	generationMock.On("ComparePassword", password, password).Return(true)
 	generationMock.On("GenerateToken").Return(token, nil)
 
@@ -108,7 +108,7 @@ func TestCreateAuthorizationCreateAuthorizationError(t *testing.T) {
 	userStorageMock.On("GetByEmail", email).Return(user, nil)
 
 	authorizationStorageMock := &StorageMock{}
-	authorizationStorageMock.On("CreateAuthorization", userID, token).Return(domain.NewError(domain.UnknownErrorCode))
+	authorizationStorageMock.On("CreateAuthorization", userID, token).Return(internal.NewError(internal.UnknownErrorCode))
 
 	authorizationService := &AuthorizationService{
 		AuthorizationStorage: authorizationStorageMock,
@@ -123,7 +123,7 @@ func TestCreateAuthorizationCreateAuthorizationError(t *testing.T) {
 	userStorageMock.AssertCalled(t, "GetByEmail", email)
 	authorizationStorageMock.AssertCalled(t, "CreateAuthorization", userID, token)
 	assert.Empty(t, result)
-	assert.Equal(t, domain.UnknownErrorCode, err.Code)
+	assert.Equal(t, internal.UnknownErrorCode, err.Code)
 }
 
 func TestCreateAuthorizationOK(t *testing.T) {
@@ -136,7 +136,7 @@ func TestCreateAuthorizationOK(t *testing.T) {
 		Password: &password,
 	}
 
-	generationMock := &domain.GenerationMock{}
+	generationMock := &internal.GenerationMock{}
 	generationMock.On("ComparePassword", password, password).Return(true)
 	generationMock.On("GenerateToken").Return(token, nil)
 

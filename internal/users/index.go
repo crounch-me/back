@@ -1,7 +1,7 @@
 package users
 
 import (
-	"github.com/crounch-me/back/domain"
+	"github.com/crounch-me/back/internal"
 )
 
 const (
@@ -10,10 +10,10 @@ const (
 
 type UserService struct {
 	UserStorage Storage
-	Generation  domain.Generation
+	Generation  internal.Generation
 }
 
-func (us *UserService) CreateUser(email string, password string) (*User, *domain.Error) {
+func (us *UserService) CreateUser(email string, password string) (*User, *internal.Error) {
 	hashedPassword, err := us.Generation.HashPassword(password)
 	if err != nil {
 		return nil, err
@@ -26,7 +26,7 @@ func (us *UserService) CreateUser(email string, password string) (*User, *domain
 
 	_, err = us.UserStorage.GetByEmail(email)
 	if err == nil {
-		return nil, domain.NewError(DuplicateUserErrorCode)
+		return nil, internal.NewError(DuplicateUserErrorCode)
 	} else if err.Code != UserNotFoundErrorCode {
 		return nil, err
 	}
@@ -44,7 +44,7 @@ func (us *UserService) CreateUser(email string, password string) (*User, *domain
 	return user, nil
 }
 
-func (us *UserService) GetByEmail(email string) (*User, *domain.Error) {
+func (us *UserService) GetByEmail(email string) (*User, *internal.Error) {
 	user, err := us.UserStorage.GetByEmail(email)
 	if err != nil {
 		return nil, err
@@ -53,7 +53,7 @@ func (us *UserService) GetByEmail(email string) (*User, *domain.Error) {
 	return user, nil
 }
 
-func (us *UserService) GetByToken(token string) (*User, *domain.Error) {
+func (us *UserService) GetByToken(token string) (*User, *internal.Error) {
 	user, err := us.UserStorage.GetByToken(token)
 	if err != nil {
 		return nil, err

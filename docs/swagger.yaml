@@ -61,27 +61,6 @@ definitions:
       name:
         type: string
     type: object
-  domain.Error:
-    properties:
-      error:
-        type: string
-      fields:
-        items:
-          $ref: '#/definitions/domain.FieldError'
-        type: array
-    type: object
-  domain.FieldError:
-    properties:
-      error:
-        type: string
-      name:
-        type: string
-    type: object
-  domain.Health:
-    properties:
-      alive:
-        type: boolean
-    type: object
   handler.CreateListRequest:
     properties:
       name:
@@ -121,7 +100,28 @@ definitions:
     - email
     - password
     type: object
-  lists.List:
+  internal.Error:
+    properties:
+      error:
+        type: string
+      fields:
+        items:
+          $ref: '#/definitions/internal.FieldError'
+        type: array
+    type: object
+  internal.FieldError:
+    properties:
+      error:
+        type: string
+      name:
+        type: string
+    type: object
+  internal.Health:
+    properties:
+      alive:
+        type: boolean
+    type: object
+  list.List:
     properties:
       archivationDate:
         type: string
@@ -137,12 +137,12 @@ definitions:
         type: string
       products:
         items:
-          $ref: '#/definitions/lists.ProductInList'
+          $ref: '#/definitions/list.ProductInList'
         type: array
     required:
     - name
     type: object
-  lists.ProductInList:
+  list.ProductInList:
     properties:
       bought:
         type: boolean
@@ -157,7 +157,7 @@ definitions:
     required:
     - name
     type: object
-  lists.ProductInListLink:
+  list.ProductInListLink:
     properties:
       bought:
         type: boolean
@@ -166,7 +166,7 @@ definitions:
       productId:
         type: string
     type: object
-  lists.UpdateProductInList:
+  list.UpdateProductInList:
     properties:
       bought:
         type: boolean
@@ -212,7 +212,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/domain.Health'
+            $ref: '#/definitions/internal.Health'
         "500":
           description: Internal Server Error
       summary: Return health of application
@@ -226,12 +226,12 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/lists.List'
+              $ref: '#/definitions/list.List'
             type: array
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/domain.Error'
+            $ref: '#/definitions/internal.Error'
       security:
       - ApiKeyAuth: []
       summary: Get the lists of the owner
@@ -254,11 +254,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/lists.List'
+            $ref: '#/definitions/list.List'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/domain.Error'
+            $ref: '#/definitions/internal.Error'
       security:
       - ApiKeyAuth: []
       summary: Create a list
@@ -280,7 +280,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/domain.Error'
+            $ref: '#/definitions/internal.Error'
       security:
       - ApiKeyAuth: []
       summary: Delete the entire list with its products
@@ -304,7 +304,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/domain.Error'
+            $ref: '#/definitions/internal.Error'
       security:
       - ApiKeyAuth: []
       summary: Reads a list with products in categories
@@ -331,7 +331,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/domain.Error'
+            $ref: '#/definitions/internal.Error'
       security:
       - ApiKeyAuth: []
       summary: Delete the product from the list
@@ -347,7 +347,7 @@ paths:
         name: productInList
         required: true
         schema:
-          $ref: '#/definitions/lists.UpdateProductInList'
+          $ref: '#/definitions/list.UpdateProductInList'
       - description: Product in list
         in: path
         name: listID
@@ -364,11 +364,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/lists.ProductInListLink'
+            $ref: '#/definitions/list.ProductInListLink'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/domain.Error'
+            $ref: '#/definitions/internal.Error'
       security:
       - ApiKeyAuth: []
       summary: Update the product in the list partially
@@ -393,11 +393,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/lists.ProductInListLink'
+            $ref: '#/definitions/list.ProductInListLink'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/domain.Error'
+            $ref: '#/definitions/internal.Error'
       security:
       - ApiKeyAuth: []
       summary: Add the product to the list
@@ -411,7 +411,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/domain.Error'
+            $ref: '#/definitions/internal.Error'
       security:
       - ApiKeyAuth: []
       summary: Removes an user authorization
@@ -430,7 +430,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/domain.Error'
+            $ref: '#/definitions/internal.Error'
       security:
       - ApiKeyAuth: []
       summary: Removes an user authorization
@@ -456,7 +456,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/domain.Error'
+            $ref: '#/definitions/internal.Error'
       security:
       - ApiKeyAuth: []
       summary: Create a new product
@@ -484,7 +484,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/domain.Error'
+            $ref: '#/definitions/internal.Error'
       security:
       - ApiKeyAuth: []
       summary: Search a product by its name in default products, it removes accentuated characters and is case insensitive
@@ -512,7 +512,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/domain.Error'
+            $ref: '#/definitions/internal.Error'
       summary: Creates a new user authorization
       tags:
       - user
@@ -538,7 +538,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/domain.Error'
+            $ref: '#/definitions/internal.Error'
       summary: Creates a new user
       tags:
       - user

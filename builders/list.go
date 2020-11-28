@@ -3,9 +3,9 @@ package builders
 import (
 	"time"
 
-	"github.com/crounch-me/back/domain/categories"
-	"github.com/crounch-me/back/domain/lists"
-	"github.com/crounch-me/back/domain/users"
+	"github.com/crounch-me/back/internal/categories"
+	"github.com/crounch-me/back/internal/list"
+	"github.com/crounch-me/back/internal/users"
 )
 
 const (
@@ -43,7 +43,7 @@ type GetListResponse struct {
 }
 
 // GetList builds the response to GetList request from a regular List
-func (lb *ListBuilder) GetList(list *lists.List) *GetListResponse {
+func (lb *ListBuilder) GetList(list *list.List) *GetListResponse {
 	listResponse := &GetListResponse{
 		ID:              list.ID,
 		Name:            list.Name,

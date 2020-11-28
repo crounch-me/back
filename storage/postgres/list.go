@@ -5,15 +5,15 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/crounch-me/back/domain"
-	"github.com/crounch-me/back/domain/categories"
-	"github.com/crounch-me/back/domain/lists"
-	"github.com/crounch-me/back/domain/products"
+	"github.com/crounch-me/back/internal"
+	"github.com/crounch-me/back/internal/categories"
+	"github.com/crounch-me/back/internal/list"
+	"github.com/crounch-me/back/internal/products"
 	"github.com/crounch-me/back/util"
 )
 
 // CreateList inserts a new list
-func (s *PostgresStorage) CreateList(id, name string, creationDate time.Time) *domain.Error {
+func (s *PostgresStorage) CreateList(id, name string, creationDate time.Time) *internal.Error {
 	query := fmt.Sprintf(`
 		INSERT INTO %s."list"(id, name, creation_date)
 		VALUES ($1, $2, $3)
@@ -22,14 +22,14 @@ func (s *PostgresStorage) CreateList(id, name string, creationDate time.Time) *d
 	_, err := s.session.Exec(query, id, name, creationDate)
 
 	if err != nil {
-		return domain.NewError(domain.UnknownErrorCode).WithCause(err)
+		return internal.NewError(internal.UnknownErrorCode).WithCause(err)
 	}
 
 	return nil
 }
 
 // ArchiveList sets the archivation date into the list table
-func (s *PostgresStorage) ArchiveList(listID string, archivationDate time.Time) *domain.Error {
+func (s *PostgresStorage) ArchiveList(listID string, archivationDate time.Time) *internal.Error {
 	query := fmt.Sprintf(`
     UPDATE %s.list
     SET archivation_date = $1
@@ -38,14 +38,14 @@ func (s *PostgresStorage) ArchiveList(listID string, archivationDate time.Time) 
 
 	_, err := s.session.Exec(query, archivationDate, listID)
 	if err != nil {
-		return domain.NewError(domain.UnknownErrorCode).WithCause(err)
+		return internal.NewError(internal.UnknownErrorCode).WithCause(err)
 	}
 
 	return nil
 }
 
 // GetUsersLists get all user's lists
-func (s *PostgresStorage) GetUsersLists(userID string) ([]*lists.List, *domain.Error) {
+func (s *PostgresStorage) GetUsersLists(userID string) ([]*list.List, *internal.Error) {
 	query := fmt.Sprintf(`
     SELECT l.id, l.name, l.creation_date, l.archivation_date
     FROM %s.list l
@@ -56,20 +56,20 @@ func (s *PostgresStorage) GetUsersLists(userID string) ([]*lists.List, *domain.E
 	rows, err := s.session.Query(query, userID)
 	defer rows.Close()
 	if err != nil {
-		return nil, domain.NewError(domain.UnknownErrorCode).WithCause(err)
+		return nil, internal.NewError(internal.UnknownErrorCode).WithCause(err)
 	}
 
-	ownersLists := make([]*lists.List, 0)
+	ownersLists := make([]*list.List, 0)
 	for rows.Next() {
 		if err = rows.Err(); err != nil {
-			return nil, domain.NewError(domain.UnknownErrorCode).WithCause(err)
+			return nil, internal.NewError(internal.UnknownErrorCode).WithCause(err)
 		}
 
-		list := &lists.List{}
+		list := &list.List{}
 
 		err = rows.Scan(&list.ID, &list.Name, &list.CreationDate, &list.ArchivationDate)
 		if err != nil {
-			return nil, domain.NewError(domain.UnknownErrorCode).WithCause(err)
+			return nil, internal.NewError(internal.UnknownErrorCode).WithCause(err)
 		}
 
 		ownersLists = append(ownersLists, list)
@@ -79,36 +79,36 @@ func (s *PostgresStorage) GetUsersLists(userID string) ([]*lists.List, *domain.E
 }
 
 // GetList retrieves a list with its id
-func (s *PostgresStorage) GetList(id string) (*lists.List, *domain.Error) {
+func (s *PostgresStorage) GetList(id string) (*list.List, *internal.Error) {
 	query := fmt.Sprintf(`
     SELECT l.id, l.name, l.creation_date, l.archivation_date
     FROM %s.list l
     WHERE l.id = $1
   `, s.schema)
 
-	callError := &domain.CallError{
+	callError := &internal.CallError{
 		PackageName: "postgres",
 		MethodName:  "GetList",
 	}
 
 	row := s.session.QueryRow(query, id)
 
-	l := &lists.List{}
+	l := &list.List{}
 	err := row.Scan(&l.ID, &l.Name, &l.CreationDate, &l.ArchivationDate)
 
 	if err == sql.ErrNoRows {
-		return nil, domain.NewError(lists.ListNotFoundErrorCode).WithCallError(callError)
+		return nil, internal.NewError(list.ListNotFoundErrorCode).WithCallError(callError)
 	}
 
 	if err != nil {
-		return nil, domain.NewError(domain.UnknownErrorCode).WithCallError(callError).WithCause(err)
+		return nil, internal.NewError(internal.UnknownErrorCode).WithCallError(callError).WithCause(err)
 	}
 
 	return l, nil
 }
 
 // UpdateProductInList updates the bought value in product in list
-func (s *PostgresStorage) UpdateProductInList(updateProductInList *lists.UpdateProductInList, productID, listID string) (*lists.ProductInListLink, *domain.Error) {
+func (s *PostgresStorage) UpdateProductInList(updateProductInList *list.UpdateProductInList, productID, listID string) (*list.ProductInListLink, *internal.Error) {
 	query := fmt.Sprintf(`
     UPDATE %s.product_in_list
     SET bought = $1
@@ -119,7 +119,7 @@ func (s *PostgresStorage) UpdateProductInList(updateProductInList *lists.UpdateP
 
 	row := s.session.QueryRow(query, updateProductInList.Bought, productID, listID)
 
-	pil := &lists.ProductInListLink{}
+	pil := &list.ProductInListLink{}
 
 	err := row.Scan(&pil.ProductID, &pil.ListID, &pil.Bought)
 	if err == sql.ErrNoRows {
@@ -127,13 +127,13 @@ func (s *PostgresStorage) UpdateProductInList(updateProductInList *lists.UpdateP
 		logger.WithError(err).
 			WithField("package", "postgres").
 			Debug("UpdateProductInList")
-		return nil, domain.NewError(lists.ProductInListNotFoundErrorCode)
+		return nil, internal.NewError(list.ProductInListNotFoundErrorCode)
 	}
 
 	return pil, nil
 }
 
-func (s *PostgresStorage) GetProductInList(productID string, listID string) (*lists.ProductInListLink, *domain.Error) {
+func (s *PostgresStorage) GetProductInList(productID string, listID string) (*list.ProductInListLink, *internal.Error) {
 	query := fmt.Sprintf(`
     SELECT product_id, list_id
     FROM %s.product_in_list
@@ -143,20 +143,20 @@ func (s *PostgresStorage) GetProductInList(productID string, listID string) (*li
 
 	row := s.session.QueryRow(query, productID, listID)
 
-	pil := &lists.ProductInListLink{}
+	pil := &list.ProductInListLink{}
 
 	err := row.Scan(&pil.ProductID, &pil.ListID)
 	if err == sql.ErrNoRows {
-		return nil, domain.NewError(lists.ProductInListNotFoundErrorCode)
+		return nil, internal.NewError(list.ProductInListNotFoundErrorCode)
 	}
 	if err != nil {
-		return nil, domain.NewError(domain.UnknownErrorCode).WithCause(err)
+		return nil, internal.NewError(internal.UnknownErrorCode).WithCause(err)
 	}
 
 	return pil, nil
 }
 
-func (s *PostgresStorage) GetProductsOfList(listID string) ([]*lists.ProductInList, *domain.Error) {
+func (s *PostgresStorage) GetProductsOfList(listID string) ([]*list.ProductInList, *internal.Error) {
 	query := fmt.Sprintf(`
     SELECT p.id, p.name, pil.bought, c.id, c.name
     FROM %s.product p
@@ -169,23 +169,23 @@ func (s *PostgresStorage) GetProductsOfList(listID string) ([]*lists.ProductInLi
 	rows, err := s.session.Query(query, listID)
 	defer rows.Close()
 	if err != nil {
-		return nil, domain.NewError(domain.UnknownErrorCode).WithCause(err)
+		return nil, internal.NewError(internal.UnknownErrorCode).WithCause(err)
 	}
 
-	productsOfList := make([]*lists.ProductInList, 0)
+	productsOfList := make([]*list.ProductInList, 0)
 	for rows.Next() {
 		if err = rows.Err(); err != nil {
-			return nil, domain.NewError(domain.UnknownErrorCode).WithCause(err)
+			return nil, internal.NewError(internal.UnknownErrorCode).WithCause(err)
 		}
 
-		productOfList := &lists.ProductInList{
+		productOfList := &list.ProductInList{
 			Product: &products.Product{},
 		}
 		var nullableCategoryID, nullableCategoryName sql.NullString
 
 		err = rows.Scan(&productOfList.ID, &productOfList.Name, &productOfList.Bought, &nullableCategoryID, &nullableCategoryName)
 		if err != nil {
-			return nil, domain.NewError(domain.UnknownErrorCode).WithCause(err)
+			return nil, internal.NewError(internal.UnknownErrorCode).WithCause(err)
 		}
 
 		if nullableCategoryID.Valid && nullableCategoryName.Valid {
@@ -201,7 +201,7 @@ func (s *PostgresStorage) GetProductsOfList(listID string) ([]*lists.ProductInLi
 	return productsOfList, nil
 }
 
-func (s *PostgresStorage) AddProductToList(productID string, listID string) *domain.Error {
+func (s *PostgresStorage) AddProductToList(productID string, listID string) *internal.Error {
 	query := fmt.Sprintf(`
     INSERT INTO %s.product_in_list(product_id, list_id)
     VALUES ($1, $2)
@@ -209,13 +209,13 @@ func (s *PostgresStorage) AddProductToList(productID string, listID string) *dom
 
 	_, err := s.session.Exec(query, productID, listID)
 	if err != nil {
-		return domain.NewError(domain.UnknownErrorCode).WithCause(err)
+		return internal.NewError(internal.UnknownErrorCode).WithCause(err)
 	}
 
 	return nil
 }
 
-func (s *PostgresStorage) DeleteProductFromList(productID string, listID string) *domain.Error {
+func (s *PostgresStorage) DeleteProductFromList(productID string, listID string) *internal.Error {
 	query := fmt.Sprintf(`
     DELETE FROM %s.product_in_list
     WHERE product_id = $1
@@ -224,33 +224,33 @@ func (s *PostgresStorage) DeleteProductFromList(productID string, listID string)
 
 	_, err := s.session.Exec(query, productID, listID)
 	if err != nil {
-		return domain.NewError(domain.UnknownErrorCode).WithCause(err)
+		return internal.NewError(internal.UnknownErrorCode).WithCause(err)
 	}
 
 	return nil
 }
 
-func (s *PostgresStorage) DeleteProductsFromList(listID string) *domain.Error {
+func (s *PostgresStorage) DeleteProductsFromList(listID string) *internal.Error {
 	deleteProductInListQuery := fmt.Sprintf(`
     DELETE FROM %s.product_in_list WHERE list_id = $1
   `, s.schema)
 
 	_, err := s.session.Exec(deleteProductInListQuery, listID)
 	if err != nil {
-		return domain.NewError(domain.UnknownErrorCode).WithCause(err)
+		return internal.NewError(internal.UnknownErrorCode).WithCause(err)
 	}
 
 	return nil
 }
 
-func (s *PostgresStorage) DeleteList(listID string) *domain.Error {
+func (s *PostgresStorage) DeleteList(listID string) *internal.Error {
 	deleteProductInListQuery := fmt.Sprintf(`
     DELETE FROM %s.list WHERE id = $1
   `, s.schema)
 
 	_, err := s.session.Exec(deleteProductInListQuery, listID)
 	if err != nil {
-		return domain.NewError(domain.UnknownErrorCode).WithCause(err)
+		return internal.NewError(internal.UnknownErrorCode).WithCause(err)
 	}
 
 	return nil
