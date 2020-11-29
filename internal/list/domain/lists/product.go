@@ -6,6 +6,10 @@ type Product struct {
 	uuid string
 }
 
+var (
+	ErrProductAlreadyInList = errors.New("product already in list")
+)
+
 func NewProduct(uuid string) (*Product, error) {
 	if uuid == "" {
 		return nil, errors.New("empty product uuid")

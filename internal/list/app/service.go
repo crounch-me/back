@@ -3,17 +3,19 @@ package app
 import (
 	"time"
 
+	"github.com/crounch-me/back/internal/list/domain/contributors"
 	"github.com/crounch-me/back/internal/list/domain/lists"
 	"github.com/crounch-me/back/util"
 )
 
 type ListService struct {
-	repository lists.Repository
+	listsRepository        lists.Repository
+	contributorsRepository contributors.Repository
 }
 
 func NewListService(listRepository lists.Repository) *ListService {
 	return &ListService{
-		repository: listRepository,
+		listsRepository: listRepository,
 	}
 }
 
@@ -25,12 +27,17 @@ func (l *ListService) CreateList(userUUID, name string) (string, error) {
 
 	creationDate := time.Now()
 
-	list, err := lists.NewList(listUUID, name, userUUID, creationDate)
+	list, err := lists.NewList(listUUID, name, creationDate)
 	if err != nil {
 		return "", err
 	}
 
-	err = l.repository.AddList(list)
+	err = l.listsRepository.AddList(list)
+	if err != nil {
+		return "", err
+	}
+
+	err = l.contributorsRepository.AddContributor(listUUID, userUUID)
 	if err != nil {
 		return "", err
 	}

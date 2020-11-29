@@ -14,21 +14,13 @@ type List struct {
 	products        []*Product
 }
 
-var (
-	ErrProductAlreadyInList = errors.New("product already in lists")
-)
-
-func NewList(uuid string, name string, creatorUUID string, creationDate time.Time) (*List, error) {
+func NewList(uuid string, name string, creationDate time.Time) (*List, error) {
 	if uuid == "" {
 		return nil, errors.New("empty list uuid")
 	}
 
 	if name == "" {
 		return nil, errors.New("empty list name")
-	}
-
-	if creatorUUID == "" {
-		return nil, errors.New("empty list creator uuid")
 	}
 
 	if creationDate.IsZero() {
@@ -40,6 +32,7 @@ func NewList(uuid string, name string, creatorUUID string, creationDate time.Tim
 		name:         name,
 		creationDate: creationDate,
 		products:     []*Product{},
+		contributors: []string{},
 	}, nil
 }
 
