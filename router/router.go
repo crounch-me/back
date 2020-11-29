@@ -66,8 +66,14 @@ func Start(config *configuration.Config) {
 
 	db := commonAdapters.GetDatabaseConnection(config.DBConnectionURI)
 	listsPostgresRepository := listAdapters.NewListsPostgresRepository(db, config.DBSchema)
-	listService := app.NewListService(listsPostgresRepository)
+	contributorsPostgresRepository := listAdapters.NewContributorsPostgresRepository(db, config.DBSchema)
+	listService, err := app.NewListService(listsPostgresRepository, contributorsPostgresRepository)
+
+	if err != nil {
+		log.Fatal(err)
+	}
 	ginServer := ports.NewGinServer(listService)
+
 	configureRoutes(r, hc, ginServer)
 
 	r.Use(cors.New(corsConfig))
@@ -79,7 +85,7 @@ func Start(config *configuration.Config) {
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
 
 	log.Info("Launching awesome server")
-	err := r.Run(":3000")
+	err = r.Run(":3000")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -106,8 +112,8 @@ func configureRoutes(r *gin.Engine, hc *handler.Context, ginServer *ports.GinSer
 	r.OPTIONS(logoutPath, optionsHandler([]string{http.MethodPost}))
 
 	// List routes
-	r.POST(listPath, checkAccess(hc.Storage), hc.CreateList)
-	r.GET(listPath, checkAccess(hc.Storage), hc.GetUsersLists)
+	r.POST(listPath, checkAccess(hc.Storage), ginServer.CreateList)
+	r.GET(listPath, checkAccess(hc.Storage), ginServer.GetUserLists)
 	r.OPTIONS(listPath, optionsHandler([]string{http.MethodPost, http.MethodGet}))
 
 	r.GET(listWithIDPath, checkAccess(hc.Storage), hc.GetList)

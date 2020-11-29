@@ -1,6 +1,7 @@
 package app
 
 import (
+	"errors"
 	"time"
 
 	"github.com/crounch-me/back/internal/list/domain/contributors"
@@ -13,10 +14,19 @@ type ListService struct {
 	contributorsRepository contributors.Repository
 }
 
-func NewListService(listRepository lists.Repository) *ListService {
-	return &ListService{
-		listsRepository: listRepository,
+func NewListService(listRepository lists.Repository, contributorsRepository contributors.Repository) (*ListService, error) {
+	if listRepository == nil {
+		return nil, errors.New("listRepository is nil")
 	}
+
+	if contributorsRepository == nil {
+		return nil, errors.New("contributorsRepository is nil")
+	}
+
+	return &ListService{
+		listsRepository:        listRepository,
+		contributorsRepository: contributorsRepository,
+	}, nil
 }
 
 func (l *ListService) CreateList(userUUID, name string) (string, error) {
