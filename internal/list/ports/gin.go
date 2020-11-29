@@ -40,3 +40,41 @@ func (h *GinServer) CreateList(c *gin.Context) {
 	c.Header(utils.HeaderContentLocation, "/lists/"+listUUID)
 	c.Status(http.StatusNoContent)
 }
+
+func (h *GinServer) GetUserLists(c *gin.Context) {
+	userUUID, err := utils.GetUserIDFromContext(c)
+	if err != nil {
+		c.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+
+	lists, err := h.listService.GetUserLists(userUUID)
+	if err != nil {
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	listsResponse := make([]*List, 0)
+	for _, list := range lists {
+		products := make([]*Product, 0)
+		for _, p := range list.Products() {
+			product := &Product{
+				UUID: p.UUID(),
+			}
+			products = append(products, product)
+		}
+
+		listResponse := &List{
+			UUID:         list.UUID(),
+			Name:         list.Name(),
+			CreationDate: list.CreationDate(),
+			Contributors: list.Contributors(),
+			Products:     products,
+		}
+
+		listsResponse = append(listsResponse, listResponse)
+	}
+
+	response := utils.NewDataResponse(listsResponse)
+	c.JSON(http.StatusOK, response)
+}

@@ -20,6 +20,10 @@ func NewProduct(uuid string) (*Product, error) {
 	}, nil
 }
 
+func (p Product) UUID() string {
+	return p.uuid
+}
+
 func (l *List) AddProduct(p *Product) error {
 	if l.HasProduct(p.uuid) {
 		return ErrProductAlreadyInList

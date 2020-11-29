@@ -48,6 +48,20 @@ func (l List) CreationDate() time.Time {
 	return l.creationDate
 }
 
+func (l List) Contributors() []string {
+	return l.contributors
+}
+
+func (l List) Products() []Product {
+	products := make([]Product, 0)
+
+	for _, product := range l.products {
+		products = append(products, *product)
+	}
+
+	return products
+}
+
 func (l List) HasProduct(uuid string) bool {
 	for _, p := range l.products {
 		if p.uuid == uuid {

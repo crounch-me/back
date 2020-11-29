@@ -12,10 +12,15 @@ import (
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 
 	"github.com/crounch-me/back/configuration"
+
 	// Import documentations for swagger endpoint
 	_ "github.com/crounch-me/back/docs"
 	"github.com/crounch-me/back/handler"
 	"github.com/crounch-me/back/internal"
+	commonAdapters "github.com/crounch-me/back/internal/common/adapters"
+	listAdapters "github.com/crounch-me/back/internal/list/adapters"
+	"github.com/crounch-me/back/internal/list/app"
+	"github.com/crounch-me/back/internal/list/ports"
 	"github.com/crounch-me/back/internal/users"
 	"github.com/crounch-me/back/util"
 )
@@ -59,7 +64,11 @@ func Start(config *configuration.Config) {
 	corsConfig := cors.DefaultConfig()
 	corsConfig.AllowAllOrigins = true
 
-	configureRoutes(r, hc)
+	db := commonAdapters.GetDatabaseConnection(config.DBConnectionURI)
+	listsPostgresRepository := listAdapters.NewListsPostgresRepository(db, config.DBSchema)
+	listService := app.NewListService(listsPostgresRepository)
+	ginServer := ports.NewGinServer(listService)
+	configureRoutes(r, hc, ginServer)
 
 	r.Use(cors.New(corsConfig))
 	r.Use(gin.Recovery())
@@ -78,7 +87,8 @@ func Start(config *configuration.Config) {
 
 func emptyHandler(c *gin.Context) {}
 
-func configureRoutes(r *gin.Engine, hc *handler.Context) {
+func configureRoutes(r *gin.Engine, hc *handler.Context, ginServer *ports.GinServer) {
+
 	r.Use(otherMethodsHandler())
 
 	// Health routes

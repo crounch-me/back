@@ -12,6 +12,16 @@ const (
 	HeaderContentLocation = "Content-Location"
 )
 
+type DataResponse struct {
+	Data interface{} `json:"data"`
+}
+
+func NewDataResponse(data interface{}) *DataResponse {
+	return &DataResponse{
+		Data: data,
+	}
+}
+
 func GetUserIDFromContext(c *gin.Context) (string, error) {
 	return "", nil
 }

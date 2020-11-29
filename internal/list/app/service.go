@@ -44,3 +44,12 @@ func (l *ListService) CreateList(userUUID, name string) (string, error) {
 
 	return listUUID, nil
 }
+
+func (l *ListService) GetUserLists(userUUID string) ([]*lists.List, error) {
+	listUUIDs, err := l.contributorsRepository.GetUserListUUIDs(userUUID)
+	if err != nil {
+		return nil, err
+	}
+
+	return l.listsRepository.ReadByIDs(listUUIDs)
+}
