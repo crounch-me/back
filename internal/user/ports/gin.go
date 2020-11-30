@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/crounch-me/back/internal"
-	"github.com/crounch-me/back/internal/common/utils"
+	"github.com/crounch-me/back/internal/common/server"
 	"github.com/crounch-me/back/internal/user/app"
 	"github.com/crounch-me/back/util"
 	"github.com/gin-gonic/gin"
@@ -40,28 +40,28 @@ func NewGinServer(userService *app.UserService, validator *util.Validator) (*Gin
 
 func (g *GinServer) ConfigureRoutes(r *gin.Engine) {
 	r.POST(userPath, g.Signup)
-	r.OPTIONS(userPath, utils.OptionsHandler([]string{http.MethodPost}))
+	r.OPTIONS(userPath, server.OptionsHandler([]string{http.MethodPost}))
 
 	r.POST(loginPath, g.Login)
-	r.OPTIONS(loginPath, utils.OptionsHandler([]string{http.MethodPost}))
+	r.OPTIONS(loginPath, server.OptionsHandler([]string{http.MethodPost}))
 }
 
-func (g *GinServer) Signup(c *gin.Context) {
+func (s *GinServer) Signup(c *gin.Context) {
 	signupRequest := &SignupRequest{}
 
-	err := utils.UnmarshalPayload(c.Request.Body, signupRequest)
+	err := server.UnmarshalPayload(c.Request.Body, signupRequest)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, internal.NewError(internal.UnmarshalErrorCode))
 		return
 	}
 
-	err = g.validator.Struct(signupRequest)
+	err = s.validator.Struct(signupRequest)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, internal.NewError(internal.InvalidErrorCode))
 		return
 	}
 
-	err = g.userService.Signup(signupRequest.Email, signupRequest.Password)
+	err = s.userService.Signup(signupRequest.Email, signupRequest.Password)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, internal.NewError(internal.UnknownErrorCode))
 		return
@@ -70,5 +70,30 @@ func (g *GinServer) Signup(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
-func (g *GinServer) Login(c *gin.Context) {
+func (s *GinServer) Login(c *gin.Context) {
+	loginRequest := &LoginRequest{}
+
+	err := server.UnmarshalPayload(c.Request.Body, loginRequest)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, internal.NewError(internal.UnmarshalErrorCode))
+		return
+	}
+
+	err = s.validator.Struct(loginRequest)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, internal.NewError(internal.InvalidErrorCode))
+		return
+	}
+
+	token, err := s.userService.Login(loginRequest.Email, loginRequest.Password)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, internal.NewError(internal.UnknownErrorCode))
+		return
+	}
+
+	tokenResponse := &TokenResponse{
+		Token: token,
+	}
+
+	server.JSON(c, tokenResponse)
 }

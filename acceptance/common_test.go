@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/crounch-me/back/builders"
-	"github.com/crounch-me/back/internal/common/utils"
+	"github.com/crounch-me/back/internal/common/server"
 	"github.com/crounch-me/back/internal/list"
 	"github.com/crounch-me/back/internal/products"
 	"github.com/crounch-me/back/util"
@@ -262,7 +262,7 @@ func (te *TestExecutor) createList(l *list.List) error {
 		return err
 	}
 
-	id := te.Response.Header.Get(utils.HeaderContentLocation)
+	id := te.Response.Header.Get(server.HeaderContentLocation)
 	if id == "" {
 		return errors.New("empty list id")
 	}

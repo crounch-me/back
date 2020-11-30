@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/crounch-me/back/internal"
-	"github.com/crounch-me/back/internal/common/utils"
+	"github.com/crounch-me/back/internal/common/server"
 	"github.com/crounch-me/back/internal/list/app"
 	"github.com/crounch-me/back/util"
 	"github.com/gin-gonic/gin"
@@ -36,7 +36,7 @@ func NewGinServer(listService *app.ListService, validator *util.Validator) (*Gin
 func (h *GinServer) CreateList(c *gin.Context) {
 	list := &CreateListRequest{}
 
-	err := utils.UnmarshalPayload(c.Request.Body, list)
+	err := server.UnmarshalPayload(c.Request.Body, list)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, internal.NewError(internal.UnmarshalErrorCode))
 		return
@@ -57,7 +57,7 @@ func (h *GinServer) CreateList(c *gin.Context) {
 		return
 	}
 
-	userUUID, err := utils.GetUserIDFromContext(c)
+	userUUID, err := server.GetUserIDFromContext(c)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusForbidden, internal.NewError(internal.ForbiddenErrorCode))
 		return
@@ -69,12 +69,12 @@ func (h *GinServer) CreateList(c *gin.Context) {
 		return
 	}
 
-	c.Header(utils.HeaderContentLocation, "/lists/"+listUUID)
+	c.Header(server.HeaderContentLocation, "/lists/"+listUUID)
 	c.Status(http.StatusCreated)
 }
 
 func (h *GinServer) GetUserLists(c *gin.Context) {
-	userUUID, err := utils.GetUserIDFromContext(c)
+	userUUID, err := server.GetUserIDFromContext(c)
 	if err != nil {
 		fmt.Println(err)
 		c.AbortWithStatus(http.StatusForbidden)
@@ -109,6 +109,5 @@ func (h *GinServer) GetUserLists(c *gin.Context) {
 		listsResponse = append(listsResponse, listResponse)
 	}
 
-	response := utils.NewDataResponse(listsResponse)
-	c.JSON(http.StatusOK, response)
+	server.JSON(c, listsResponse)
 }

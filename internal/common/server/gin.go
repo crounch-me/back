@@ -1,4 +1,4 @@
-package utils
+package server
 
 import (
 	"encoding/json"
@@ -44,6 +44,11 @@ func UnmarshalPayload(payload io.ReadCloser, i interface{}) error {
 	}
 
 	return json.Unmarshal(bytePayload, i)
+}
+
+func JSON(c *gin.Context, response interface{}) {
+	dataResponse := NewDataResponse(response)
+	c.JSON(http.StatusOK, dataResponse)
 }
 
 func OptionsHandler(allowedMethods []string) gin.HandlerFunc {
