@@ -1,4 +1,4 @@
-package users
+package user
 
 // User represents an user of the application
 type User struct {

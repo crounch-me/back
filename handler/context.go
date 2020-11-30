@@ -16,7 +16,7 @@ import (
 	"github.com/crounch-me/back/internal/authorization.go"
 	"github.com/crounch-me/back/internal/list"
 	"github.com/crounch-me/back/internal/products"
-	"github.com/crounch-me/back/internal/users"
+	"github.com/crounch-me/back/internal/user"
 	"github.com/crounch-me/back/storage"
 	"github.com/crounch-me/back/storage/postgres"
 	"github.com/crounch-me/back/util"
@@ -31,7 +31,7 @@ type Services struct {
 	Authorization *authorization.AuthorizationService
 	List          *list.ListService
 	Product       *products.ProductService
-	User          *users.UserService
+	User          *user.UserService
 }
 
 type Builders struct {
@@ -173,7 +173,7 @@ func NewServices(storage storage.Storage, generation internal.Generation) *Servi
 			ProductStorage: storage,
 			Generation:     generation,
 		},
-		User: &users.UserService{
+		User: &user.UserService{
 			UserStorage: storage,
 			Generation:  generation,
 		},

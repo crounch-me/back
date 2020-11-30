@@ -29,7 +29,7 @@ func NewListService(listRepository lists.Repository, contributorsRepository cont
 	}, nil
 }
 
-func (l *ListService) CreateList(userUUID, name string) (string, error) {
+func (s *ListService) CreateList(userUUID, name string) (string, error) {
 	listUUID, err := util.GenerateID()
 	if err != nil {
 		return "", err
@@ -42,12 +42,12 @@ func (l *ListService) CreateList(userUUID, name string) (string, error) {
 		return "", err
 	}
 
-	err = l.listsRepository.AddList(list)
+	err = s.listsRepository.AddList(list)
 	if err != nil {
 		return "", err
 	}
 
-	err = l.contributorsRepository.AddContributor(listUUID, userUUID)
+	err = s.contributorsRepository.AddContributor(listUUID, userUUID)
 	if err != nil {
 		return "", err
 	}
@@ -55,11 +55,11 @@ func (l *ListService) CreateList(userUUID, name string) (string, error) {
 	return listUUID, nil
 }
 
-func (l *ListService) GetUserLists(userUUID string) ([]*lists.List, error) {
-	listUUIDs, err := l.contributorsRepository.GetUserListUUIDs(userUUID)
+func (s *ListService) GetUserLists(userUUID string) ([]*lists.List, error) {
+	listUUIDs, err := s.contributorsRepository.GetUserListUUIDs(userUUID)
 	if err != nil {
 		return nil, err
 	}
 
-	return l.listsRepository.ReadByIDs(listUUIDs)
+	return s.listsRepository.ReadByIDs(listUUIDs)
 }

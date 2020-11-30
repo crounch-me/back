@@ -532,7 +532,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/users.User"
+                            "$ref": "#/definitions/user.User"
                         }
                     },
                     "500": {
@@ -553,7 +553,7 @@
                     "type": "string"
                 },
                 "owner": {
-                    "$ref": "#/definitions/users.User"
+                    "$ref": "#/definitions/user.User"
                 }
             }
         },
@@ -592,7 +592,7 @@
                 "contributors": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/users.User"
+                        "$ref": "#/definitions/user.User"
                     }
                 },
                 "creationDate": {
@@ -625,7 +625,7 @@
                     "type": "string"
                 },
                 "owner": {
-                    "$ref": "#/definitions/users.User"
+                    "$ref": "#/definitions/user.User"
                 }
             }
         },
@@ -745,7 +745,7 @@
                 "contributors": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/users.User"
+                        "$ref": "#/definitions/user.User"
                     }
                 },
                 "creationDate": {
@@ -784,7 +784,7 @@
                     "type": "string"
                 },
                 "owner": {
-                    "$ref": "#/definitions/users.User"
+                    "$ref": "#/definitions/user.User"
                 }
             }
         },
@@ -826,11 +826,11 @@
                     "type": "string"
                 },
                 "owner": {
-                    "$ref": "#/definitions/users.User"
+                    "$ref": "#/definitions/user.User"
                 }
             }
         },
-        "users.User": {
+        "user.User": {
             "type": "object",
             "required": [
                 "email",
@@ -847,6 +847,9 @@
                     "type": "string"
                 }
             }
+        },
+        "users.User": {
+            "type": "object"
         }
     },
     "securityDefinitions": {

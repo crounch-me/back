@@ -6,7 +6,7 @@ import (
 	"github.com/crounch-me/back/internal"
 	"github.com/crounch-me/back/internal/contributors"
 	"github.com/crounch-me/back/internal/products"
-	"github.com/crounch-me/back/internal/users"
+	"github.com/crounch-me/back/internal/user"
 )
 
 type ListService struct {
@@ -37,7 +37,7 @@ func (ls *ListService) CreateList(name, userID string) (*List, *internal.Error) 
 	list := &List{
 		ID:   id,
 		Name: name,
-		Contributors: []*users.User{
+		Contributors: []*user.User{
 			{
 				ID: userID,
 			},

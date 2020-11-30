@@ -27,6 +27,10 @@ func NewList(uuid string, name string, creationDate time.Time, archivationDate *
 		return nil, errors.New("empty list creation date")
 	}
 
+	if archivationDate != nil && archivationDate.IsZero() {
+		return nil, errors.New("empty but not nil list archivation date")
+	}
+
 	return &List{
 		uuid:            uuid,
 		name:            name,
@@ -53,22 +57,8 @@ func (l List) Contributors() []string {
 	return l.contributors
 }
 
-func (l List) Products() []Product {
-	products := make([]Product, 0)
+func (l *List) Archive() {
+	now := time.Now()
 
-	for _, product := range l.products {
-		products = append(products, *product)
-	}
-
-	return products
-}
-
-func (l List) HasProduct(uuid string) bool {
-	for _, p := range l.products {
-		if p.uuid == uuid {
-			return true
-		}
-	}
-
-	return false
+	l.archivationDate = &now
 }

@@ -7,7 +7,7 @@ import (
 	"github.com/crounch-me/back/internal/authorization.go"
 	"github.com/crounch-me/back/internal/list"
 	"github.com/crounch-me/back/internal/products"
-	"github.com/crounch-me/back/internal/users"
+	"github.com/crounch-me/back/internal/user"
 )
 
 var errorToStatus map[string]int
@@ -23,8 +23,8 @@ func initializeErrorsMap() {
 	errorToStatus[internal.UnknownErrorCode] = http.StatusInternalServerError
 
 	// User errors
-	errorToStatus[users.UserNotFoundErrorCode] = http.StatusNotFound
-	errorToStatus[users.DuplicateUserErrorCode] = http.StatusConflict
+	errorToStatus[user.UserNotFoundErrorCode] = http.StatusNotFound
+	errorToStatus[user.DuplicateUserErrorCode] = http.StatusConflict
 
 	// List errors
 	errorToStatus[list.ListNotFoundErrorCode] = http.StatusNotFound

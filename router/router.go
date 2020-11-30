@@ -21,7 +21,7 @@ import (
 	listAdapters "github.com/crounch-me/back/internal/list/adapters"
 	"github.com/crounch-me/back/internal/list/app"
 	"github.com/crounch-me/back/internal/list/ports"
-	"github.com/crounch-me/back/internal/users"
+	"github.com/crounch-me/back/internal/user"
 	"github.com/crounch-me/back/util"
 )
 
@@ -142,7 +142,7 @@ func configureRoutes(r *gin.Engine, hc *handler.Context, ginServer *ports.GinSer
 	r.OPTIONS(listProductPath, optionsHandler([]string{http.MethodPost, http.MethodPatch, http.MethodDelete}))
 }
 
-func checkAccess(us users.Storage) gin.HandlerFunc {
+func checkAccess(us user.Storage) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token := c.GetHeader("Authorization")
 
@@ -155,7 +155,7 @@ func checkAccess(us users.Storage) gin.HandlerFunc {
 		userID, err := us.GetUserIDByToken(token)
 
 		if err != nil {
-			if err.Code == users.UserNotFoundErrorCode {
+			if err.Code == user.UserNotFoundErrorCode {
 				c.AbortWithStatusJSON(http.StatusUnauthorized, internal.NewError(internal.UnauthorizedErrorCode))
 				return
 			}

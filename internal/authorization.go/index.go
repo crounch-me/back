@@ -2,22 +2,22 @@ package authorization
 
 import (
 	"github.com/crounch-me/back/internal"
-	"github.com/crounch-me/back/internal/users"
+	"github.com/crounch-me/back/internal/user"
 )
 
 type AuthorizationService struct {
-	UserStorage          users.Storage
+	UserStorage          user.Storage
 	AuthorizationStorage Storage
 	Generation           internal.Generation
 }
 
 func (as *AuthorizationService) CreateAuthorization(email, password string) (*Authorization, *internal.Error) {
-	user, err := as.UserStorage.GetByEmail(email)
+	u, err := as.UserStorage.GetByEmail(email)
 	if err != nil {
 		return nil, err
 	}
 
-	isPasswordEqual := as.Generation.ComparePassword(*user.Password, password)
+	isPasswordEqual := as.Generation.ComparePassword(*u.Password, password)
 	if !isPasswordEqual {
 		return nil, internal.NewError(WrongPasswordErrorCode)
 	}
@@ -28,15 +28,15 @@ func (as *AuthorizationService) CreateAuthorization(email, password string) (*Au
 		return nil, err
 	}
 
-	err = as.AuthorizationStorage.CreateAuthorization(user.ID, token)
+	err = as.AuthorizationStorage.CreateAuthorization(u.ID, token)
 	if err != nil {
 		return nil, err
 	}
 
 	authorization := &Authorization{
 		AccessToken: token,
-		Owner: &users.User{
-			ID: user.ID,
+		Owner: &user.User{
+			ID: u.ID,
 		},
 	}
 

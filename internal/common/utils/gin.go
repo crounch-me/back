@@ -4,8 +4,11 @@ import (
 	"encoding/json"
 	"io"
 	"io/ioutil"
+	"net/http"
+	"strings"
 
 	"github.com/crounch-me/back/internal"
+	"github.com/crounch-me/back/util"
 	"github.com/gin-gonic/gin"
 )
 
@@ -41,4 +44,15 @@ func UnmarshalPayload(payload io.ReadCloser, i interface{}) error {
 	}
 
 	return json.Unmarshal(bytePayload, i)
+}
+
+func OptionsHandler(allowedMethods []string) gin.HandlerFunc {
+	allowedMethods = append(allowedMethods, http.MethodOptions)
+	allowedHeaders := []string{util.HeaderContentType, util.HeaderAuthorization, util.HeaderAccept}
+	return func(c *gin.Context) {
+		c.Writer.Header().Set(util.HeaderAccessControlAllowOrigin, "*")
+		c.Writer.Header().Set(util.HeaderAccessControlAllowMethods, strings.Join(allowedMethods, ","))
+		c.Writer.Header().Set(util.HeaderAccessControlAllowHeaders, strings.Join(allowedHeaders, ","))
+		c.AbortWithStatus(http.StatusOK)
+	}
 }

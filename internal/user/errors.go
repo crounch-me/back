@@ -1,4 +1,4 @@
-package users
+package user
 
 const (
 	UserNotFoundErrorCode  = "user-not-found-error"

@@ -547,7 +547,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/users.User"
+                            "$ref": "#/definitions/user.User"
                         }
                     },
                     "500": {
@@ -568,7 +568,7 @@ var doc = `{
                     "type": "string"
                 },
                 "owner": {
-                    "$ref": "#/definitions/users.User"
+                    "$ref": "#/definitions/user.User"
                 }
             }
         },
@@ -607,7 +607,7 @@ var doc = `{
                 "contributors": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/users.User"
+                        "$ref": "#/definitions/user.User"
                     }
                 },
                 "creationDate": {
@@ -640,7 +640,7 @@ var doc = `{
                     "type": "string"
                 },
                 "owner": {
-                    "$ref": "#/definitions/users.User"
+                    "$ref": "#/definitions/user.User"
                 }
             }
         },
@@ -760,7 +760,7 @@ var doc = `{
                 "contributors": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/users.User"
+                        "$ref": "#/definitions/user.User"
                     }
                 },
                 "creationDate": {
@@ -799,7 +799,7 @@ var doc = `{
                     "type": "string"
                 },
                 "owner": {
-                    "$ref": "#/definitions/users.User"
+                    "$ref": "#/definitions/user.User"
                 }
             }
         },
@@ -841,11 +841,11 @@ var doc = `{
                     "type": "string"
                 },
                 "owner": {
-                    "$ref": "#/definitions/users.User"
+                    "$ref": "#/definitions/user.User"
                 }
             }
         },
-        "users.User": {
+        "user.User": {
             "type": "object",
             "required": [
                 "email",
@@ -862,6 +862,9 @@ var doc = `{
                     "type": "string"
                 }
             }
+        },
+        "users.User": {
+            "type": "object"
         }
     },
     "securityDefinitions": {
