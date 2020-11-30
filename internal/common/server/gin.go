@@ -2,12 +2,16 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"strings"
 
+	"github.com/crounch-me/back/handler"
 	"github.com/crounch-me/back/internal"
+	authorizationApp "github.com/crounch-me/back/internal/authorization/app"
+	"github.com/crounch-me/back/internal/user"
 	"github.com/crounch-me/back/util"
 	"github.com/gin-gonic/gin"
 )
@@ -37,6 +41,31 @@ func GetUserIDFromContext(c *gin.Context) (string, error) {
 	return userID.(string), nil
 }
 
+func CheckUserAuthorization(authorizationService *authorizationApp.AuthorizationService) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		token := c.GetHeader("Authorization")
+
+		if token == "" {
+			fmt.Println("Unauthorized - No token provided")
+			c.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
+
+		userUUID, err := authorizationService.GetUserUUIDByToken(token)
+		if err != nil {
+			if err.Error() == user.UserNotFoundErrorCode {
+				c.AbortWithStatusJSON(http.StatusUnauthorized, internal.NewError(internal.UnauthorizedErrorCode))
+				return
+			}
+
+			c.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+
+		c.Set(handler.ContextUserID, userUUID)
+	}
+}
+
 func UnmarshalPayload(payload io.ReadCloser, i interface{}) error {
 	bytePayload, err := ioutil.ReadAll(payload)
 	if err != nil {
@@ -54,6 +83,7 @@ func JSON(c *gin.Context, response interface{}) {
 func OptionsHandler(allowedMethods []string) gin.HandlerFunc {
 	allowedMethods = append(allowedMethods, http.MethodOptions)
 	allowedHeaders := []string{util.HeaderContentType, util.HeaderAuthorization, util.HeaderAccept}
+
 	return func(c *gin.Context) {
 		c.Writer.Header().Set(util.HeaderAccessControlAllowOrigin, "*")
 		c.Writer.Header().Set(util.HeaderAccessControlAllowMethods, strings.Join(allowedMethods, ","))

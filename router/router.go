@@ -17,11 +17,16 @@ import (
 	_ "github.com/crounch-me/back/docs"
 	"github.com/crounch-me/back/handler"
 	"github.com/crounch-me/back/internal"
+	authorizationAdapters "github.com/crounch-me/back/internal/authorization/adapters"
+	authorizationApp "github.com/crounch-me/back/internal/authorization/app"
 	commonAdapters "github.com/crounch-me/back/internal/common/adapters"
 	listAdapters "github.com/crounch-me/back/internal/list/adapters"
-	"github.com/crounch-me/back/internal/list/app"
-	"github.com/crounch-me/back/internal/list/ports"
+	listApp "github.com/crounch-me/back/internal/list/app"
+	listPorts "github.com/crounch-me/back/internal/list/ports"
 	"github.com/crounch-me/back/internal/user"
+	userAdapters "github.com/crounch-me/back/internal/user/adapters"
+	userApp "github.com/crounch-me/back/internal/user/app"
+	userPorts "github.com/crounch-me/back/internal/user/ports"
 	"github.com/crounch-me/back/util"
 )
 
@@ -64,22 +69,61 @@ func Start(config *configuration.Config) {
 	corsConfig := cors.DefaultConfig()
 	corsConfig.AllowAllOrigins = true
 
-	db := commonAdapters.GetDatabaseConnection(config.DBConnectionURI)
-	listsPostgresRepository := listAdapters.NewListsPostgresRepository(db, config.DBSchema)
-	contributorsPostgresRepository := listAdapters.NewContributorsPostgresRepository(db, config.DBSchema)
-
-	listService, err := app.NewListService(listsPostgresRepository, contributorsPostgresRepository)
-
-	if err != nil {
-		log.Fatal(err)
-	}
 	validator := util.NewValidator()
-	ginServer, err := ports.NewGinServer(listService, validator)
+
+	db := commonAdapters.GetDatabaseConnection(config.DBConnectionURI)
+
+	authorizationsRepository, err := authorizationAdapters.NewAuthorizationsPostgresRepository(db, config.DBSchema)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	configureRoutes(r, hc, ginServer)
+	contributorsRepository, err := listAdapters.NewContributorsPostgresRepository(db, config.DBSchema)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	listsRepository, err := listAdapters.NewListsPostgresRepository(db, config.DBSchema)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	usersRepository, err := userAdapters.NewUsersPostgresRepository(db, config.DBSchema)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	userService, err := userApp.NewUserService(authorizationsRepository, usersRepository)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	listService, err := listApp.NewListService(listsRepository, contributorsRepository)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	authorizationService, err := authorizationApp.NewAuthorizationService(authorizationsRepository)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	listServer, err := listPorts.NewGinServer(listService, authorizationService, validator)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	userServer, err := userPorts.NewGinServer(userService, validator)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	r.Use(accessControlAllowOriginHandler())
+
+	userServer.ConfigureRoutes(r)
+	listServer.ConfigureRoutes(r)
+
+	configureRoutes(r, hc)
 
 	r.Use(cors.New(corsConfig))
 	r.Use(gin.Recovery())
@@ -98,29 +142,18 @@ func Start(config *configuration.Config) {
 
 func emptyHandler(c *gin.Context) {}
 
-func configureRoutes(r *gin.Engine, hc *handler.Context, ginServer *ports.GinServer) {
-
-	r.Use(otherMethodsHandler())
-
+func configureRoutes(r *gin.Engine, hc *handler.Context) {
 	// Health routes
 	r.GET(healthPath, hc.Health)
 	r.OPTIONS(healthPath, optionsHandler([]string{http.MethodGet}))
 
 	// User routes
-	r.POST(userPath, hc.Signup)
-	r.OPTIONS(userPath, optionsHandler([]string{http.MethodPost}))
-	r.POST(loginPath, hc.Login)
-	r.OPTIONS(loginPath, optionsHandler([]string{http.MethodPost}))
 	r.GET(mePath, checkAccess(hc.Storage), hc.Me)
 	r.OPTIONS(mePath, optionsHandler([]string{http.MethodGet}))
 	r.POST(logoutPath, hc.Logout)
 	r.OPTIONS(logoutPath, optionsHandler([]string{http.MethodPost}))
 
 	// List routes
-	r.POST(listPath, checkAccess(hc.Storage), ginServer.CreateList)
-	r.GET(listPath, checkAccess(hc.Storage), ginServer.GetUserLists)
-	r.OPTIONS(listPath, optionsHandler([]string{http.MethodPost, http.MethodGet}))
-
 	r.GET(listWithIDPath, checkAccess(hc.Storage), hc.GetList)
 	r.DELETE(listWithIDPath, checkAccess(hc.Storage), hc.DeleteList)
 	r.OPTIONS(listWithIDPath, optionsHandler([]string{http.MethodGet, http.MethodDelete}))
@@ -179,7 +212,7 @@ func optionsHandler(allowedMethods []string) gin.HandlerFunc {
 	}
 }
 
-func otherMethodsHandler() gin.HandlerFunc {
+func accessControlAllowOriginHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Writer.Header().Set(util.HeaderAccessControlAllowOrigin, "*")
 		c.Next()

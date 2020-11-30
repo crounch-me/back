@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/crounch-me/back/internal"
-	"github.com/crounch-me/back/internal/authorization.go"
+	"github.com/crounch-me/back/internal/authorization"
 	"github.com/crounch-me/back/internal/list"
 	"github.com/crounch-me/back/internal/products"
 	"github.com/crounch-me/back/internal/user"

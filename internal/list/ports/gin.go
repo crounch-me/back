@@ -6,21 +6,35 @@ import (
 	"net/http"
 
 	"github.com/crounch-me/back/internal"
+	authorizationApp "github.com/crounch-me/back/internal/authorization/app"
 	"github.com/crounch-me/back/internal/common/server"
-	"github.com/crounch-me/back/internal/list/app"
+	listApp "github.com/crounch-me/back/internal/list/app"
+	userApp "github.com/crounch-me/back/internal/user/app"
 	"github.com/crounch-me/back/util"
 	"github.com/gin-gonic/gin"
 	"gopkg.in/go-playground/validator.v9"
 )
 
+const (
+	listPath        = "/lists"
+	listWithIDPath  = "/lists/:listID"
+	archiveListPath = "/lists/:listID/archive"
+)
+
 type GinServer struct {
-	listService *app.ListService
-	validator   *util.Validator
+	authorizationService *authorizationApp.AuthorizationService
+	listService          *listApp.ListService
+	userService          *userApp.UserService
+	validator            *util.Validator
 }
 
-func NewGinServer(listService *app.ListService, validator *util.Validator) (*GinServer, error) {
+func NewGinServer(listService *listApp.ListService, authorizationService *authorizationApp.AuthorizationService, validator *util.Validator) (*GinServer, error) {
 	if listService == nil {
 		return nil, errors.New("listService is nil")
+	}
+
+	if authorizationService == nil {
+		return nil, errors.New("authorizationService is nil")
 	}
 
 	if validator == nil {
@@ -33,7 +47,13 @@ func NewGinServer(listService *app.ListService, validator *util.Validator) (*Gin
 	}, nil
 }
 
-func (h *GinServer) CreateList(c *gin.Context) {
+func (s *GinServer) ConfigureRoutes(r *gin.Engine) {
+	r.POST(listPath, server.CheckUserAuthorization(s.authorizationService), s.CreateList)
+	r.GET(listPath, server.CheckUserAuthorization(s.authorizationService), s.GetUserLists)
+	r.OPTIONS(listPath, server.OptionsHandler([]string{http.MethodGet, http.MethodPost}))
+}
+
+func (s *GinServer) CreateList(c *gin.Context) {
 	list := &CreateListRequest{}
 
 	err := server.UnmarshalPayload(c.Request.Body, list)
@@ -42,7 +62,7 @@ func (h *GinServer) CreateList(c *gin.Context) {
 		return
 	}
 
-	err = h.validator.Struct(list)
+	err = s.validator.Struct(list)
 	if err != nil {
 		fields := make([]*internal.FieldError, 0)
 		for _, e := range err.(validator.ValidationErrors) {
@@ -63,7 +83,7 @@ func (h *GinServer) CreateList(c *gin.Context) {
 		return
 	}
 
-	listUUID, err := h.listService.CreateList(userUUID, list.Name)
+	listUUID, err := s.listService.CreateList(userUUID, list.Name)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, internal.NewError(internal.UnknownErrorCode))
 		return

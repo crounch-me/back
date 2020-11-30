@@ -2,6 +2,7 @@ package adapters
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -14,11 +15,15 @@ type ListsPostgresRepository struct {
 	schema  string
 }
 
-func NewListsPostgresRepository(session *sql.DB, schema string) *ListsPostgresRepository {
+func NewListsPostgresRepository(session *sql.DB, schema string) (*ListsPostgresRepository, error) {
+	if session == nil {
+		return nil, errors.New("db session is nil")
+	}
+
 	return &ListsPostgresRepository{
 		session: session,
 		schema:  schema,
-	}
+	}, nil
 }
 
 func (r *ListsPostgresRepository) AddList(list *lists.List) error {

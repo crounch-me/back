@@ -1,7 +1,7 @@
 package storage
 
 import (
-	"github.com/crounch-me/back/internal/authorization.go"
+	"github.com/crounch-me/back/internal/authorization"
 	"github.com/crounch-me/back/internal/contributors"
 	"github.com/crounch-me/back/internal/list"
 	"github.com/crounch-me/back/internal/products"

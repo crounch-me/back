@@ -3,8 +3,8 @@ package app
 import (
 	"errors"
 
+	"github.com/crounch-me/back/internal/authorization/domain/authorizations"
 	"github.com/crounch-me/back/internal/common/utils"
-	"github.com/crounch-me/back/internal/user/domain/authorizations"
 	"github.com/crounch-me/back/internal/user/domain/users"
 )
 

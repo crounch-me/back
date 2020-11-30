@@ -2,6 +2,7 @@ package adapters
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 )
 
@@ -10,11 +11,15 @@ type ContributorsPostgresRepository struct {
 	schema  string
 }
 
-func NewContributorsPostgresRepository(session *sql.DB, schema string) *ContributorsPostgresRepository {
+func NewContributorsPostgresRepository(session *sql.DB, schema string) (*ContributorsPostgresRepository, error) {
+	if session == nil {
+		return nil, errors.New("db session is nil")
+	}
+
 	return &ContributorsPostgresRepository{
 		session: session,
 		schema:  schema,
-	}
+	}, nil
 }
 
 func (r ContributorsPostgresRepository) AddContributor(listUUID, userUUID string) error {
