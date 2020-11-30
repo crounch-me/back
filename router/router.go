@@ -67,12 +67,17 @@ func Start(config *configuration.Config) {
 	db := commonAdapters.GetDatabaseConnection(config.DBConnectionURI)
 	listsPostgresRepository := listAdapters.NewListsPostgresRepository(db, config.DBSchema)
 	contributorsPostgresRepository := listAdapters.NewContributorsPostgresRepository(db, config.DBSchema)
+
 	listService, err := app.NewListService(listsPostgresRepository, contributorsPostgresRepository)
 
 	if err != nil {
 		log.Fatal(err)
 	}
-	ginServer := ports.NewGinServer(listService)
+	validator := util.NewValidator()
+	ginServer, err := ports.NewGinServer(listService, validator)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	configureRoutes(r, hc, ginServer)
 
@@ -82,7 +87,7 @@ func Start(config *configuration.Config) {
 
 	url := ginSwagger.URL("http://localhost:3000/swagger/doc.json")
 
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
+	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
 
 	log.Info("Launching awesome server")
 	err = r.Run(":3000")

@@ -37,7 +37,7 @@ func (l *ListService) CreateList(userUUID, name string) (string, error) {
 
 	creationDate := time.Now()
 
-	list, err := lists.NewList(listUUID, name, creationDate)
+	list, err := lists.NewList(listUUID, name, creationDate, nil)
 	if err != nil {
 		return "", err
 	}

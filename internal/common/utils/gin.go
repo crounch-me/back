@@ -5,11 +5,14 @@ import (
 	"io"
 	"io/ioutil"
 
+	"github.com/crounch-me/back/internal"
 	"github.com/gin-gonic/gin"
 )
 
 const (
 	HeaderContentLocation = "Content-Location"
+
+	ContextUserID = "ContextUserID"
 )
 
 type DataResponse struct {
@@ -23,7 +26,12 @@ func NewDataResponse(data interface{}) *DataResponse {
 }
 
 func GetUserIDFromContext(c *gin.Context) (string, error) {
-	return "", nil
+	userID, exists := c.Get(ContextUserID)
+	if !exists {
+		return "", internal.NewError(internal.UnknownErrorCode).WithCall("utils", "GetUserIDFromContext")
+	}
+
+	return userID.(string), nil
 }
 
 func UnmarshalPayload(payload io.ReadCloser, i interface{}) error {

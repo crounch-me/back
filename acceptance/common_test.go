@@ -2,6 +2,7 @@ package acceptance
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -11,6 +12,7 @@ import (
 	"time"
 
 	"github.com/crounch-me/back/builders"
+	"github.com/crounch-me/back/internal/common/utils"
 	"github.com/crounch-me/back/internal/list"
 	"github.com/crounch-me/back/internal/products"
 	"github.com/crounch-me/back/util"
@@ -260,12 +262,12 @@ func (te *TestExecutor) createList(l *list.List) error {
 		return err
 	}
 
-	id, err := te.getValueFromBody("$.id")
-	if err != nil {
-		return err
+	id := te.Response.Header.Get(utils.HeaderContentLocation)
+	if id == "" {
+		return errors.New("empty list id")
 	}
 
-	te.Variables.ListID = id.(string)
+	te.Variables.ListID = id
 
 	return nil
 }

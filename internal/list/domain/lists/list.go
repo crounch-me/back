@@ -14,7 +14,7 @@ type List struct {
 	products        []*Product
 }
 
-func NewList(uuid string, name string, creationDate time.Time) (*List, error) {
+func NewList(uuid string, name string, creationDate time.Time, archivationDate *time.Time) (*List, error) {
 	if uuid == "" {
 		return nil, errors.New("empty list uuid")
 	}
@@ -28,11 +28,12 @@ func NewList(uuid string, name string, creationDate time.Time) (*List, error) {
 	}
 
 	return &List{
-		uuid:         uuid,
-		name:         name,
-		creationDate: creationDate,
-		products:     []*Product{},
-		contributors: []string{},
+		uuid:            uuid,
+		name:            name,
+		creationDate:    creationDate,
+		archivationDate: archivationDate,
+		products:        []*Product{},
+		contributors:    []string{},
 	}, nil
 }
 

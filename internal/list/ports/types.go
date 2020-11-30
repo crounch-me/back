@@ -3,7 +3,7 @@ package ports
 import "time"
 
 type CreateListRequest struct {
-	Name string `json:"name" validate="required"`
+	Name string `json:"name" validate:"required"`
 }
 
 type List struct {
