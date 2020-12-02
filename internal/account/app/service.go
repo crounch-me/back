@@ -3,12 +3,12 @@ package app
 import (
 	"errors"
 
-	"github.com/crounch-me/back/internal/authorization/domain/authorizations"
+	"github.com/crounch-me/back/internal/account/domain/authorizations"
+	"github.com/crounch-me/back/internal/account/domain/users"
 	"github.com/crounch-me/back/internal/common/utils"
-	"github.com/crounch-me/back/internal/user/domain/users"
 )
 
-type UserService struct {
+type AccountService struct {
 	authorizationsRepository authorizations.Repository
 	generationLibrary        utils.GenerationLibrary
 	hashLibrary              utils.HashLibrary
@@ -21,7 +21,7 @@ var (
 	NotFoundIndex = -1
 )
 
-func NewUserService(authorizationsRepository authorizations.Repository, usersRepository users.Repository) (*UserService, error) {
+func NewAccountService(authorizationsRepository authorizations.Repository, usersRepository users.Repository) (*AccountService, error) {
 	if authorizationsRepository == nil {
 		return nil, errors.New("authorizationsRepository is nil")
 	}
@@ -30,13 +30,13 @@ func NewUserService(authorizationsRepository authorizations.Repository, usersRep
 		return nil, errors.New("usersRepository is nil")
 	}
 
-	return &UserService{
+	return &AccountService{
 		authorizationsRepository: authorizationsRepository,
 		usersRepository:          usersRepository,
 	}, nil
 }
 
-func (s *UserService) Signup(email, password string) error {
+func (s *AccountService) Signup(email, password string) error {
 	_, err := s.usersRepository.FindByEmail(email)
 	if err != nil {
 		if err != ErrUserNotFound {
@@ -64,7 +64,7 @@ func (s *UserService) Signup(email, password string) error {
 	return s.usersRepository.AddUser(u)
 }
 
-func (s *UserService) Login(email, password string) (string, error) {
+func (s *AccountService) Login(email, password string) (string, error) {
 	u, err := s.usersRepository.FindByEmail(email)
 	if err != nil {
 		return "", err
@@ -86,4 +86,8 @@ func (s *UserService) Login(email, password string) (string, error) {
 	}
 
 	return token, nil
+}
+
+func (s *AccountService) GetUserUUIDByToken(token string) (string, error) {
+	return s.authorizationsRepository.GetUserUUIDByToken(token)
 }

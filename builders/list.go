@@ -3,9 +3,9 @@ package builders
 import (
 	"time"
 
+	"github.com/crounch-me/back/internal/account"
 	"github.com/crounch-me/back/internal/categories"
 	"github.com/crounch-me/back/internal/list"
-	"github.com/crounch-me/back/internal/user"
 )
 
 const (
@@ -27,7 +27,7 @@ type CategoryInGetListResponse struct {
 type ProductInGetListResponse struct {
 	ID       string               `json:"id"`
 	Name     string               `json:"name" validate:"required,lt=61"`
-	Owner    *user.User           `json:"owner,omitempty"`
+	Owner    *account.User        `json:"owner,omitempty"`
 	Bought   bool                 `json:"bought"`
 	Category *categories.Category `json:"category,omitempty"`
 }
@@ -38,7 +38,7 @@ type GetListResponse struct {
 	Name            string                       `json:"name" validate:"required,lt=61"`
 	CreationDate    time.Time                    `json:"creationDate"`
 	ArchivationDate *time.Time                   `json:"archivationDate,omitempty"`
-	Contributors    []*user.User                 `json:"contributors,omitempty"`
+	Contributors    []*account.User              `json:"contributors,omitempty"`
 	Categories      []*CategoryInGetListResponse `json:"categories"`
 }
 

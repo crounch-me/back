@@ -2,7 +2,7 @@ package products
 
 import (
 	"github.com/crounch-me/back/internal"
-	"github.com/crounch-me/back/internal/user"
+	"github.com/crounch-me/back/internal/account"
 )
 
 type ProductService struct {
@@ -37,7 +37,7 @@ func (ps *ProductService) CreateProduct(name, userID string) (*Product, *interna
 	product := &Product{
 		ID:   id,
 		Name: name,
-		Owner: &user.User{
+		Owner: &account.User{
 			ID: userID,
 		},
 	}
@@ -46,5 +46,5 @@ func (ps *ProductService) CreateProduct(name, userID string) (*Product, *interna
 }
 
 func (ps *ProductService) SearchDefaults(name string) ([]*Product, *internal.Error) {
-	return ps.ProductStorage.SearchDefaults(name, user.AdminID)
+	return ps.ProductStorage.SearchDefaults(name, account.AdminID)
 }

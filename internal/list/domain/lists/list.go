@@ -10,7 +10,7 @@ type List struct {
 	name            string
 	creationDate    time.Time
 	archivationDate *time.Time
-	contributors    []string
+	contributors    []*Contributor
 	products        []*Product
 }
 
@@ -37,7 +37,7 @@ func NewList(uuid string, name string, creationDate time.Time, archivationDate *
 		creationDate:    creationDate,
 		archivationDate: archivationDate,
 		products:        []*Product{},
-		contributors:    []string{},
+		contributors:    []*Contributor{},
 	}, nil
 }
 
@@ -51,10 +51,6 @@ func (l List) Name() string {
 
 func (l List) CreationDate() time.Time {
 	return l.creationDate
-}
-
-func (l List) Contributors() []string {
-	return l.contributors
 }
 
 func (l *List) Archive() {

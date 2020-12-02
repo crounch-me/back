@@ -6,35 +6,34 @@ import (
 	"net/http"
 
 	"github.com/crounch-me/back/internal"
-	authorizationApp "github.com/crounch-me/back/internal/authorization/app"
+	accountApp "github.com/crounch-me/back/internal/account/app"
 	"github.com/crounch-me/back/internal/common/server"
 	listApp "github.com/crounch-me/back/internal/list/app"
-	userApp "github.com/crounch-me/back/internal/user/app"
 	"github.com/crounch-me/back/util"
 	"github.com/gin-gonic/gin"
 	"gopkg.in/go-playground/validator.v9"
 )
 
 const (
-	listPath        = "/lists"
-	listWithIDPath  = "/lists/:listID"
-	archiveListPath = "/lists/:listID/archive"
+	listUUIDPathParam = "listID"
+	listPath          = "/lists"
+	listWithIDPath    = "/lists/:listID"
+	archiveListPath   = "/lists/:listID/archive"
 )
 
 type GinServer struct {
-	authorizationService *authorizationApp.AuthorizationService
-	listService          *listApp.ListService
-	userService          *userApp.UserService
-	validator            *util.Validator
+	accountService *accountApp.AccountService
+	listService    *listApp.ListService
+	validator      *util.Validator
 }
 
-func NewGinServer(listService *listApp.ListService, authorizationService *authorizationApp.AuthorizationService, validator *util.Validator) (*GinServer, error) {
+func NewGinServer(listService *listApp.ListService, accountService *accountApp.AccountService, validator *util.Validator) (*GinServer, error) {
 	if listService == nil {
 		return nil, errors.New("listService is nil")
 	}
 
-	if authorizationService == nil {
-		return nil, errors.New("authorizationService is nil")
+	if accountService == nil {
+		return nil, errors.New("accountService is nil")
 	}
 
 	if validator == nil {
@@ -48,8 +47,8 @@ func NewGinServer(listService *listApp.ListService, authorizationService *author
 }
 
 func (s *GinServer) ConfigureRoutes(r *gin.Engine) {
-	r.POST(listPath, server.CheckUserAuthorization(s.authorizationService), s.CreateList)
-	r.GET(listPath, server.CheckUserAuthorization(s.authorizationService), s.GetUserLists)
+	r.POST(listPath, server.CheckUserAuthorization(s.accountService), s.CreateList)
+	r.GET(listPath, server.CheckUserAuthorization(s.accountService), s.GetUserLists)
 	r.OPTIONS(listPath, server.OptionsHandler([]string{http.MethodGet, http.MethodPost}))
 }
 
@@ -93,7 +92,7 @@ func (s *GinServer) CreateList(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
-func (h *GinServer) GetUserLists(c *gin.Context) {
+func (s *GinServer) GetUserLists(c *gin.Context) {
 	userUUID, err := server.GetUserIDFromContext(c)
 	if err != nil {
 		fmt.Println(err)
@@ -101,7 +100,7 @@ func (h *GinServer) GetUserLists(c *gin.Context) {
 		return
 	}
 
-	lists, err := h.listService.GetUserLists(userUUID)
+	lists, err := s.listService.GetUserLists(userUUID)
 	if err != nil {
 		fmt.Println(err)
 		c.AbortWithStatus(http.StatusInternalServerError)
@@ -118,11 +117,19 @@ func (h *GinServer) GetUserLists(c *gin.Context) {
 			products = append(products, product)
 		}
 
+		contributors := make([]*Contributor, 0)
+		for _, c := range list.Contributors() {
+			contributor := &Contributor{
+				UUID: c.UUID(),
+			}
+			contributors = append(contributors, contributor)
+		}
+
 		listResponse := &List{
 			UUID:         list.UUID(),
 			Name:         list.Name(),
 			CreationDate: list.CreationDate(),
-			Contributors: list.Contributors(),
+			Contributors: contributors,
 			Products:     products,
 		}
 
@@ -130,4 +137,22 @@ func (h *GinServer) GetUserLists(c *gin.Context) {
 	}
 
 	server.JSON(c, listsResponse)
+}
+
+func (s *GinServer) GetList(c *gin.Context) {
+	userUUID, err := server.GetUserIDFromContext(c)
+	if err != nil {
+		fmt.Println(err)
+		c.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+
+	listUUID := c.Param(listUUIDPathParam)
+	list, err := s.listService.ReadList(userUUID, listUUID)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, internal.NewError(internal.UnknownErrorCode))
+		return
+	}
+
+	server.JSON(c, list)
 }

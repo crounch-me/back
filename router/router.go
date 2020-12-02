@@ -17,16 +17,15 @@ import (
 	_ "github.com/crounch-me/back/docs"
 	"github.com/crounch-me/back/handler"
 	"github.com/crounch-me/back/internal"
-	authorizationAdapters "github.com/crounch-me/back/internal/authorization/adapters"
-	authorizationApp "github.com/crounch-me/back/internal/authorization/app"
+	"github.com/crounch-me/back/internal/account"
+	accountAdapters "github.com/crounch-me/back/internal/account/adapters"
+	userAdapters "github.com/crounch-me/back/internal/account/adapters"
+	accountApp "github.com/crounch-me/back/internal/account/app"
+	userPorts "github.com/crounch-me/back/internal/account/ports"
 	commonAdapters "github.com/crounch-me/back/internal/common/adapters"
 	listAdapters "github.com/crounch-me/back/internal/list/adapters"
 	listApp "github.com/crounch-me/back/internal/list/app"
 	listPorts "github.com/crounch-me/back/internal/list/ports"
-	"github.com/crounch-me/back/internal/user"
-	userAdapters "github.com/crounch-me/back/internal/user/adapters"
-	userApp "github.com/crounch-me/back/internal/user/app"
-	userPorts "github.com/crounch-me/back/internal/user/ports"
 	"github.com/crounch-me/back/util"
 )
 
@@ -73,12 +72,7 @@ func Start(config *configuration.Config) {
 
 	db := commonAdapters.GetDatabaseConnection(config.DBConnectionURI)
 
-	authorizationsRepository, err := authorizationAdapters.NewAuthorizationsPostgresRepository(db, config.DBSchema)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	contributorsRepository, err := listAdapters.NewContributorsPostgresRepository(db, config.DBSchema)
+	authorizationsRepository, err := accountAdapters.NewAuthorizationsPostgresRepository(db, config.DBSchema)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -93,22 +87,22 @@ func Start(config *configuration.Config) {
 		log.Fatal(err)
 	}
 
-	userService, err := userApp.NewUserService(authorizationsRepository, usersRepository)
+	userService, err := accountApp.NewAccountService(authorizationsRepository, usersRepository)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	listService, err := listApp.NewListService(listsRepository, contributorsRepository)
+	listService, err := listApp.NewListService(listsRepository)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	authorizationService, err := authorizationApp.NewAuthorizationService(authorizationsRepository)
+	accountService, err := accountApp.NewAccountService(authorizationsRepository, usersRepository)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	listServer, err := listPorts.NewGinServer(listService, authorizationService, validator)
+	listServer, err := listPorts.NewGinServer(listService, accountService, validator)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -175,7 +169,7 @@ func configureRoutes(r *gin.Engine, hc *handler.Context) {
 	r.OPTIONS(listProductPath, optionsHandler([]string{http.MethodPost, http.MethodPatch, http.MethodDelete}))
 }
 
-func checkAccess(us user.Storage) gin.HandlerFunc {
+func checkAccess(us account.Storage) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token := c.GetHeader("Authorization")
 
@@ -188,7 +182,7 @@ func checkAccess(us user.Storage) gin.HandlerFunc {
 		userID, err := us.GetUserIDByToken(token)
 
 		if err != nil {
-			if err.Code == user.UserNotFoundErrorCode {
+			if err.Code == account.UserNotFoundErrorCode {
 				c.AbortWithStatusJSON(http.StatusUnauthorized, internal.NewError(internal.UnauthorizedErrorCode))
 				return
 			}

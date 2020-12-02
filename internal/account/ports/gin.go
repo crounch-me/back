@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/crounch-me/back/internal"
+	"github.com/crounch-me/back/internal/account/app"
 	"github.com/crounch-me/back/internal/common/server"
-	"github.com/crounch-me/back/internal/user/app"
 	"github.com/crounch-me/back/util"
 	"github.com/gin-gonic/gin"
 )
@@ -19,11 +19,11 @@ const (
 )
 
 type GinServer struct {
-	userService *app.UserService
+	userService *app.AccountService
 	validator   *util.Validator
 }
 
-func NewGinServer(userService *app.UserService, validator *util.Validator) (*GinServer, error) {
+func NewGinServer(userService *app.AccountService, validator *util.Validator) (*GinServer, error) {
 	if userService == nil {
 		return nil, errors.New("users gin server userService is nil")
 	}

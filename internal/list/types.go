@@ -3,8 +3,8 @@ package list
 import (
 	"time"
 
+	"github.com/crounch-me/back/internal/account"
 	"github.com/crounch-me/back/internal/products"
-	"github.com/crounch-me/back/internal/user"
 )
 
 // List represents a shopping list
@@ -13,7 +13,7 @@ type List struct {
 	Name            string           `json:"name" validate:"required,lt=61"`
 	CreationDate    time.Time        `json:"creationDate"`
 	ArchivationDate *time.Time       `json:"archivationDate,omitempty"`
-	Contributors    []*user.User     `json:"contributors,omitempty"`
+	Contributors    []*account.User  `json:"contributors,omitempty"`
 	Products        []*ProductInList `json:"products,omitempty"`
 }
 

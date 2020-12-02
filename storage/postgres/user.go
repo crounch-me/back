@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/crounch-me/back/internal"
-	"github.com/crounch-me/back/internal/user"
+	"github.com/crounch-me/back/internal/account"
 )
 
 // CreateUser inserts a new user with hashed password
@@ -25,7 +25,7 @@ func (s *PostgresStorage) CreateUser(id, email, password string) *internal.Error
 }
 
 // GetByEmail find the user with his email
-func (s *PostgresStorage) GetByEmail(email string) (*user.User, *internal.Error) {
+func (s *PostgresStorage) GetByEmail(email string) (*account.User, *internal.Error) {
 	query := fmt.Sprintf(`
 		SELECT id, password
 		FROM %s."user"
@@ -34,12 +34,12 @@ func (s *PostgresStorage) GetByEmail(email string) (*user.User, *internal.Error)
 
 	row := s.session.QueryRow(query, email)
 
-	u := &user.User{}
+	u := &account.User{}
 
 	err := row.Scan(&u.ID, &u.Password)
 
 	if err == sql.ErrNoRows {
-		return nil, internal.NewError(user.UserNotFoundErrorCode)
+		return nil, internal.NewError(account.UserNotFoundErrorCode)
 	}
 
 	if err != nil {
@@ -65,7 +65,7 @@ func (s *PostgresStorage) GetUserIDByToken(token string) (*string, *internal.Err
 	err := row.Scan(&id)
 
 	if err == sql.ErrNoRows {
-		return nil, internal.NewError(user.UserNotFoundErrorCode)
+		return nil, internal.NewError(account.UserNotFoundErrorCode)
 	}
 
 	if err != nil {
@@ -76,7 +76,7 @@ func (s *PostgresStorage) GetUserIDByToken(token string) (*string, *internal.Err
 }
 
 // GetByToken find the user with his token
-func (s *PostgresStorage) GetByToken(token string) (*user.User, *internal.Error) {
+func (s *PostgresStorage) GetByToken(token string) (*account.User, *internal.Error) {
 	query := fmt.Sprintf(`
 		SELECT id, password, email
     FROM %s."user"
@@ -86,12 +86,12 @@ func (s *PostgresStorage) GetByToken(token string) (*user.User, *internal.Error)
 
 	row := s.session.QueryRow(query, token)
 
-	u := &user.User{}
+	u := &account.User{}
 
 	err := row.Scan(&u.ID, &u.Password, &u.Email)
 
 	if err == sql.ErrNoRows {
-		return nil, internal.NewError(user.UserNotFoundErrorCode)
+		return nil, internal.NewError(account.UserNotFoundErrorCode)
 	}
 
 	if err != nil {

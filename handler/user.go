@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/crounch-me/back/internal"
-	"github.com/crounch-me/back/internal/user"
+	"github.com/crounch-me/back/internal/account"
 
 	"github.com/gin-gonic/gin"
 )
@@ -21,11 +21,11 @@ type SignupRequest struct {
 // @Accept json
 // @Produce  json
 // @Param user body SignupRequest true "User to signup with"
-// @Success 200 {object} user.User
+// @Success 200 {object} account.User
 // @Failure 500 {object} internal.Error
 // @Router /users/signup [post]
 func (hc *Context) Signup(c *gin.Context) {
-	u := &user.User{}
+	u := &account.User{}
 
 	err := hc.UnmarshalAndValidate(c, u)
 	if err != nil {
@@ -122,7 +122,7 @@ func (hc *Context) Me(c *gin.Context) {
 	u, err := hc.Services.User.GetByToken(token)
 
 	if err != nil {
-		if err.Code == user.UserNotFoundErrorCode {
+		if err.Code == account.UserNotFoundErrorCode {
 			hc.LogAndSendError(c, internal.NewError(internal.UnauthorizedErrorCode))
 			return
 		}

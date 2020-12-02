@@ -4,28 +4,21 @@ import (
 	"errors"
 	"time"
 
-	"github.com/crounch-me/back/internal/list/domain/contributors"
 	"github.com/crounch-me/back/internal/list/domain/lists"
 	"github.com/crounch-me/back/util"
 )
 
 type ListService struct {
-	listsRepository        lists.Repository
-	contributorsRepository contributors.Repository
+	listsRepository lists.Repository
 }
 
-func NewListService(listRepository lists.Repository, contributorsRepository contributors.Repository) (*ListService, error) {
+func NewListService(listRepository lists.Repository) (*ListService, error) {
 	if listRepository == nil {
 		return nil, errors.New("listRepository is nil")
 	}
 
-	if contributorsRepository == nil {
-		return nil, errors.New("contributorsRepository is nil")
-	}
-
 	return &ListService{
-		listsRepository:        listRepository,
-		contributorsRepository: contributorsRepository,
+		listsRepository: listRepository,
 	}, nil
 }
 
@@ -47,7 +40,7 @@ func (s *ListService) CreateList(userUUID, name string) (string, error) {
 		return "", err
 	}
 
-	err = s.contributorsRepository.AddContributor(listUUID, userUUID)
+	err = s.listsRepository.AddContributor(listUUID, userUUID)
 	if err != nil {
 		return "", err
 	}
@@ -56,10 +49,28 @@ func (s *ListService) CreateList(userUUID, name string) (string, error) {
 }
 
 func (s *ListService) GetUserLists(userUUID string) ([]*lists.List, error) {
-	listUUIDs, err := s.contributorsRepository.GetUserListUUIDs(userUUID)
+	listUUIDs, err := s.listsRepository.GetContributorListUUIDs(userUUID)
 	if err != nil {
 		return nil, err
 	}
 
 	return s.listsRepository.ReadByIDs(listUUIDs)
+}
+
+func (s *ListService) ReadList(userUUID, listUUID string) (*lists.List, error) {
+	l, err := s.listsRepository.ReadByID(listUUID)
+	if err != nil {
+		return nil, err
+	}
+
+	c, err := lists.NewContributor(userUUID)
+	if err != nil {
+		return nil, err
+	}
+
+	if !c.ContributeIn(l) {
+		return nil, errors.New("user not contributor")
+	}
+
+	return l, nil
 }

@@ -4,10 +4,10 @@ import (
 	"net/http"
 
 	"github.com/crounch-me/back/internal"
+	"github.com/crounch-me/back/internal/account"
 	"github.com/crounch-me/back/internal/authorization"
 	"github.com/crounch-me/back/internal/list"
 	"github.com/crounch-me/back/internal/products"
-	"github.com/crounch-me/back/internal/user"
 )
 
 var errorToStatus map[string]int
@@ -23,8 +23,8 @@ func initializeErrorsMap() {
 	errorToStatus[internal.UnknownErrorCode] = http.StatusInternalServerError
 
 	// User errors
-	errorToStatus[user.UserNotFoundErrorCode] = http.StatusNotFound
-	errorToStatus[user.DuplicateUserErrorCode] = http.StatusConflict
+	errorToStatus[account.UserNotFoundErrorCode] = http.StatusNotFound
+	errorToStatus[account.DuplicateUserErrorCode] = http.StatusConflict
 
 	// List errors
 	errorToStatus[list.ListNotFoundErrorCode] = http.StatusNotFound

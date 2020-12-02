@@ -2,11 +2,11 @@ package authorization
 
 import (
 	"github.com/crounch-me/back/internal"
-	"github.com/crounch-me/back/internal/user"
+	"github.com/crounch-me/back/internal/account"
 )
 
 type AuthorizationService struct {
-	UserStorage          user.Storage
+	UserStorage          account.Storage
 	AuthorizationStorage Storage
 	Generation           internal.Generation
 }
@@ -35,7 +35,7 @@ func (as *AuthorizationService) CreateAuthorization(email, password string) (*Au
 
 	authorization := &Authorization{
 		AccessToken: token,
-		Owner: &user.User{
+		Owner: &account.User{
 			ID: u.ID,
 		},
 	}

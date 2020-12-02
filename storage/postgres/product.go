@@ -6,9 +6,9 @@ import (
 	"strings"
 
 	"github.com/crounch-me/back/internal"
+	"github.com/crounch-me/back/internal/account"
 	"github.com/crounch-me/back/internal/categories"
 	"github.com/crounch-me/back/internal/products"
-	"github.com/crounch-me/back/internal/user"
 )
 
 // CreateProduct inserts a new product
@@ -40,7 +40,7 @@ func (s *PostgresStorage) GetProduct(id string) (*products.Product, *internal.Er
 	row := s.session.QueryRow(query, id)
 
 	p := &products.Product{
-		Owner: &user.User{},
+		Owner: &account.User{},
 	}
 
 	var nullableCategoryID, nullableCategoryName sql.NullString

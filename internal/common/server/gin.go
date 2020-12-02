@@ -10,8 +10,8 @@ import (
 
 	"github.com/crounch-me/back/handler"
 	"github.com/crounch-me/back/internal"
-	authorizationApp "github.com/crounch-me/back/internal/authorization/app"
-	"github.com/crounch-me/back/internal/user"
+	"github.com/crounch-me/back/internal/account"
+	accountApp "github.com/crounch-me/back/internal/account/app"
 	"github.com/crounch-me/back/util"
 	"github.com/gin-gonic/gin"
 )
@@ -41,7 +41,7 @@ func GetUserIDFromContext(c *gin.Context) (string, error) {
 	return userID.(string), nil
 }
 
-func CheckUserAuthorization(authorizationService *authorizationApp.AuthorizationService) gin.HandlerFunc {
+func CheckUserAuthorization(accountService *accountApp.AccountService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token := c.GetHeader("Authorization")
 
@@ -51,9 +51,9 @@ func CheckUserAuthorization(authorizationService *authorizationApp.Authorization
 			return
 		}
 
-		userUUID, err := authorizationService.GetUserUUIDByToken(token)
+		userUUID, err := accountService.GetUserUUIDByToken(token)
 		if err != nil {
-			if err.Error() == user.UserNotFoundErrorCode {
+			if err.Error() == account.UserNotFoundErrorCode {
 				c.AbortWithStatusJSON(http.StatusUnauthorized, internal.NewError(internal.UnauthorizedErrorCode))
 				return
 			}

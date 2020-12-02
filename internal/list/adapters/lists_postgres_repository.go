@@ -79,3 +79,32 @@ func (r *ListsPostgresRepository) ReadByIDs(uuids []string) ([]*lists.List, erro
 
 	return result, nil
 }
+
+func (r *ListsPostgresRepository) ReadByID(uuid string) (*lists.List, error) {
+	query := fmt.Sprintf(`
+    SELECT l.id, l.name, l.creation_date, l.archivation_date
+    FROM %s.list l
+    WHERE l.id = $1
+  `, r.schema)
+
+	row := r.session.QueryRow(query, uuid)
+
+	list := &List{}
+
+	err := row.Scan(&list.ID, &list.Name, &list.CreationDate, &list.ArchivationDate)
+	if err != nil {
+		return nil, internal.NewError(internal.UnknownErrorCode).WithCause(err)
+	}
+
+	return lists.NewList(list.ID, list.Name, list.CreationDate, list.ArchivationDate)
+}
+
+func (r *ListsPostgresRepository) AddContributor(listUUID, userUUID string) error {
+	fmt.Println("called AddContributor")
+	return nil
+}
+
+func (r *ListsPostgresRepository) GetContributorListUUIDs(userUUID string) ([]string, error) {
+	fmt.Println("called GetUserListUUIDs")
+	return []string{}, nil
+}

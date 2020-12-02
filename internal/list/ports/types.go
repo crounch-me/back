@@ -7,11 +7,15 @@ type CreateListRequest struct {
 }
 
 type List struct {
-	UUID         string     `json:"id"`
-	Name         string     `json:"name"`
-	CreationDate time.Time  `json:"creationDate"`
-	Contributors []string   `json:"contributors"`
-	Products     []*Product `json:"products"`
+	UUID         string         `json:"id"`
+	Name         string         `json:"name"`
+	CreationDate time.Time      `json:"creationDate"`
+	Contributors []*Contributor `json:"contributors"`
+	Products     []*Product     `json:"products"`
+}
+
+type Contributor struct {
+	UUID string `json:"id"`
 }
 
 type Product struct {

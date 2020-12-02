@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/crounch-me/back/internal/user/domain/users"
+	"github.com/crounch-me/back/internal/account/domain/users"
 )
 
 type UsersPostgresRepository struct {
