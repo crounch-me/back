@@ -26,21 +26,6 @@ func NewListsPostgresRepository(session *sql.DB, schema string) (*ListsPostgresR
 	}, nil
 }
 
-func (r *ListsPostgresRepository) AddList(list *lists.List) error {
-	query := fmt.Sprintf(`
-		INSERT INTO %s."list"(id, name, creation_date)
-		VALUES ($1, $2, $3)
-	`, r.schema)
-
-	_, err := r.session.Exec(query, list.UUID(), list.Name(), list.CreationDate())
-
-	if err != nil {
-		return internal.NewError(internal.UnknownErrorCode).WithCause(err)
-	}
-
-	return nil
-}
-
 func (r *ListsPostgresRepository) ReadByIDs(uuids []string) ([]*lists.List, error) {
 	query := fmt.Sprintf(`
     SELECT l.id, l.name, l.creation_date, l.archivation_date
@@ -107,4 +92,57 @@ func (r *ListsPostgresRepository) AddContributor(listUUID, userUUID string) erro
 func (r *ListsPostgresRepository) GetContributorListUUIDs(userUUID string) ([]string, error) {
 	fmt.Println("called GetUserListUUIDs")
 	return []string{}, nil
+}
+
+func (r *ListsPostgresRepository) UpdateList(l *List) error {
+	query := fmt.Sprintf(`
+    UPDATE %s.list
+    SET name = $1,
+    archivation_date = $1
+  `, r.schema)
+
+	_, err := r.session.Exec(query, l.Name, l.ArchivationDate)
+
+	if err != nil {
+		return internal.NewError(internal.UnknownErrorCode).WithCause(err)
+	}
+
+	return nil
+}
+
+func (r *ListsPostgresRepository) SaveList(l *lists.List) error {
+	query := fmt.Sprintf(`
+    INSERT INTO %s.list(id, name, creation_date)
+    VALUES ($1, $2, $3)
+  `, r.schema)
+
+	_, err := r.session.Exec(query, l.UUID(), l.Name(), l.CreationDate())
+	if err != nil {
+		return internal.NewError(internal.UnknownErrorCode).WithCause(err)
+	}
+
+	for _, c := range l.Contributors() {
+		query = fmt.Sprintf(`
+      INSERT INTO %s.contributor(list_id, contributor_id)
+      VALUES ($1, $2)
+    `, r.schema)
+
+		_, err := r.session.Exec(query, l.UUID(), c.UUID())
+		if err != nil {
+			return err
+		}
+	}
+
+	for _, p := range l.Products() {
+		query := fmt.Sprintf(`
+      INSERT INTO %s.article(article_id, list_id)
+      VALUES ($1, $2)
+    `, r.schema)
+
+		_, err := r.session.Exec(query, p.UUID(), l.UUID())
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

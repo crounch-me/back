@@ -9,10 +9,10 @@ import (
 )
 
 type ListService struct {
-	listsRepository lists.Repository
+	listsRepository Repository
 }
 
-func NewListService(listRepository lists.Repository) (*ListService, error) {
+func NewListService(listRepository Repository) (*ListService, error) {
 	if listRepository == nil {
 		return nil, errors.New("listRepository is nil")
 	}
@@ -22,7 +22,7 @@ func NewListService(listRepository lists.Repository) (*ListService, error) {
 	}, nil
 }
 
-func (s *ListService) CreateList(userUUID, name string) (string, error) {
+func (s *ListService) CreateList(creatorUUID, name string) (string, error) {
 	listUUID, err := util.GenerateID()
 	if err != nil {
 		return "", err
@@ -30,17 +30,19 @@ func (s *ListService) CreateList(userUUID, name string) (string, error) {
 
 	creationDate := time.Now()
 
-	list, err := lists.NewList(listUUID, name, creationDate, nil)
+	l, err := lists.NewList(listUUID, name, creationDate, nil)
 	if err != nil {
 		return "", err
 	}
 
-	err = s.listsRepository.AddList(list)
+	c, err := lists.NewContributor(creatorUUID)
 	if err != nil {
 		return "", err
 	}
 
-	err = s.listsRepository.AddContributor(listUUID, userUUID)
+	l.AddContributor(c)
+
+	err = s.listsRepository.SaveList(l)
 	if err != nil {
 		return "", err
 	}
@@ -48,13 +50,13 @@ func (s *ListService) CreateList(userUUID, name string) (string, error) {
 	return listUUID, nil
 }
 
-func (s *ListService) GetUserLists(userUUID string) ([]*lists.List, error) {
-	listUUIDs, err := s.listsRepository.GetContributorListUUIDs(userUUID)
+func (s *ListService) GetContributorLists(contributorUUID string) ([]*lists.List, error) {
+	c, err := lists.NewContributor(contributorUUID)
 	if err != nil {
 		return nil, err
 	}
 
-	return s.listsRepository.ReadByIDs(listUUIDs)
+	return s.listsRepository.ReadByContributor(c)
 }
 
 func (s *ListService) ReadList(userUUID, listUUID string) (*lists.List, error) {
@@ -70,6 +72,22 @@ func (s *ListService) ReadList(userUUID, listUUID string) (*lists.List, error) {
 
 	if !c.ContributeIn(l) {
 		return nil, errors.New("user not contributor")
+	}
+
+	return l, nil
+}
+
+func (s *ListService) ArchiveList(listUUID string) (*lists.List, error) {
+	l, err := s.listsRepository.ReadByID(listUUID)
+	if err != nil {
+		return nil, err
+	}
+
+	l.Archive()
+
+	err = s.listsRepository.UpdateList(l)
+	if err != nil {
+		return nil, err
 	}
 
 	return l, nil

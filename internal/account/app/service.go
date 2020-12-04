@@ -88,6 +88,10 @@ func (s *AccountService) Login(email, password string) (string, error) {
 	return token, nil
 }
 
+func (s *AccountService) Logout(userUUID, token string) error {
+	return s.authorizationsRepository.RemoveAuthorization(userUUID, token)
+}
+
 func (s *AccountService) GetUserUUIDByToken(token string) (string, error) {
 	return s.authorizationsRepository.GetUserUUIDByToken(token)
 }

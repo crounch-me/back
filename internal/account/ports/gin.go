@@ -19,22 +19,22 @@ const (
 )
 
 type GinServer struct {
-	userService *app.AccountService
-	validator   *util.Validator
+	accountService *app.AccountService
+	validator      *util.Validator
 }
 
-func NewGinServer(userService *app.AccountService, validator *util.Validator) (*GinServer, error) {
-	if userService == nil {
-		return nil, errors.New("users gin server userService is nil")
+func NewGinServer(accountService *app.AccountService, validator *util.Validator) (*GinServer, error) {
+	if accountService == nil {
+		return nil, errors.New("account gin server accountService is nil")
 	}
 
 	if validator == nil {
-		return nil, errors.New("users gin server validator is nil")
+		return nil, errors.New("account gin server validator is nil")
 	}
 
 	return &GinServer{
-		userService: userService,
-		validator:   validator,
+		accountService: accountService,
+		validator:      validator,
 	}, nil
 }
 
@@ -44,6 +44,9 @@ func (g *GinServer) ConfigureRoutes(r *gin.Engine) {
 
 	r.POST(loginPath, g.Login)
 	r.OPTIONS(loginPath, server.OptionsHandler([]string{http.MethodPost}))
+
+	r.POST(logoutPath, g.Logout)
+	r.OPTIONS(logoutPath, server.OptionsHandler([]string{http.MethodPost}))
 }
 
 func (s *GinServer) Signup(c *gin.Context) {
@@ -61,7 +64,7 @@ func (s *GinServer) Signup(c *gin.Context) {
 		return
 	}
 
-	err = s.userService.Signup(signupRequest.Email, signupRequest.Password)
+	err = s.accountService.Signup(signupRequest.Email, signupRequest.Password)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, internal.NewError(internal.UnknownErrorCode))
 		return
@@ -85,7 +88,7 @@ func (s *GinServer) Login(c *gin.Context) {
 		return
 	}
 
-	token, err := s.userService.Login(loginRequest.Email, loginRequest.Password)
+	token, err := s.accountService.Login(loginRequest.Email, loginRequest.Password)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, internal.NewError(internal.UnknownErrorCode))
 		return
@@ -96,4 +99,27 @@ func (s *GinServer) Login(c *gin.Context) {
 	}
 
 	server.JSON(c, tokenResponse)
+}
+
+func (s *GinServer) Logout(c *gin.Context) {
+	token := c.GetHeader("Authorization")
+
+	if token == "" {
+		c.Status(http.StatusNoContent)
+		return
+	}
+
+	userUUID, err := server.GetUserIDFromContext(c)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusForbidden, internal.NewError(internal.ForbiddenErrorCode))
+		return
+	}
+
+	err = s.accountService.Logout(userUUID, token)
+	if err != nil {
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	c.Status(http.StatusNoContent)
 }

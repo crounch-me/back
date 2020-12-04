@@ -77,10 +77,7 @@ func Start(config *configuration.Config) {
 		log.Fatal(err)
 	}
 
-	listsRepository, err := listAdapters.NewListsPostgresRepository(db, config.DBSchema)
-	if err != nil {
-		log.Fatal(err)
-	}
+	listsRepository := listAdapters.NewListsMemoryRepository()
 
 	usersRepository, err := userAdapters.NewUsersPostgresRepository(db, config.DBSchema)
 	if err != nil {
@@ -144,8 +141,6 @@ func configureRoutes(r *gin.Engine, hc *handler.Context) {
 	// User routes
 	r.GET(mePath, checkAccess(hc.Storage), hc.Me)
 	r.OPTIONS(mePath, optionsHandler([]string{http.MethodGet}))
-	r.POST(logoutPath, hc.Logout)
-	r.OPTIONS(logoutPath, optionsHandler([]string{http.MethodPost}))
 
 	// List routes
 	r.GET(listWithIDPath, checkAccess(hc.Storage), hc.GetList)

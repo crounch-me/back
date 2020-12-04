@@ -100,7 +100,7 @@ func (s *GinServer) GetUserLists(c *gin.Context) {
 		return
 	}
 
-	lists, err := s.listService.GetUserLists(userUUID)
+	lists, err := s.listService.GetContributorLists(userUUID)
 	if err != nil {
 		fmt.Println(err)
 		c.AbortWithStatus(http.StatusInternalServerError)

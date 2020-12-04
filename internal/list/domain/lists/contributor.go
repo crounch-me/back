@@ -18,6 +18,10 @@ func (c Contributor) UUID() string {
 	return c.uuid
 }
 
+func (l *List) AddContributor(c *Contributor) {
+	l.contributors = append(l.contributors, c)
+}
+
 func (l List) Contributors() []*Contributor {
 	return l.contributors
 }

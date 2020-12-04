@@ -1,11 +1,23 @@
 basePath: /
 definitions:
+  account.User:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
   authorization.Authorization:
     properties:
       accessToken:
         type: string
       owner:
-        $ref: '#/definitions/user.User'
+        $ref: '#/definitions/account.User'
     type: object
   builders.CategoryInGetListResponse:
     properties:
@@ -28,7 +40,7 @@ definitions:
         type: array
       contributors:
         items:
-          $ref: '#/definitions/user.User'
+          $ref: '#/definitions/account.User'
         type: array
       creationDate:
         type: string
@@ -50,7 +62,7 @@ definitions:
       name:
         type: string
       owner:
-        $ref: '#/definitions/user.User'
+        $ref: '#/definitions/account.User'
     required:
     - name
     type: object
@@ -127,7 +139,7 @@ definitions:
         type: string
       contributors:
         items:
-          $ref: '#/definitions/user.User'
+          $ref: '#/definitions/account.User'
         type: array
       creationDate:
         type: string
@@ -153,7 +165,7 @@ definitions:
       name:
         type: string
       owner:
-        $ref: '#/definitions/user.User'
+        $ref: '#/definitions/account.User'
     required:
     - name
     type: object
@@ -180,21 +192,9 @@ definitions:
       name:
         type: string
       owner:
-        $ref: '#/definitions/user.User'
+        $ref: '#/definitions/account.User'
     required:
     - name
-    type: object
-  user.User:
-    properties:
-      email:
-        type: string
-      id:
-        type: string
-      password:
-        type: string
-    required:
-    - email
-    - password
     type: object
   users.User:
     type: object
@@ -536,7 +536,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/user.User'
+            $ref: '#/definitions/account.User'
         "500":
           description: Internal Server Error
           schema:

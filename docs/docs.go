@@ -547,7 +547,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/user.User"
+                            "$ref": "#/definitions/account.User"
                         }
                     },
                     "500": {
@@ -561,6 +561,24 @@ var doc = `{
         }
     },
     "definitions": {
+        "account.User": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
         "authorization.Authorization": {
             "type": "object",
             "properties": {
@@ -568,7 +586,7 @@ var doc = `{
                     "type": "string"
                 },
                 "owner": {
-                    "$ref": "#/definitions/user.User"
+                    "$ref": "#/definitions/account.User"
                 }
             }
         },
@@ -607,7 +625,7 @@ var doc = `{
                 "contributors": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/user.User"
+                        "$ref": "#/definitions/account.User"
                     }
                 },
                 "creationDate": {
@@ -640,7 +658,7 @@ var doc = `{
                     "type": "string"
                 },
                 "owner": {
-                    "$ref": "#/definitions/user.User"
+                    "$ref": "#/definitions/account.User"
                 }
             }
         },
@@ -760,7 +778,7 @@ var doc = `{
                 "contributors": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/user.User"
+                        "$ref": "#/definitions/account.User"
                     }
                 },
                 "creationDate": {
@@ -799,7 +817,7 @@ var doc = `{
                     "type": "string"
                 },
                 "owner": {
-                    "$ref": "#/definitions/user.User"
+                    "$ref": "#/definitions/account.User"
                 }
             }
         },
@@ -841,25 +859,7 @@ var doc = `{
                     "type": "string"
                 },
                 "owner": {
-                    "$ref": "#/definitions/user.User"
-                }
-            }
-        },
-        "user.User": {
-            "type": "object",
-            "required": [
-                "email",
-                "password"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
+                    "$ref": "#/definitions/account.User"
                 }
             }
         },
