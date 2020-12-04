@@ -70,6 +70,35 @@ var doc = `{
                 }
             }
         },
+        "/account/logout": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "tags": [
+                    "account"
+                ],
+                "summary": "Removes the user authorization when the user token is found",
+                "operationId": "logout",
+                "responses": {
+                    "204": {},
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/internal.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/account/signup": {
             "post": {
                 "consumes": [
@@ -128,7 +157,7 @@ var doc = `{
                 }
             }
         },
-        "/lists": {
+        "/listing/lists": {
             "get": {
                 "security": [
                     {
@@ -139,18 +168,24 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "list"
+                    "listing"
                 ],
-                "summary": "Get the lists of the owner",
-                "operationId": "get-owners-lists",
+                "summary": "Get the authenticated contributor accessible lists",
+                "operationId": "get-contributors-lists",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/list.List"
+                                "$ref": "#/definitions/ports.List"
                             }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/internal.Error"
                         }
                     },
                     "500": {
@@ -174,7 +209,7 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "list"
+                    "listing"
                 ],
                 "summary": "Create a list",
                 "operationId": "create-list",
@@ -185,15 +220,22 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.CreateListRequest"
+                            "$ref": "#/definitions/ports.CreateListRequest"
                         }
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
+                    "201": {},
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/list.List"
+                            "$ref": "#/definitions/internal.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/internal.Error"
                         }
                     },
                     "500": {
@@ -218,7 +260,7 @@ var doc = `{
                 "tags": [
                     "list"
                 ],
-                "summary": "Reads a list with products in categories",
+                "summary": "Reads a list with its product and contributor ids",
                 "operationId": "get-list",
                 "parameters": [
                     {
@@ -313,7 +355,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/list.ProductInListLink"
+                            "$ref": "#/definitions/listing.ProductInListLink"
                         }
                     },
                     "500": {
@@ -388,7 +430,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/list.UpdateProductInList"
+                            "$ref": "#/definitions/listing.UpdateProductInList"
                         }
                     },
                     {
@@ -410,67 +452,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/list.ProductInListLink"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/internal.Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/logout": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "tags": [
-                    "account"
-                ],
-                "summary": "Removes the user authorization when the user token is found",
-                "operationId": "logout",
-                "responses": {
-                    "204": {},
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "$ref": "#/definitions/internal.Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/internal.Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/me": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "user"
-                ],
-                "summary": "Removes an user authorization",
-                "operationId": "me",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/users.User"
+                            "$ref": "#/definitions/listing.ProductInListLink"
                         }
                     },
                     "500": {
@@ -672,17 +654,6 @@ var doc = `{
                 }
             }
         },
-        "handler.CreateListRequest": {
-            "type": "object",
-            "required": [
-                "name"
-            ],
-            "properties": {
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
         "handler.CreateProductRequest": {
             "type": "object",
             "required": [
@@ -735,19 +706,54 @@ var doc = `{
                 }
             }
         },
-        "list.List": {
+        "listing.ProductInListLink": {
+            "type": "object",
+            "properties": {
+                "bought": {
+                    "type": "boolean"
+                },
+                "listId": {
+                    "type": "string"
+                },
+                "productId": {
+                    "type": "string"
+                }
+            }
+        },
+        "listing.UpdateProductInList": {
+            "type": "object",
+            "properties": {
+                "bought": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "ports.Contributor": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "ports.CreateListRequest": {
             "type": "object",
             "required": [
                 "name"
             ],
             "properties": {
-                "archivationDate": {
+                "name": {
                     "type": "string"
-                },
+                }
+            }
+        },
+        "ports.List": {
+            "type": "object",
+            "properties": {
                 "contributors": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/account.User"
+                        "$ref": "#/definitions/ports.Contributor"
                     }
                 },
                 "creationDate": {
@@ -762,53 +768,8 @@ var doc = `{
                 "products": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/list.ProductInList"
+                        "$ref": "#/definitions/ports.Product"
                     }
-                }
-            }
-        },
-        "list.ProductInList": {
-            "type": "object",
-            "required": [
-                "name"
-            ],
-            "properties": {
-                "bought": {
-                    "type": "boolean"
-                },
-                "category": {
-                    "$ref": "#/definitions/categories.Category"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "owner": {
-                    "$ref": "#/definitions/account.User"
-                }
-            }
-        },
-        "list.ProductInListLink": {
-            "type": "object",
-            "properties": {
-                "bought": {
-                    "type": "boolean"
-                },
-                "listId": {
-                    "type": "string"
-                },
-                "productId": {
-                    "type": "string"
-                }
-            }
-        },
-        "list.UpdateProductInList": {
-            "type": "object",
-            "properties": {
-                "bought": {
-                    "type": "boolean"
                 }
             }
         },
@@ -823,6 +784,14 @@ var doc = `{
                     "type": "string"
                 },
                 "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "ports.Product": {
+            "type": "object",
+            "properties": {
+                "id": {
                     "type": "string"
                 }
             }
@@ -869,9 +838,6 @@ var doc = `{
                     "$ref": "#/definitions/account.User"
                 }
             }
-        },
-        "users.User": {
-            "type": "object"
         }
     },
     "securityDefinitions": {

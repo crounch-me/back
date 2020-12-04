@@ -3,7 +3,7 @@ package storage
 import (
 	"github.com/crounch-me/back/internal/account"
 	"github.com/crounch-me/back/internal/contributors"
-	"github.com/crounch-me/back/internal/list"
+	list "github.com/crounch-me/back/internal/listing"
 	"github.com/crounch-me/back/internal/products"
 )
 

@@ -3,7 +3,7 @@ package handler
 import (
 	"net/http"
 
-	"github.com/crounch-me/back/internal"
+	"github.com/crounch-me/back/internal/common/errors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -22,7 +22,7 @@ type CreateProductRequest struct {
 // @Produce json
 // @Param product body CreateProductRequest true "Product to create"
 // @Success 200 {object} products.Product
-// @Failure 500 {object} internal.Error
+// @Failure 500 {object} errors.Error
 // @Security ApiKeyAuth
 // @Router /products [post]
 func (hc *Context) CreateProduct(c *gin.Context) {
@@ -36,7 +36,7 @@ func (hc *Context) CreateProduct(c *gin.Context) {
 
 	userID, exists := c.Get(ContextUserID)
 	if !exists {
-		hc.LogAndSendError(c, internal.NewError(internal.UnknownErrorCode))
+		hc.LogAndSendError(c, errors.NewError(errors.UnknownErrorCode))
 		return
 	}
 
@@ -61,7 +61,7 @@ type ProductSearchRequest struct {
 // @Produce json
 // @Param product body ProductSearchRequest true "Product search request"
 // @Success 200 {object} []products.Product
-// @Failure 500 {object} internal.Error
+// @Failure 500 {object} errors.Error
 // @Security ApiKeyAuth
 // @Router /products/search [post]
 func (hc *Context) SearchDefaultProducts(c *gin.Context) {

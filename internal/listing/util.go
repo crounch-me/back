@@ -1,8 +1,8 @@
-package list
+package listing
 
-import "github.com/crounch-me/back/internal"
+import "github.com/crounch-me/back/internal/common/errors"
 
-func (ls *ListService) isUserAuthorized(listID string, userID string) (bool, *internal.Error) {
+func (ls *ListService) isUserAuthorized(listID string, userID string) (bool, *errors.Error) {
 	contributorIDs, err := ls.ContributorStorage.GetContributorsIDs(listID)
 	if err != nil {
 		return false, err

@@ -4,8 +4,8 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/crounch-me/back/internal"
 	"github.com/crounch-me/back/internal/account/app"
+	commonErrors "github.com/crounch-me/back/internal/common/errors"
 	"github.com/crounch-me/back/internal/common/server"
 	"github.com/crounch-me/back/util"
 	"github.com/gin-gonic/gin"
@@ -57,27 +57,27 @@ func (s *GinServer) ConfigureRoutes(r *gin.Engine) {
 // @Accept json
 // @Param user body SignupRequest true "User to signup with"
 // @Success 201
-// @Failure 400 {object} internal.Error
-// @Failure 500 {object} internal.Error
+// @Failure 400 {object} errors.Error
+// @Failure 500 {object} errors.Error
 // @Router /account/signup [post]
 func (s *GinServer) Signup(c *gin.Context) {
 	signupRequest := &SignupRequest{}
 
 	err := server.UnmarshalPayload(c.Request.Body, signupRequest)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, internal.NewError(internal.UnmarshalErrorCode))
+		c.AbortWithStatusJSON(http.StatusBadRequest, commonErrors.NewError(commonErrors.UnmarshalErrorCode))
 		return
 	}
 
 	err = s.validator.Struct(signupRequest)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, internal.NewError(internal.InvalidErrorCode))
+		c.AbortWithStatusJSON(http.StatusBadRequest, commonErrors.NewError(commonErrors.InvalidErrorCode))
 		return
 	}
 
 	err = s.accountService.Signup(signupRequest.Email, signupRequest.Password)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, internal.NewError(internal.UnknownErrorCode))
+		c.AbortWithStatusJSON(http.StatusInternalServerError, commonErrors.NewError(commonErrors.UnknownErrorCode))
 		return
 	}
 
@@ -92,27 +92,27 @@ func (s *GinServer) Signup(c *gin.Context) {
 // @Produce  json
 // @Param user body LoginRequest true "User to login with"
 // @Success 200 {object} TokenResponse
-// @Failure 400 {object} internal.Error
-// @Failure 500 {object} internal.Error
+// @Failure 400 {object} errors.Error
+// @Failure 500 {object} errors.Error
 // @Router /account/login [post]
 func (s *GinServer) Login(c *gin.Context) {
 	loginRequest := &LoginRequest{}
 
 	err := server.UnmarshalPayload(c.Request.Body, loginRequest)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, internal.NewError(internal.UnmarshalErrorCode))
+		c.AbortWithStatusJSON(http.StatusBadRequest, commonErrors.NewError(commonErrors.UnmarshalErrorCode))
 		return
 	}
 
 	err = s.validator.Struct(loginRequest)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, internal.NewError(internal.InvalidErrorCode))
+		c.AbortWithStatusJSON(http.StatusBadRequest, commonErrors.NewError(commonErrors.InvalidErrorCode))
 		return
 	}
 
 	token, err := s.accountService.Login(loginRequest.Email, loginRequest.Password)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, internal.NewError(internal.UnknownErrorCode))
+		c.AbortWithStatusJSON(http.StatusInternalServerError, commonErrors.NewError(commonErrors.UnknownErrorCode))
 		return
 	}
 
@@ -128,8 +128,8 @@ func (s *GinServer) Login(c *gin.Context) {
 // @ID logout
 // @Tags account
 // @Success 204
-// @Failure 403 {object} internal.Error
-// @Failure 500 {object} internal.Error
+// @Failure 403 {object} errors.Error
+// @Failure 500 {object} errors.Error
 // @Security ApiKeyAuth
 // @Router /account/logout [post]
 func (s *GinServer) Logout(c *gin.Context) {
@@ -142,7 +142,7 @@ func (s *GinServer) Logout(c *gin.Context) {
 
 	userUUID, err := s.accountService.GetUserUUIDByToken(token)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusForbidden, internal.NewError(internal.ForbiddenErrorCode))
+		c.AbortWithStatusJSON(http.StatusForbidden, commonErrors.NewError(commonErrors.ForbiddenErrorCode))
 		return
 	}
 

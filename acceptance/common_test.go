@@ -13,7 +13,7 @@ import (
 
 	"github.com/crounch-me/back/builders"
 	"github.com/crounch-me/back/internal/common/server"
-	"github.com/crounch-me/back/internal/list"
+	"github.com/crounch-me/back/internal/listing"
 	"github.com/crounch-me/back/internal/products"
 	"github.com/crounch-me/back/util"
 	"github.com/cucumber/godog"
@@ -245,7 +245,7 @@ func (te *TestExecutor) iCreateAndAuthenticateWithARandomUser() error {
 	return te.imAuthenticatedWithThisRandomUser()
 }
 
-func (te *TestExecutor) createList(l *list.List) error {
+func (te *TestExecutor) createList(l *listing.List) error {
 	te.RequestBody = fmt.Sprintf(`
     {
       "name": "%s"
@@ -276,7 +276,7 @@ func (te *TestExecutor) iCreateTheseLists(listDataTable *messages.PickleStepArgu
 	for i, row := range listDataTable.Rows {
 		if i != 0 {
 			name := strings.TrimSpace(row.Cells[0].Value)
-			l := &list.List{
+			l := &listing.List{
 				Name: name,
 			}
 
@@ -338,7 +338,7 @@ func (te *TestExecutor) iCreateARandomList() error {
 		return err
 	}
 
-	l := &list.List{
+	l := &listing.List{
 		Name: name,
 	}
 

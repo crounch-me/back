@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/crounch-me/back/internal/list/domain/lists"
+	"github.com/crounch-me/back/internal/listing/domain/lists"
 	"github.com/crounch-me/back/util"
 )
 

@@ -9,9 +9,9 @@ import (
 	"strings"
 
 	"github.com/crounch-me/back/handler"
-	"github.com/crounch-me/back/internal"
 	"github.com/crounch-me/back/internal/account"
 	accountApp "github.com/crounch-me/back/internal/account/app"
+	"github.com/crounch-me/back/internal/common/errors"
 	"github.com/crounch-me/back/util"
 	"github.com/gin-gonic/gin"
 )
@@ -35,7 +35,7 @@ func NewDataResponse(data interface{}) *DataResponse {
 func GetUserIDFromContext(c *gin.Context) (string, error) {
 	userID, exists := c.Get(ContextUserID)
 	if !exists {
-		return "", internal.NewError(internal.UnknownErrorCode).WithCall("utils", "GetUserIDFromContext")
+		return "", errors.NewError(errors.UnknownErrorCode).WithCall("utils", "GetUserIDFromContext")
 	}
 
 	return userID.(string), nil
@@ -54,7 +54,7 @@ func CheckUserAuthorization(accountService *accountApp.AccountService) gin.Handl
 		userUUID, err := accountService.GetUserUUIDByToken(token)
 		if err != nil {
 			if err.Error() == account.UserNotFoundErrorCode {
-				c.AbortWithStatusJSON(http.StatusUnauthorized, internal.NewError(internal.UnauthorizedErrorCode))
+				c.AbortWithStatusJSON(http.StatusUnauthorized, errors.NewError(errors.UnauthorizedErrorCode))
 				return
 			}
 

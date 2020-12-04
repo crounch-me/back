@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/crounch-me/back/internal"
-	"github.com/crounch-me/back/internal/list/domain/lists"
+	commonErrors "github.com/crounch-me/back/internal/common/errors"
+	"github.com/crounch-me/back/internal/listing/domain/lists"
 )
 
 type ListsPostgresRepository struct {
@@ -38,20 +38,20 @@ func (r *ListsPostgresRepository) ReadByIDs(uuids []string) ([]*lists.List, erro
 	rows, err := r.session.Query(query, listUUIDs)
 	defer rows.Close()
 	if err != nil {
-		return nil, internal.NewError(internal.UnknownErrorCode).WithCause(err)
+		return nil, commonErrors.NewError(commonErrors.UnknownErrorCode).WithCause(err)
 	}
 
 	result := make([]*lists.List, 0)
 	for rows.Next() {
 		if err = rows.Err(); err != nil {
-			return nil, internal.NewError(internal.UnknownErrorCode).WithCause(err)
+			return nil, commonErrors.NewError(commonErrors.UnknownErrorCode).WithCause(err)
 		}
 
 		list := &List{}
 
 		err = rows.Scan(&list.ID, &list.Name, &list.CreationDate, &list.ArchivationDate)
 		if err != nil {
-			return nil, internal.NewError(internal.UnknownErrorCode).WithCause(err)
+			return nil, commonErrors.NewError(commonErrors.UnknownErrorCode).WithCause(err)
 		}
 
 		domainList, err := lists.NewList(list.ID, list.Name, list.CreationDate, list.ArchivationDate)
@@ -78,7 +78,7 @@ func (r *ListsPostgresRepository) ReadByID(uuid string) (*lists.List, error) {
 
 	err := row.Scan(&list.ID, &list.Name, &list.CreationDate, &list.ArchivationDate)
 	if err != nil {
-		return nil, internal.NewError(internal.UnknownErrorCode).WithCause(err)
+		return nil, commonErrors.NewError(commonErrors.UnknownErrorCode).WithCause(err)
 	}
 
 	return lists.NewList(list.ID, list.Name, list.CreationDate, list.ArchivationDate)
@@ -104,7 +104,7 @@ func (r *ListsPostgresRepository) UpdateList(l *List) error {
 	_, err := r.session.Exec(query, l.Name, l.ArchivationDate)
 
 	if err != nil {
-		return internal.NewError(internal.UnknownErrorCode).WithCause(err)
+		return commonErrors.NewError(commonErrors.UnknownErrorCode).WithCause(err)
 	}
 
 	return nil
@@ -118,7 +118,7 @@ func (r *ListsPostgresRepository) SaveList(l *lists.List) error {
 
 	_, err := r.session.Exec(query, l.UUID(), l.Name(), l.CreationDate())
 	if err != nil {
-		return internal.NewError(internal.UnknownErrorCode).WithCause(err)
+		return commonErrors.NewError(commonErrors.UnknownErrorCode).WithCause(err)
 	}
 
 	for _, c := range l.Contributors() {

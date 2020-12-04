@@ -1,10 +1,10 @@
-package list
+package listing
 
 import (
 	"time"
 
 	"github.com/crounch-me/back/internal"
-	"github.com/crounch-me/back/internal/account"
+	"github.com/crounch-me/back/internal/common/errors"
 	"github.com/crounch-me/back/internal/contributors"
 	"github.com/crounch-me/back/internal/products"
 )
@@ -16,56 +16,14 @@ type ListService struct {
 	Generation         internal.Generation
 }
 
-func (ls *ListService) CreateList(name, userID string) (*List, *internal.Error) {
-	id, err := ls.Generation.GenerateID()
-	if err != nil {
-		return nil, err
-	}
-
-	creationDate := time.Now()
-	err = ls.ListStorage.CreateList(id, name, creationDate)
-
-	if err != nil {
-		return nil, err
-	}
-
-	err = ls.ContributorStorage.CreateContributor(id, userID)
-	if err != nil {
-		return nil, err
-	}
-
-	list := &List{
-		ID:   id,
-		Name: name,
-		Contributors: []*account.User{
-			{
-				ID: userID,
-			},
-		},
-		CreationDate: creationDate,
-	}
-
-	return list, nil
-}
-
-func (ls *ListService) GetUsersLists(userID string) ([]*List, *internal.Error) {
-	lists, err := ls.ListStorage.GetUsersLists(userID)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return lists, nil
-}
-
-func (ls *ListService) ArchiveList(listID, userID string) (*List, *internal.Error) {
+func (ls *ListService) ArchiveList(listID, userID string) (*List, *errors.Error) {
 	isUserAuthorized, err := ls.isUserAuthorized(listID, userID)
 	if err != nil {
 		return nil, err
 	}
 
 	if !isUserAuthorized {
-		return nil, internal.NewError(internal.ForbiddenErrorCode)
+		return nil, errors.NewError(errors.ForbiddenErrorCode)
 	}
 
 	list, err := ls.ListStorage.GetList(listID)
@@ -85,7 +43,7 @@ func (ls *ListService) ArchiveList(listID, userID string) (*List, *internal.Erro
 	return list, nil
 }
 
-func (ls *ListService) UpdateProductInList(updateProductInList *UpdateProductInList, productID, listID, userID string) (*ProductInListLink, *internal.Error) {
+func (ls *ListService) UpdateProductInList(updateProductInList *UpdateProductInList, productID, listID, userID string) (*ProductInListLink, *errors.Error) {
 	_, err := ls.ListStorage.GetList(listID)
 	if err != nil {
 		return nil, err
@@ -97,7 +55,7 @@ func (ls *ListService) UpdateProductInList(updateProductInList *UpdateProductInL
 	}
 
 	if !isUserAuthorized {
-		return nil, internal.NewError(internal.ForbiddenErrorCode)
+		return nil, errors.NewError(errors.ForbiddenErrorCode)
 	}
 
 	_, err = ls.ProductStorage.GetProduct(productID)
@@ -113,7 +71,7 @@ func (ls *ListService) UpdateProductInList(updateProductInList *UpdateProductInL
 	return productInListLink, nil
 }
 
-func (ls *ListService) GetList(listID, userID string) (*List, *internal.Error) {
+func (ls *ListService) GetList(listID, userID string) (*List, *errors.Error) {
 	list, err := ls.ListStorage.GetList(listID)
 	if err != nil {
 		return nil, err
@@ -125,7 +83,7 @@ func (ls *ListService) GetList(listID, userID string) (*List, *internal.Error) {
 	}
 
 	if !isUserAuthorized {
-		return nil, internal.NewError(internal.ForbiddenErrorCode)
+		return nil, errors.NewError(errors.ForbiddenErrorCode)
 	}
 
 	list.Products, err = ls.ListStorage.GetProductsOfList(listID)
@@ -136,7 +94,7 @@ func (ls *ListService) GetList(listID, userID string) (*List, *internal.Error) {
 	return list, err
 }
 
-func (ls *ListService) DeleteProductFromList(productID, listID, userID string) *internal.Error {
+func (ls *ListService) DeleteProductFromList(productID, listID, userID string) *errors.Error {
 	_, err := ls.ListStorage.GetList(listID)
 	if err != nil {
 		return err
@@ -148,7 +106,7 @@ func (ls *ListService) DeleteProductFromList(productID, listID, userID string) *
 	}
 
 	if !isUserAuthorized {
-		return internal.NewError(internal.ForbiddenErrorCode)
+		return errors.NewError(errors.ForbiddenErrorCode)
 	}
 
 	_, err = ls.ProductStorage.GetProduct(productID)
@@ -159,7 +117,7 @@ func (ls *ListService) DeleteProductFromList(productID, listID, userID string) *
 	return ls.ListStorage.DeleteProductFromList(productID, listID)
 }
 
-func (ls *ListService) AddProductToList(productID, listID, userID string) (*ProductInListLink, *internal.Error) {
+func (ls *ListService) AddProductToList(productID, listID, userID string) (*ProductInListLink, *errors.Error) {
 	_, err := ls.ListStorage.GetList(listID)
 	if err != nil {
 		return nil, err
@@ -171,7 +129,7 @@ func (ls *ListService) AddProductToList(productID, listID, userID string) (*Prod
 	}
 
 	if !isUserAuthorized {
-		return nil, internal.NewError(internal.ForbiddenErrorCode)
+		return nil, errors.NewError(errors.ForbiddenErrorCode)
 	}
 
 	product, err := ls.ProductStorage.GetProduct(productID)
@@ -180,12 +138,12 @@ func (ls *ListService) AddProductToList(productID, listID, userID string) (*Prod
 	}
 
 	if !products.IsUserAuthorized(product, userID) {
-		return nil, internal.NewError(internal.ForbiddenErrorCode)
+		return nil, errors.NewError(errors.ForbiddenErrorCode)
 	}
 
 	productInList, err := ls.ListStorage.GetProductInList(productID, listID)
 	if err == nil {
-		return nil, internal.NewError(DuplicateProductInListErrorCode)
+		return nil, errors.NewError(DuplicateProductInListErrorCode)
 	} else if err.Code != ProductInListNotFoundErrorCode {
 		return nil, err
 	}
@@ -203,7 +161,7 @@ func (ls *ListService) AddProductToList(productID, listID, userID string) (*Prod
 	return productInList, nil
 }
 
-func (ls *ListService) DeleteList(listID, userID string) *internal.Error {
+func (ls *ListService) DeleteList(listID, userID string) *errors.Error {
 	_, err := ls.ListStorage.GetList(listID)
 	if err != nil {
 		return err
@@ -215,7 +173,7 @@ func (ls *ListService) DeleteList(listID, userID string) *internal.Error {
 	}
 
 	if !isUserAuthorized {
-		return internal.NewError(internal.ForbiddenErrorCode)
+		return errors.NewError(errors.ForbiddenErrorCode)
 	}
 
 	err = ls.ListStorage.DeleteProductsFromList(listID)

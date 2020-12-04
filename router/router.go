@@ -16,26 +16,21 @@ import (
 	// Import documentations for swagger endpoint
 	_ "github.com/crounch-me/back/docs"
 	"github.com/crounch-me/back/handler"
-	"github.com/crounch-me/back/internal"
 	"github.com/crounch-me/back/internal/account"
 	accountAdapters "github.com/crounch-me/back/internal/account/adapters"
 	userAdapters "github.com/crounch-me/back/internal/account/adapters"
 	accountApp "github.com/crounch-me/back/internal/account/app"
 	userPorts "github.com/crounch-me/back/internal/account/ports"
 	commonAdapters "github.com/crounch-me/back/internal/common/adapters"
-	listAdapters "github.com/crounch-me/back/internal/list/adapters"
-	listApp "github.com/crounch-me/back/internal/list/app"
-	listPorts "github.com/crounch-me/back/internal/list/ports"
+	"github.com/crounch-me/back/internal/common/errors"
+	listAdapters "github.com/crounch-me/back/internal/listing/adapters"
+	listApp "github.com/crounch-me/back/internal/listing/app"
+	listPorts "github.com/crounch-me/back/internal/listing/ports"
 	"github.com/crounch-me/back/util"
 )
 
 const (
 	healthPath = "/health"
-
-	userPath   = "/users"
-	loginPath  = "/users/login"
-	mePath     = "/me"
-	logoutPath = "/logout"
 
 	listPath        = "/lists"
 	listWithIDPath  = "/lists/:listID"
@@ -122,7 +117,7 @@ func Start(config *configuration.Config) {
 
 	url := ginSwagger.URL("http://localhost:3000/swagger/doc.json")
 
-	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
 
 	log.Info("Launching awesome server")
 	err = r.Run(":3000")
@@ -174,7 +169,7 @@ func checkAccess(us account.Storage) gin.HandlerFunc {
 
 		if err != nil {
 			if err.Code == account.UserNotFoundErrorCode {
-				c.AbortWithStatusJSON(http.StatusUnauthorized, internal.NewError(internal.UnauthorizedErrorCode))
+				c.AbortWithStatusJSON(http.StatusUnauthorized, errors.NewError(errors.UnauthorizedErrorCode))
 				return
 			}
 			log.WithError(err).Error("Unauthorized - Error while accessing database")

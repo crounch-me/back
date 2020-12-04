@@ -5,7 +5,7 @@ import (
 
 	"github.com/crounch-me/back/internal/account"
 	"github.com/crounch-me/back/internal/categories"
-	"github.com/crounch-me/back/internal/list"
+	"github.com/crounch-me/back/internal/listing"
 )
 
 const (
@@ -43,7 +43,7 @@ type GetListResponse struct {
 }
 
 // GetList builds the response to GetList request from a regular List
-func (lb *ListBuilder) GetList(list *list.List) *GetListResponse {
+func (lb *ListBuilder) GetList(list *listing.List) *GetListResponse {
 	listResponse := &GetListResponse{
 		ID:              list.ID,
 		Name:            list.Name,

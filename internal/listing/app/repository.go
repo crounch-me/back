@@ -1,6 +1,6 @@
 package app
 
-import "github.com/crounch-me/back/internal/list/domain/lists"
+import "github.com/crounch-me/back/internal/listing/domain/lists"
 
 type Repository interface {
 	ReadByContributor(c *lists.Contributor) ([]*lists.List, error)

@@ -3,10 +3,10 @@ package postgres
 import (
 	"fmt"
 
-	"github.com/crounch-me/back/internal"
+	"github.com/crounch-me/back/internal/common/errors"
 )
 
-func (s *PostgresStorage) CreateContributor(listID, userID string) *internal.Error {
+func (s *PostgresStorage) CreateContributor(listID, userID string) *errors.Error {
 	query := fmt.Sprintf(`
     INSERT INTO %s."contributor" (list_id, user_id)
     VALUES ($1, $2)
@@ -15,13 +15,13 @@ func (s *PostgresStorage) CreateContributor(listID, userID string) *internal.Err
 	_, err := s.session.Exec(query, listID, userID)
 
 	if err != nil {
-		return internal.NewError(internal.UnknownErrorCode).WithCause(err)
+		return errors.NewError(errors.UnknownErrorCode).WithCause(err)
 	}
 
 	return nil
 }
 
-func (s *PostgresStorage) GetContributorsIDs(listID string) ([]string, *internal.Error) {
+func (s *PostgresStorage) GetContributorsIDs(listID string) ([]string, *errors.Error) {
 	query := fmt.Sprintf(`
     SELECT c.user_id
     FROM %s.contributor c
@@ -32,20 +32,20 @@ func (s *PostgresStorage) GetContributorsIDs(listID string) ([]string, *internal
 	defer rows.Close()
 
 	if err != nil {
-		return nil, internal.NewError(internal.UnknownErrorCode).WithCause(err)
+		return nil, errors.NewError(errors.UnknownErrorCode).WithCause(err)
 	}
 
 	contributorIDs := make([]string, 0)
 	for rows.Next() {
 		if err = rows.Err(); err != nil {
-			return nil, internal.NewError(internal.UnknownErrorCode).WithCause(err)
+			return nil, errors.NewError(errors.UnknownErrorCode).WithCause(err)
 		}
 
 		contributorID := ""
 
 		err = rows.Scan(&contributorID)
 		if err != nil {
-			return nil, internal.NewError(internal.UnknownErrorCode).WithCause(err)
+			return nil, errors.NewError(errors.UnknownErrorCode).WithCause(err)
 		}
 
 		contributorIDs = append(contributorIDs, contributorID)

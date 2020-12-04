@@ -3,8 +3,7 @@ package handler
 import (
 	"net/http"
 
-	"github.com/crounch-me/back/internal"
-	"github.com/crounch-me/back/internal/list"
+	list "github.com/crounch-me/back/internal/listing"
 	"github.com/crounch-me/back/util"
 	"github.com/gin-gonic/gin"
 )
@@ -12,70 +11,6 @@ import (
 const (
 	ListNotFoundDescription = "The list was not found"
 )
-
-type CreateListRequest struct {
-	Name string `json:"name" validate:"required"`
-}
-
-// CreateList creates a new list
-// @Summary Create a list
-// @ID create-list
-// @Tags list
-// @Accept json
-// @Produce  json
-// @Param list body CreateListRequest true "List to create"
-// @Success 200 {object} list.List
-// @Failure 500 {object} internal.Error
-// @Security ApiKeyAuth
-// @Router /lists [post]
-func (hc *Context) CreateList(c *gin.Context) {
-	list := &CreateListRequest{}
-
-	err := hc.UnmarshalAndValidate(c, list)
-	if err != nil {
-		hc.LogAndSendError(c, err)
-		return
-	}
-
-	userID, exists := c.Get(ContextUserID)
-	if !exists {
-		hc.LogAndSendError(c, internal.NewError(internal.UnknownErrorCode))
-		return
-	}
-
-	createdList, err := hc.Services.List.CreateList(list.Name, userID.(string))
-	if err != nil {
-		hc.LogAndSendError(c, err)
-		return
-	}
-
-	c.JSON(http.StatusCreated, createdList)
-}
-
-// GetUsersLists handles the request to get the owner's lists
-// @Summary Get the lists of the owner
-// @ID get-owners-lists
-// @Tags list
-// @Produce  json
-// @Success 200 {object} []list.List
-// @Failure 500 {object} internal.Error
-// @Security ApiKeyAuth
-// @Router /lists [get]
-func (hc *Context) GetUsersLists(c *gin.Context) {
-	userID, exists := c.Get(ContextUserID)
-	if !exists {
-		hc.LogAndSendError(c, internal.NewError(internal.UnknownErrorCode))
-		return
-	}
-
-	lists, err := hc.Services.List.GetUsersLists(userID.(string))
-	if err != nil {
-		hc.LogAndSendError(c, err)
-		return
-	}
-
-	c.JSON(http.StatusOK, lists)
-}
 
 // AddProductToList handles the request to add a product to a list
 // @Summary Add the product to the list
@@ -85,7 +20,7 @@ func (hc *Context) GetUsersLists(c *gin.Context) {
 // @Param listID path string true "List ID"
 // @Param productID path string true "Product ID"
 // @Success 200 {object} list.ProductInListLink
-// @Failure 500 {object} internal.Error
+// @Failure 500 {object} errors.Error
 // @Security ApiKeyAuth
 // @Router /lists/{listID}/products/{productID} [post]
 func (hc *Context) AddProductToList(c *gin.Context) {
@@ -128,7 +63,7 @@ func (hc *Context) AddProductToList(c *gin.Context) {
 // @Param listID path string true "Product in list"
 // @Param productID path string true "Product in list"
 // @Success 200 {object} list.ProductInListLink
-// @Failure 500 {object} internal.Error
+// @Failure 500 {object} errors.Error
 // @Security ApiKeyAuth
 // @Router /lists/{listID}/products/{productID} [patch]
 func (hc *Context) UpdateProductInList(c *gin.Context) {
@@ -187,7 +122,7 @@ func (hc *Context) UpdateProductInList(c *gin.Context) {
 // @Param listID path string true "List ID"
 // @Param productID path string true "Product ID"
 // @Success 204
-// @Failure 500 {object} internal.Error
+// @Failure 500 {object} errors.Error
 // @Security ApiKeyAuth
 // @Router /lists/{listID}/products/{productID} [delete]
 func (hc *Context) DeleteProductFromList(c *gin.Context) {
@@ -227,7 +162,7 @@ func (hc *Context) DeleteProductFromList(c *gin.Context) {
 // @Produce json
 // @Param listID path string true "List ID"
 // @Success 204
-// @Failure 500 {object} internal.Error
+// @Failure 500 {object} errors.Error
 // @Security ApiKeyAuth
 // @Router /lists/{listID} [delete]
 func (hc *Context) DeleteList(c *gin.Context) {
@@ -262,9 +197,9 @@ func (hc *Context) DeleteList(c *gin.Context) {
 // @Produce json
 // @Param listID path string true "List ID"
 // @Success 200 {object} builders.GetListResponse
-// @Failure 400 {object} internal.Error
-// @Failure 404 {object} internal.Error
-// @Failure 500 {object} internal.Error
+// @Failure 400 {object} errors.Error
+// @Failure 404 {object} errors.Error
+// @Failure 500 {object} errors.Error
 func (hc *Context) ArchiveList(c *gin.Context) {
 	userID, err := hc.GetUserIDFromContext(c)
 	if err != nil {
@@ -297,7 +232,7 @@ func (hc *Context) ArchiveList(c *gin.Context) {
 // @Produce json
 // @Param listID path string true "List ID"
 // @Success 200 {object} builders.GetListResponse
-// @Failure 500 {object} internal.Error
+// @Failure 500 {object} errors.Error
 // @Security ApiKeyAuth
 // @Router /lists/{listID} [get]
 func (hc *Context) GetList(c *gin.Context) {

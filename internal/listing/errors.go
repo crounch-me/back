@@ -1,4 +1,4 @@
-package list
+package listing
 
 const (
 	ListNotFoundErrorCode           = "list-not-found-error"

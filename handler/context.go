@@ -13,7 +13,8 @@ import (
 	"github.com/crounch-me/back/builders"
 	"github.com/crounch-me/back/configuration"
 	"github.com/crounch-me/back/internal"
-	"github.com/crounch-me/back/internal/list"
+	"github.com/crounch-me/back/internal/common/errors"
+	list "github.com/crounch-me/back/internal/listing"
 	"github.com/crounch-me/back/internal/products"
 	"github.com/crounch-me/back/storage"
 	"github.com/crounch-me/back/storage/postgres"
@@ -66,7 +67,7 @@ func NewContext(config *configuration.Config) *Context {
 // LogAndSendError logs and sends the error
 func (hc *Context) LogAndSendError(c *gin.Context, err error) {
 	var status int
-	if internalErr, ok := err.(*internal.Error); ok {
+	if internalErr, ok := err.(*errors.Error); ok {
 		status = hc.ErrorCodeToHTTPStatus(internalErr.Code)
 		logBuilder := logrus.WithTime(time.Now())
 
@@ -113,32 +114,32 @@ func (hc *Context) UnmarshalPayload(c *gin.Context, i interface{}) error {
 	return nil
 }
 
-func (hc *Context) GetUserIDFromContext(c *gin.Context) (string, *internal.Error) {
+func (hc *Context) GetUserIDFromContext(c *gin.Context) (string, *errors.Error) {
 	userID, exists := c.Get(ContextUserID)
 	if !exists {
-		return "", internal.NewError(internal.UnknownErrorCode).WithCall("handler", "GetUserIDFromContext")
+		return "", errors.NewError(errors.UnknownErrorCode).WithCall("handler", "GetUserIDFromContext")
 	}
 	return userID.(string), nil
 }
 
-func (hc *Context) UnmarshalAndValidate(c *gin.Context, i interface{}) *internal.Error {
+func (hc *Context) UnmarshalAndValidate(c *gin.Context, i interface{}) *errors.Error {
 	err := hc.UnmarshalPayload(c, i)
 
 	if err != nil {
-		return internal.NewError(internal.UnmarshalErrorCode).WithCause(err)
+		return errors.NewError(errors.UnmarshalErrorCode).WithCause(err)
 	}
 
 	err = hc.Validator.Struct(i)
 	if err != nil {
-		fields := make([]*internal.FieldError, 0)
+		fields := make([]*errors.FieldError, 0)
 		for _, e := range err.(validator.ValidationErrors) {
-			field := &internal.FieldError{
+			field := &errors.FieldError{
 				Error: e.Tag(),
 				Name:  e.Field(),
 			}
 			fields = append(fields, field)
 		}
-		return internal.NewError(internal.InvalidErrorCode).WithFields(fields)
+		return errors.NewError(errors.InvalidErrorCode).WithFields(fields)
 	}
 
 	return nil

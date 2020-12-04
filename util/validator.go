@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/crounch-me/back/internal"
+	"github.com/crounch-me/back/internal/common/errors"
 	"gopkg.in/go-playground/validator.v9"
 )
 
@@ -33,16 +33,16 @@ func (v *Validator) Struct(s interface{}) error {
 	return v.validate.Struct(s)
 }
 
-func (v *Validator) Var(fieldName, value, tag string) *internal.Error {
+func (v *Validator) Var(fieldName, value, tag string) *errors.Error {
 	err := v.validate.Var(value, tag)
 	if err != nil {
-		fields := []*internal.FieldError{
+		fields := []*errors.FieldError{
 			{
 				Name:  fieldName,
 				Error: tag,
 			},
 		}
-		return internal.NewError(internal.InvalidErrorCode).WithFields(fields)
+		return errors.NewError(errors.InvalidErrorCode).WithFields(fields)
 	}
 
 	return nil

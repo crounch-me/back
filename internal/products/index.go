@@ -3,6 +3,7 @@ package products
 import (
 	"github.com/crounch-me/back/internal"
 	"github.com/crounch-me/back/internal/account"
+	"github.com/crounch-me/back/internal/common/errors"
 )
 
 type ProductService struct {
@@ -10,20 +11,20 @@ type ProductService struct {
 	Generation     internal.Generation
 }
 
-func (ps *ProductService) GetProduct(productID, userID string) (*Product, *internal.Error) {
+func (ps *ProductService) GetProduct(productID, userID string) (*Product, *errors.Error) {
 	product, err := ps.ProductStorage.GetProduct(productID)
 	if err != nil {
 		return nil, err
 	}
 
 	if !IsUserAuthorized(product, userID) {
-		return nil, internal.NewError(internal.ForbiddenErrorCode)
+		return nil, errors.NewError(errors.ForbiddenErrorCode)
 	}
 
 	return product, nil
 }
 
-func (ps *ProductService) CreateProduct(name, userID string) (*Product, *internal.Error) {
+func (ps *ProductService) CreateProduct(name, userID string) (*Product, *errors.Error) {
 	id, err := ps.Generation.GenerateID()
 	if err != nil {
 		return nil, err
@@ -45,6 +46,6 @@ func (ps *ProductService) CreateProduct(name, userID string) (*Product, *interna
 	return product, nil
 }
 
-func (ps *ProductService) SearchDefaults(name string) ([]*Product, *internal.Error) {
+func (ps *ProductService) SearchDefaults(name string) ([]*Product, *errors.Error) {
 	return ps.ProductStorage.SearchDefaults(name, account.AdminID)
 }

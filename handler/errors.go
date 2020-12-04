@@ -3,9 +3,9 @@ package handler
 import (
 	"net/http"
 
-	"github.com/crounch-me/back/internal"
 	"github.com/crounch-me/back/internal/account"
-	"github.com/crounch-me/back/internal/list"
+	"github.com/crounch-me/back/internal/common/errors"
+	list "github.com/crounch-me/back/internal/listing"
 	"github.com/crounch-me/back/internal/products"
 )
 
@@ -15,11 +15,11 @@ func initializeErrorsMap() {
 	errorToStatus = make(map[string]int)
 
 	// Internal errors
-	errorToStatus[internal.UnmarshalErrorCode] = http.StatusBadRequest
-	errorToStatus[internal.InvalidErrorCode] = http.StatusBadRequest
-	errorToStatus[internal.ForbiddenErrorCode] = http.StatusForbidden
-	errorToStatus[internal.UnauthorizedErrorCode] = http.StatusUnauthorized
-	errorToStatus[internal.UnknownErrorCode] = http.StatusInternalServerError
+	errorToStatus[errors.UnmarshalErrorCode] = http.StatusBadRequest
+	errorToStatus[errors.InvalidErrorCode] = http.StatusBadRequest
+	errorToStatus[errors.ForbiddenErrorCode] = http.StatusForbidden
+	errorToStatus[errors.UnauthorizedErrorCode] = http.StatusUnauthorized
+	errorToStatus[errors.UnknownErrorCode] = http.StatusInternalServerError
 
 	// User errors
 	errorToStatus[account.UserNotFoundErrorCode] = http.StatusNotFound

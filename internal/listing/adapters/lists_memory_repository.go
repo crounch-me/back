@@ -4,7 +4,7 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/crounch-me/back/internal/list/domain/lists"
+	"github.com/crounch-me/back/internal/listing/domain/lists"
 )
 
 type ListsMemoryRepository struct {

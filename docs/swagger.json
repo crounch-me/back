@@ -43,13 +43,42 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal.Error"
+                            "$ref": "#/definitions/errors.Error"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal.Error"
+                            "$ref": "#/definitions/errors.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/account/logout": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "tags": [
+                    "account"
+                ],
+                "summary": "Removes the user authorization when the user token is found",
+                "operationId": "logout",
+                "responses": {
+                    "204": {},
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/errors.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.Error"
                         }
                     }
                 }
@@ -81,13 +110,13 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal.Error"
+                            "$ref": "#/definitions/errors.Error"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal.Error"
+                            "$ref": "#/definitions/errors.Error"
                         }
                     }
                 }
@@ -113,7 +142,7 @@
                 }
             }
         },
-        "/lists": {
+        "/listing/lists": {
             "get": {
                 "security": [
                     {
@@ -124,24 +153,30 @@
                     "application/json"
                 ],
                 "tags": [
-                    "list"
+                    "listing"
                 ],
-                "summary": "Get the lists of the owner",
-                "operationId": "get-owners-lists",
+                "summary": "Get the authenticated contributor accessible lists",
+                "operationId": "get-contributors-lists",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/list.List"
+                                "$ref": "#/definitions/ports.List"
                             }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/errors.Error"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal.Error"
+                            "$ref": "#/definitions/errors.Error"
                         }
                     }
                 }
@@ -159,7 +194,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "list"
+                    "listing"
                 ],
                 "summary": "Create a list",
                 "operationId": "create-list",
@@ -170,21 +205,28 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.CreateListRequest"
+                            "$ref": "#/definitions/ports.CreateListRequest"
                         }
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
+                    "201": {},
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/list.List"
+                            "$ref": "#/definitions/errors.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/errors.Error"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal.Error"
+                            "$ref": "#/definitions/errors.Error"
                         }
                     }
                 }
@@ -203,7 +245,7 @@
                 "tags": [
                     "list"
                 ],
-                "summary": "Reads a list with products in categories",
+                "summary": "Reads a list with its product and contributor ids",
                 "operationId": "get-list",
                 "parameters": [
                     {
@@ -224,7 +266,7 @@
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal.Error"
+                            "$ref": "#/definitions/errors.Error"
                         }
                     }
                 }
@@ -257,7 +299,7 @@
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal.Error"
+                            "$ref": "#/definitions/errors.Error"
                         }
                     }
                 }
@@ -298,13 +340,13 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/list.ProductInListLink"
+                            "$ref": "#/definitions/listing.ProductInListLink"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal.Error"
+                            "$ref": "#/definitions/errors.Error"
                         }
                     }
                 }
@@ -344,7 +386,7 @@
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal.Error"
+                            "$ref": "#/definitions/errors.Error"
                         }
                     }
                 }
@@ -373,7 +415,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/list.UpdateProductInList"
+                            "$ref": "#/definitions/listing.UpdateProductInList"
                         }
                     },
                     {
@@ -395,73 +437,13 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/list.ProductInListLink"
+                            "$ref": "#/definitions/listing.ProductInListLink"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal.Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/logout": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "tags": [
-                    "account"
-                ],
-                "summary": "Removes the user authorization when the user token is found",
-                "operationId": "logout",
-                "responses": {
-                    "204": {},
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "$ref": "#/definitions/internal.Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/internal.Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/me": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "user"
-                ],
-                "summary": "Removes an user authorization",
-                "operationId": "me",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/users.User"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/internal.Error"
+                            "$ref": "#/definitions/errors.Error"
                         }
                     }
                 }
@@ -503,7 +485,7 @@
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal.Error"
+                            "$ref": "#/definitions/errors.Error"
                         }
                     }
                 }
@@ -548,7 +530,7 @@
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal.Error"
+                            "$ref": "#/definitions/errors.Error"
                         }
                     }
                 }
@@ -657,17 +639,6 @@
                 }
             }
         },
-        "handler.CreateListRequest": {
-            "type": "object",
-            "required": [
-                "name"
-            ],
-            "properties": {
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
         "handler.CreateProductRequest": {
             "type": "object",
             "required": [
@@ -687,7 +658,7 @@
                 }
             }
         },
-        "internal.Error": {
+        "errors.Error": {
             "type": "object",
             "properties": {
                 "error": {
@@ -696,12 +667,12 @@
                 "fields": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/internal.FieldError"
+                        "$ref": "#/definitions/errors.FieldError"
                     }
                 }
             }
         },
-        "internal.FieldError": {
+        "errors.FieldError": {
             "type": "object",
             "properties": {
                 "error": {
@@ -720,19 +691,54 @@
                 }
             }
         },
-        "list.List": {
+        "listing.ProductInListLink": {
+            "type": "object",
+            "properties": {
+                "bought": {
+                    "type": "boolean"
+                },
+                "listId": {
+                    "type": "string"
+                },
+                "productId": {
+                    "type": "string"
+                }
+            }
+        },
+        "listing.UpdateProductInList": {
+            "type": "object",
+            "properties": {
+                "bought": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "ports.Contributor": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "ports.CreateListRequest": {
             "type": "object",
             "required": [
                 "name"
             ],
             "properties": {
-                "archivationDate": {
+                "name": {
                     "type": "string"
-                },
+                }
+            }
+        },
+        "ports.List": {
+            "type": "object",
+            "properties": {
                 "contributors": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/account.User"
+                        "$ref": "#/definitions/ports.Contributor"
                     }
                 },
                 "creationDate": {
@@ -747,53 +753,8 @@
                 "products": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/list.ProductInList"
+                        "$ref": "#/definitions/ports.Product"
                     }
-                }
-            }
-        },
-        "list.ProductInList": {
-            "type": "object",
-            "required": [
-                "name"
-            ],
-            "properties": {
-                "bought": {
-                    "type": "boolean"
-                },
-                "category": {
-                    "$ref": "#/definitions/categories.Category"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "owner": {
-                    "$ref": "#/definitions/account.User"
-                }
-            }
-        },
-        "list.ProductInListLink": {
-            "type": "object",
-            "properties": {
-                "bought": {
-                    "type": "boolean"
-                },
-                "listId": {
-                    "type": "string"
-                },
-                "productId": {
-                    "type": "string"
-                }
-            }
-        },
-        "list.UpdateProductInList": {
-            "type": "object",
-            "properties": {
-                "bought": {
-                    "type": "boolean"
                 }
             }
         },
@@ -808,6 +769,14 @@
                     "type": "string"
                 },
                 "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "ports.Product": {
+            "type": "object",
+            "properties": {
+                "id": {
                     "type": "string"
                 }
             }
@@ -854,9 +823,6 @@
                     "$ref": "#/definitions/account.User"
                 }
             }
-        },
-        "users.User": {
-            "type": "object"
         }
     },
     "securityDefinitions": {
