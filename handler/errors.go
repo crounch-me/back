@@ -5,7 +5,6 @@ import (
 
 	"github.com/crounch-me/back/internal"
 	"github.com/crounch-me/back/internal/account"
-	"github.com/crounch-me/back/internal/authorization"
 	"github.com/crounch-me/back/internal/list"
 	"github.com/crounch-me/back/internal/products"
 )
@@ -35,9 +34,6 @@ func initializeErrorsMap() {
 
 	// Product errors
 	errorToStatus[products.ProductNotFoundErrorCode] = http.StatusNotFound
-
-	// Authorization errors
-	errorToStatus[authorization.WrongPasswordErrorCode] = http.StatusBadRequest
 }
 
 // ErrorCodeToHTTPStatus returns the status from the given error

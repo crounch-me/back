@@ -138,10 +138,6 @@ func configureRoutes(r *gin.Engine, hc *handler.Context) {
 	r.GET(healthPath, hc.Health)
 	r.OPTIONS(healthPath, optionsHandler([]string{http.MethodGet}))
 
-	// User routes
-	r.GET(mePath, checkAccess(hc.Storage), hc.Me)
-	r.OPTIONS(mePath, optionsHandler([]string{http.MethodGet}))
-
 	// List routes
 	r.GET(listWithIDPath, checkAccess(hc.Storage), hc.GetList)
 	r.DELETE(listWithIDPath, checkAccess(hc.Storage), hc.DeleteList)

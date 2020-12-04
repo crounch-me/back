@@ -13,8 +13,6 @@ import (
 	"github.com/crounch-me/back/builders"
 	"github.com/crounch-me/back/configuration"
 	"github.com/crounch-me/back/internal"
-	"github.com/crounch-me/back/internal/account"
-	"github.com/crounch-me/back/internal/authorization"
 	"github.com/crounch-me/back/internal/list"
 	"github.com/crounch-me/back/internal/products"
 	"github.com/crounch-me/back/storage"
@@ -28,10 +26,8 @@ const (
 )
 
 type Services struct {
-	Authorization *authorization.AuthorizationService
-	List          *list.ListService
-	Product       *products.ProductService
-	User          *account.UserService
+	List    *list.ListService
+	Product *products.ProductService
 }
 
 type Builders struct {
@@ -158,11 +154,6 @@ func NewBuilders() *Builders {
 // NewServices create an object which contains all necessary services
 func NewServices(storage storage.Storage, generation internal.Generation) *Services {
 	return &Services{
-		Authorization: &authorization.AuthorizationService{
-			AuthorizationStorage: storage,
-			UserStorage:          storage,
-			Generation:           generation,
-		},
 		List: &list.ListService{
 			ListStorage:        storage,
 			ProductStorage:     storage,
@@ -172,10 +163,6 @@ func NewServices(storage storage.Storage, generation internal.Generation) *Servi
 		Product: &products.ProductService{
 			ProductStorage: storage,
 			Generation:     generation,
-		},
-		User: &account.UserService{
-			UserStorage: storage,
-			Generation:  generation,
 		},
 	}
 }

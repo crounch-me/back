@@ -12,13 +12,6 @@ definitions:
     - email
     - password
     type: object
-  authorization.Authorization:
-    properties:
-      accessToken:
-        type: string
-      owner:
-        $ref: '#/definitions/account.User'
-    type: object
   builders.CategoryInGetListResponse:
     properties:
       id:
@@ -87,30 +80,10 @@ definitions:
     required:
     - name
     type: object
-  handler.LoginRequest:
-    properties:
-      email:
-        type: string
-      password:
-        type: string
-    required:
-    - email
-    - password
-    type: object
   handler.ProductSearchRequest:
     properties:
       name:
         type: string
-    type: object
-  handler.SignupRequest:
-    properties:
-      email:
-        type: string
-      password:
-        type: string
-    required:
-    - email
-    - password
     type: object
   internal.Error:
     properties:
@@ -183,6 +156,31 @@ definitions:
       bought:
         type: boolean
     type: object
+  ports.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  ports.SignupRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  ports.TokenResponse:
+    properties:
+      token:
+        type: string
+    type: object
   products.Product:
     properties:
       category:
@@ -205,6 +203,61 @@ info:
   title: Crounch Me API
   version: "1.0"
 paths:
+  /account/login:
+    post:
+      consumes:
+      - application/json
+      operationId: login
+      parameters:
+      - description: User to login with
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/ports.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ports.TokenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal.Error'
+      summary: Creates a new user authorization when email is found and password is valid
+      tags:
+      - account
+  /account/signup:
+    post:
+      consumes:
+      - application/json
+      operationId: signup
+      parameters:
+      - description: User to signup with
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/ports.SignupRequest'
+      responses:
+        "201": {}
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal.Error'
+      summary: Creates a new user with his email and password
+      tags:
+      - account
   /health:
     get:
       operationId: get-health
@@ -410,15 +463,19 @@ paths:
       operationId: logout
       responses:
         "204": {}
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/internal.Error'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/internal.Error'
       security:
       - ApiKeyAuth: []
-      summary: Removes an user authorization
+      summary: Removes the user authorization when the user token is found
       tags:
-      - user
+      - account
   /me:
     get:
       operationId: me
@@ -492,58 +549,6 @@ paths:
       summary: Search a product by its name in default products, it removes accentuated characters and is case insensitive
       tags:
       - product
-  /users/login:
-    post:
-      consumes:
-      - application/json
-      operationId: login
-      parameters:
-      - description: User to login with
-        in: body
-        name: user
-        required: true
-        schema:
-          $ref: '#/definitions/handler.LoginRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/authorization.Authorization'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/internal.Error'
-      summary: Creates a new user authorization
-      tags:
-      - user
-  /users/signup:
-    post:
-      consumes:
-      - application/json
-      operationId: signup
-      parameters:
-      - description: User to signup with
-        in: body
-        name: user
-        required: true
-        schema:
-          $ref: '#/definitions/handler.SignupRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/account.User'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/internal.Error'
-      summary: Creates a new user
-      tags:
-      - user
 securityDefinitions:
   ApiKeyAuth:
     in: header

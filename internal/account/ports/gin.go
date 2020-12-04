@@ -12,8 +12,9 @@ import (
 )
 
 const (
+	loginPath  = "/account/login"
+	signupPath = "/account/signup"
 	userPath   = "/users"
-	loginPath  = "/users/login"
 	mePath     = "/me"
 	logoutPath = "/logout"
 )
@@ -38,17 +39,27 @@ func NewGinServer(accountService *app.AccountService, validator *util.Validator)
 	}, nil
 }
 
-func (g *GinServer) ConfigureRoutes(r *gin.Engine) {
-	r.POST(userPath, g.Signup)
-	r.OPTIONS(userPath, server.OptionsHandler([]string{http.MethodPost}))
+func (s *GinServer) ConfigureRoutes(r *gin.Engine) {
+	r.POST(signupPath, s.Signup)
+	r.OPTIONS(signupPath, server.OptionsHandler([]string{http.MethodPost}))
 
-	r.POST(loginPath, g.Login)
+	r.POST(loginPath, s.Login)
 	r.OPTIONS(loginPath, server.OptionsHandler([]string{http.MethodPost}))
 
-	r.POST(logoutPath, g.Logout)
+	r.POST(logoutPath, s.Logout)
 	r.OPTIONS(logoutPath, server.OptionsHandler([]string{http.MethodPost}))
 }
 
+// Signup creates a new user with his email and password
+// @Summary Creates a new user with his email and password
+// @ID signup
+// @Tags account
+// @Accept json
+// @Param user body SignupRequest true "User to signup with"
+// @Success 201
+// @Failure 400 {object} internal.Error
+// @Failure 500 {object} internal.Error
+// @Router /account/signup [post]
 func (s *GinServer) Signup(c *gin.Context) {
 	signupRequest := &SignupRequest{}
 
@@ -73,6 +84,17 @@ func (s *GinServer) Signup(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
+// Login creates a new user authorization when email is found and password is valid
+// @Summary Creates a new user authorization when email is found and password is valid
+// @ID login
+// @Tags account
+// @Accept json
+// @Produce  json
+// @Param user body LoginRequest true "User to login with"
+// @Success 200 {object} TokenResponse
+// @Failure 400 {object} internal.Error
+// @Failure 500 {object} internal.Error
+// @Router /account/login [post]
 func (s *GinServer) Login(c *gin.Context) {
 	loginRequest := &LoginRequest{}
 
@@ -90,7 +112,7 @@ func (s *GinServer) Login(c *gin.Context) {
 
 	token, err := s.accountService.Login(loginRequest.Email, loginRequest.Password)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, internal.NewError(internal.UnknownErrorCode))
+		c.AbortWithStatusJSON(http.StatusInternalServerError, internal.NewError(internal.UnknownErrorCode))
 		return
 	}
 
@@ -101,6 +123,15 @@ func (s *GinServer) Login(c *gin.Context) {
 	server.JSON(c, tokenResponse)
 }
 
+// Logout removes the user authorization when the user token is found
+// @Summary Removes the user authorization when the user token is found
+// @ID logout
+// @Tags account
+// @Success 204
+// @Failure 403 {object} internal.Error
+// @Failure 500 {object} internal.Error
+// @Security ApiKeyAuth
+// @Router /account/logout [post]
 func (s *GinServer) Logout(c *gin.Context) {
 	token := c.GetHeader("Authorization")
 
@@ -109,7 +140,7 @@ func (s *GinServer) Logout(c *gin.Context) {
 		return
 	}
 
-	userUUID, err := server.GetUserIDFromContext(c)
+	userUUID, err := s.accountService.GetUserUUIDByToken(token)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusForbidden, internal.NewError(internal.ForbiddenErrorCode))
 		return
