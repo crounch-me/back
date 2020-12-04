@@ -27,7 +27,12 @@ type GinServer struct {
 	validator      *util.Validator
 }
 
-func NewGinServer(listService *listApp.ListService, accountService *accountApp.AccountService, validator *util.Validator) (*GinServer, error) {
+func NewGinServer(
+	listService *listApp.ListService,
+	accountService *accountApp.AccountService,
+	validator *util.Validator,
+	responseBuilder *ResponseBuilder,
+) (*GinServer, error) {
 	if listService == nil {
 		return nil, errors.New("listService is nil")
 	}
@@ -40,6 +45,10 @@ func NewGinServer(listService *listApp.ListService, accountService *accountApp.A
 		return nil, errors.New("validator is nil")
 	}
 
+	if responseBuilder == nil {
+		return nil, errors.New("responseBuilder is nil")
+	}
+
 	return &GinServer{
 		listService: listService,
 		validator:   validator,
@@ -50,6 +59,9 @@ func (s *GinServer) ConfigureRoutes(r *gin.Engine) {
 	r.POST(listPath, server.CheckUserAuthorization(s.accountService), s.CreateList)
 	r.GET(listPath, server.CheckUserAuthorization(s.accountService), s.GetContributorsLists)
 	r.OPTIONS(listPath, server.OptionsHandler([]string{http.MethodGet, http.MethodPost}))
+
+	r.GET(listWithIDPath, server.CheckUserAuthorization(s.accountService), s.GetContributorsLists)
+	r.OPTIONS(listWithIDPath, server.OptionsHandler([]string{http.MethodGet}))
 }
 
 // CreateList creates a new list
@@ -110,7 +122,7 @@ func (s *GinServer) CreateList(c *gin.Context) {
 // @ID get-contributors-lists
 // @Tags listing
 // @Produce  json
-// @Success 200 {object} []List
+// @Success 200 {object} []ListResponse
 // @Failure 403 {object} errors.Error
 // @Failure 500 {object} errors.Error
 // @Security ApiKeyAuth
@@ -130,31 +142,11 @@ func (s *GinServer) GetContributorsLists(c *gin.Context) {
 		return
 	}
 
-	listsResponse := make([]*List, 0)
+	listsResponse := make([]*ListResponse, 0)
+	responseBuilder := NewResponseBuilder()
 	for _, list := range lists {
-		products := make([]*Product, 0)
-		for _, p := range list.Products() {
-			product := &Product{
-				UUID: p.UUID(),
-			}
-			products = append(products, product)
-		}
-
-		contributors := make([]*Contributor, 0)
-		for _, c := range list.Contributors() {
-			contributor := &Contributor{
-				UUID: c.UUID(),
-			}
-			contributors = append(contributors, contributor)
-		}
-
-		listResponse := &List{
-			UUID:         list.UUID(),
-			Name:         list.Name(),
-			CreationDate: list.CreationDate(),
-			Contributors: contributors,
-			Products:     products,
-		}
+		listResponse := responseBuilder.FromDomain(list).Build()
+		responseBuilder.Reset()
 
 		listsResponse = append(listsResponse, listResponse)
 	}
@@ -165,13 +157,14 @@ func (s *GinServer) GetContributorsLists(c *gin.Context) {
 // GetList reads a specific list with its product and contributor ids
 // @Summary Reads a list with its product and contributor ids
 // @ID get-list
-// @Tags list
+// @Tags listing
 // @Produce json
 // @Param listID path string true "List ID"
-// @Success 200 {object} builders.GetListResponse
+// @Success 200 {object} ListResponse
+// @Failure 403 {object} errors.Error
 // @Failure 500 {object} errors.Error
 // @Security ApiKeyAuth
-// @Router /lists/{listID} [get]
+// @Router /listing/lists/{listID} [get]
 func (s *GinServer) GetList(c *gin.Context) {
 	userUUID, err := server.GetUserIDFromContext(c)
 	if err != nil {
@@ -187,5 +180,9 @@ func (s *GinServer) GetList(c *gin.Context) {
 		return
 	}
 
-	server.JSON(c, list)
+	listResponse := NewResponseBuilder().
+		FromDomain(list).
+		Build()
+
+	server.JSON(c, listResponse)
 }

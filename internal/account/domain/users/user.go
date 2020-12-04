@@ -32,6 +32,10 @@ func (u User) UUID() string {
 	return u.uuid
 }
 
+func (u User) Email() string {
+	return u.email
+}
+
 func (u User) Password() string {
 	return u.password
 }

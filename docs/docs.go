@@ -58,13 +58,13 @@ var doc = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal.Error"
+                            "$ref": "#/definitions/errors.Error"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal.Error"
+                            "$ref": "#/definitions/errors.Error"
                         }
                     }
                 }
@@ -87,13 +87,13 @@ var doc = `{
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/internal.Error"
+                            "$ref": "#/definitions/errors.Error"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal.Error"
+                            "$ref": "#/definitions/errors.Error"
                         }
                     }
                 }
@@ -125,13 +125,13 @@ var doc = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal.Error"
+                            "$ref": "#/definitions/errors.Error"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal.Error"
+                            "$ref": "#/definitions/errors.Error"
                         }
                     }
                 }
@@ -178,20 +178,20 @@ var doc = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/ports.List"
+                                "$ref": "#/definitions/ports.ListResponse"
                             }
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/internal.Error"
+                            "$ref": "#/definitions/errors.Error"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal.Error"
+                            "$ref": "#/definitions/errors.Error"
                         }
                     }
                 }
@@ -229,25 +229,25 @@ var doc = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal.Error"
+                            "$ref": "#/definitions/errors.Error"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/internal.Error"
+                            "$ref": "#/definitions/errors.Error"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal.Error"
+                            "$ref": "#/definitions/errors.Error"
                         }
                     }
                 }
             }
         },
-        "/lists/{listID}": {
+        "/listing/lists/{listID}": {
             "get": {
                 "security": [
                     {
@@ -258,7 +258,7 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "list"
+                    "listing"
                 ],
                 "summary": "Reads a list with its product and contributor ids",
                 "operationId": "get-list",
@@ -275,17 +275,25 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/builders.GetListResponse"
+                            "$ref": "#/definitions/ports.ListResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/errors.Error"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal.Error"
+                            "$ref": "#/definitions/errors.Error"
                         }
                     }
                 }
-            },
+            }
+        },
+        "/lists/{listID}": {
             "delete": {
                 "security": [
                     {
@@ -314,7 +322,7 @@ var doc = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal.Error"
+                            "$ref": "#/definitions/errors.Error"
                         }
                     }
                 }
@@ -361,7 +369,7 @@ var doc = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal.Error"
+                            "$ref": "#/definitions/errors.Error"
                         }
                     }
                 }
@@ -401,7 +409,7 @@ var doc = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal.Error"
+                            "$ref": "#/definitions/errors.Error"
                         }
                     }
                 }
@@ -458,7 +466,7 @@ var doc = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal.Error"
+                            "$ref": "#/definitions/errors.Error"
                         }
                     }
                 }
@@ -500,7 +508,7 @@ var doc = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal.Error"
+                            "$ref": "#/definitions/errors.Error"
                         }
                     }
                 }
@@ -545,7 +553,7 @@ var doc = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal.Error"
+                            "$ref": "#/definitions/errors.Error"
                         }
                     }
                 }
@@ -654,6 +662,31 @@ var doc = `{
                 }
             }
         },
+        "errors.Error": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "fields": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/errors.FieldError"
+                    }
+                }
+            }
+        },
+        "errors.FieldError": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "handler.CreateProductRequest": {
             "type": "object",
             "required": [
@@ -668,31 +701,6 @@ var doc = `{
         "handler.ProductSearchRequest": {
             "type": "object",
             "properties": {
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "internal.Error": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string"
-                },
-                "fields": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/internal.FieldError"
-                    }
-                }
-            }
-        },
-        "internal.FieldError": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string"
-                },
                 "name": {
                     "type": "string"
                 }
@@ -728,7 +736,7 @@ var doc = `{
                 }
             }
         },
-        "ports.Contributor": {
+        "ports.ContributorResponse": {
             "type": "object",
             "properties": {
                 "id": {
@@ -747,13 +755,13 @@ var doc = `{
                 }
             }
         },
-        "ports.List": {
+        "ports.ListResponse": {
             "type": "object",
             "properties": {
                 "contributors": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/ports.Contributor"
+                        "$ref": "#/definitions/ports.ContributorResponse"
                     }
                 },
                 "creationDate": {
@@ -768,7 +776,7 @@ var doc = `{
                 "products": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/ports.Product"
+                        "$ref": "#/definitions/ports.ProductResponse"
                     }
                 }
             }
@@ -788,7 +796,7 @@ var doc = `{
                 }
             }
         },
-        "ports.Product": {
+        "ports.ProductResponse": {
             "type": "object",
             "properties": {
                 "id": {

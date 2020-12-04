@@ -24,9 +24,9 @@ func NewUsersPostgresRepository(session *sql.DB, schema string) (*UsersPostgresR
 }
 
 func (r *UsersPostgresRepository) AddUser(user *users.User) error {
-	return nil
+	return errors.New("UsersPostgresRepository.AddUser not implemented")
 }
 
 func (r *UsersPostgresRepository) FindByEmail(email string) (*users.User, error) {
-	return nil, nil
+	return nil, errors.New("UsersPostgresRepository.FindByEmail not implemented")
 }

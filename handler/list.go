@@ -224,38 +224,3 @@ func (hc *Context) ArchiveList(c *gin.Context) {
 
 	c.JSON(http.StatusOK, listResponse)
 }
-
-// GetList return a list with its products inside the categories
-// @Summary Reads a list with products in categories
-// @ID get-list
-// @Tags list
-// @Produce json
-// @Param listID path string true "List ID"
-// @Success 200 {object} builders.GetListResponse
-// @Failure 500 {object} errors.Error
-// @Security ApiKeyAuth
-// @Router /lists/{listID} [get]
-func (hc *Context) GetList(c *gin.Context) {
-	userID, err := hc.GetUserIDFromContext(c)
-	if err != nil {
-		hc.LogAndSendError(c, err)
-		return
-	}
-
-	listID := c.Param("listID")
-	err = hc.Validator.Var("listID", listID, "uuid")
-	if err != nil {
-		hc.LogAndSendError(c, err)
-		return
-	}
-
-	list, err := hc.Services.List.GetList(listID, userID)
-	if err != nil {
-		hc.LogAndSendError(c, err)
-		return
-	}
-
-	listResponse := hc.Builders.List.GetList(list)
-
-	c.JSON(http.StatusOK, listResponse)
-}

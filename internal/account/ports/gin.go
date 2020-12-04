@@ -2,6 +2,7 @@ package ports
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/crounch-me/back/internal/account/app"
@@ -16,7 +17,7 @@ const (
 	signupPath = "/account/signup"
 	userPath   = "/users"
 	mePath     = "/me"
-	logoutPath = "/logout"
+	logoutPath = "/account/logout"
 )
 
 type GinServer struct {
@@ -65,18 +66,21 @@ func (s *GinServer) Signup(c *gin.Context) {
 
 	err := server.UnmarshalPayload(c.Request.Body, signupRequest)
 	if err != nil {
+		fmt.Println(err)
 		c.AbortWithStatusJSON(http.StatusBadRequest, commonErrors.NewError(commonErrors.UnmarshalErrorCode))
 		return
 	}
 
 	err = s.validator.Struct(signupRequest)
 	if err != nil {
+		fmt.Println(err)
 		c.AbortWithStatusJSON(http.StatusBadRequest, commonErrors.NewError(commonErrors.InvalidErrorCode))
 		return
 	}
 
 	err = s.accountService.Signup(signupRequest.Email, signupRequest.Password)
 	if err != nil {
+		fmt.Println(err)
 		c.AbortWithStatusJSON(http.StatusInternalServerError, commonErrors.NewError(commonErrors.UnknownErrorCode))
 		return
 	}

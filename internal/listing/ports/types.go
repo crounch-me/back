@@ -6,18 +6,18 @@ type CreateListRequest struct {
 	Name string `json:"name" validate:"required"`
 }
 
-type List struct {
-	UUID         string         `json:"id"`
-	Name         string         `json:"name"`
-	CreationDate time.Time      `json:"creationDate"`
-	Contributors []*Contributor `json:"contributors"`
-	Products     []*Product     `json:"products"`
+type ListResponse struct {
+	UUID         string                 `json:"id"`
+	Name         string                 `json:"name"`
+	CreationDate time.Time              `json:"creationDate"`
+	Contributors []*ContributorResponse `json:"contributors"`
+	Products     []*ProductResponse     `json:"products"`
 }
 
-type Contributor struct {
+type ContributorResponse struct {
 	UUID string `json:"id"`
 }
 
-type Product struct {
+type ProductResponse struct {
 	UUID string `json:"id"`
 }

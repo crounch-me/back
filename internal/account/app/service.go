@@ -15,15 +15,30 @@ type AccountService struct {
 	usersRepository          users.Repository
 }
 
-var (
-	ErrUserNotFound = errors.New("user not found")
-
+const (
 	NotFoundIndex = -1
 )
 
-func NewAccountService(authorizationsRepository authorizations.Repository, usersRepository users.Repository) (*AccountService, error) {
+var (
+	ErrUserNotFound = errors.New("user not found")
+)
+
+func NewAccountService(
+	authorizationsRepository authorizations.Repository,
+	generationLibrary utils.GenerationLibrary,
+	hashLibrary utils.HashLibrary,
+	usersRepository users.Repository,
+) (*AccountService, error) {
 	if authorizationsRepository == nil {
 		return nil, errors.New("authorizationsRepository is nil")
+	}
+
+	if generationLibrary == nil {
+		return nil, errors.New("generationLibrary is nil")
+	}
+
+	if hashLibrary == nil {
+		return nil, errors.New("hashLibrary is nil")
 	}
 
 	if usersRepository == nil {
@@ -32,6 +47,8 @@ func NewAccountService(authorizationsRepository authorizations.Repository, users
 
 	return &AccountService{
 		authorizationsRepository: authorizationsRepository,
+		generationLibrary:        generationLibrary,
+		hashLibrary:              hashLibrary,
 		usersRepository:          usersRepository,
 	}, nil
 }

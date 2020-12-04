@@ -163,7 +163,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/ports.List"
+                                "$ref": "#/definitions/ports.ListResponse"
                             }
                         }
                     },
@@ -232,7 +232,7 @@
                 }
             }
         },
-        "/lists/{listID}": {
+        "/listing/lists/{listID}": {
             "get": {
                 "security": [
                     {
@@ -243,7 +243,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "list"
+                    "listing"
                 ],
                 "summary": "Reads a list with its product and contributor ids",
                 "operationId": "get-list",
@@ -260,7 +260,13 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/builders.GetListResponse"
+                            "$ref": "#/definitions/ports.ListResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/errors.Error"
                         }
                     },
                     "500": {
@@ -270,7 +276,9 @@
                         }
                     }
                 }
-            },
+            }
+        },
+        "/lists/{listID}": {
             "delete": {
                 "security": [
                     {
@@ -639,25 +647,6 @@
                 }
             }
         },
-        "handler.CreateProductRequest": {
-            "type": "object",
-            "required": [
-                "name"
-            ],
-            "properties": {
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "handler.ProductSearchRequest": {
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
         "errors.Error": {
             "type": "object",
             "properties": {
@@ -678,6 +667,25 @@
                 "error": {
                     "type": "string"
                 },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.CreateProductRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.ProductSearchRequest": {
+            "type": "object",
+            "properties": {
                 "name": {
                     "type": "string"
                 }
@@ -713,7 +721,7 @@
                 }
             }
         },
-        "ports.Contributor": {
+        "ports.ContributorResponse": {
             "type": "object",
             "properties": {
                 "id": {
@@ -732,13 +740,13 @@
                 }
             }
         },
-        "ports.List": {
+        "ports.ListResponse": {
             "type": "object",
             "properties": {
                 "contributors": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/ports.Contributor"
+                        "$ref": "#/definitions/ports.ContributorResponse"
                     }
                 },
                 "creationDate": {
@@ -753,7 +761,7 @@
                 "products": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/ports.Product"
+                        "$ref": "#/definitions/ports.ProductResponse"
                     }
                 }
             }
@@ -773,7 +781,7 @@
                 }
             }
         },
-        "ports.Product": {
+        "ports.ProductResponse": {
             "type": "object",
             "properties": {
                 "id": {

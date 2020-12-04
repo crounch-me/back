@@ -18,14 +18,14 @@ import (
 	"github.com/crounch-me/back/handler"
 	"github.com/crounch-me/back/internal/account"
 	accountAdapters "github.com/crounch-me/back/internal/account/adapters"
-	userAdapters "github.com/crounch-me/back/internal/account/adapters"
 	accountApp "github.com/crounch-me/back/internal/account/app"
-	userPorts "github.com/crounch-me/back/internal/account/ports"
+	accountPorts "github.com/crounch-me/back/internal/account/ports"
 	commonAdapters "github.com/crounch-me/back/internal/common/adapters"
 	"github.com/crounch-me/back/internal/common/errors"
-	listAdapters "github.com/crounch-me/back/internal/listing/adapters"
-	listApp "github.com/crounch-me/back/internal/listing/app"
-	listPorts "github.com/crounch-me/back/internal/listing/ports"
+	"github.com/crounch-me/back/internal/common/utils"
+	listingAdapters "github.com/crounch-me/back/internal/listing/adapters"
+	listingApp "github.com/crounch-me/back/internal/listing/app"
+	listingPorts "github.com/crounch-me/back/internal/listing/ports"
 	"github.com/crounch-me/back/util"
 )
 
@@ -64,6 +64,9 @@ func Start(config *configuration.Config) {
 	corsConfig.AllowAllOrigins = true
 
 	validator := util.NewValidator()
+	listResponseBuilder := listingPorts.NewResponseBuilder()
+	generationLibrary := utils.NewGeneration()
+	hashLibrary := utils.NewHash()
 
 	db := commonAdapters.GetDatabaseConnection(config.DBConnectionURI)
 
@@ -72,34 +75,25 @@ func Start(config *configuration.Config) {
 		log.Fatal(err)
 	}
 
-	listsRepository := listAdapters.NewListsMemoryRepository()
+	listsRepository := listingAdapters.NewListsMemoryRepository()
+	usersRepository := accountAdapters.NewUsersMemoryRepository()
 
-	usersRepository, err := userAdapters.NewUsersPostgresRepository(db, config.DBSchema)
+	listService, err := listingApp.NewListService(listsRepository)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	userService, err := accountApp.NewAccountService(authorizationsRepository, usersRepository)
+	accountService, err := accountApp.NewAccountService(authorizationsRepository, generationLibrary, hashLibrary, usersRepository)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	listService, err := listApp.NewListService(listsRepository)
+	listServer, err := listingPorts.NewGinServer(listService, accountService, validator, listResponseBuilder)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	accountService, err := accountApp.NewAccountService(authorizationsRepository, usersRepository)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	listServer, err := listPorts.NewGinServer(listService, accountService, validator)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	userServer, err := userPorts.NewGinServer(userService, validator)
+	userServer, err := accountPorts.NewGinServer(accountService, validator)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -134,7 +128,6 @@ func configureRoutes(r *gin.Engine, hc *handler.Context) {
 	r.OPTIONS(healthPath, optionsHandler([]string{http.MethodGet}))
 
 	// List routes
-	r.GET(listWithIDPath, checkAccess(hc.Storage), hc.GetList)
 	r.DELETE(listWithIDPath, checkAccess(hc.Storage), hc.DeleteList)
 	r.OPTIONS(listWithIDPath, optionsHandler([]string{http.MethodGet, http.MethodDelete}))
 

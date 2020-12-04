@@ -4,6 +4,7 @@ import (
 	"errors"
 	"sync"
 
+	"github.com/crounch-me/back/internal/listing/app"
 	"github.com/crounch-me/back/internal/listing/domain/lists"
 )
 
@@ -12,9 +13,9 @@ type ListsMemoryRepository struct {
 	lock  *sync.RWMutex
 }
 
-func NewListsMemoryRepository() *ListsMemoryRepository {
+func NewListsMemoryRepository() app.Repository {
 	return &ListsMemoryRepository{
-		lists: map[string]*lists.List{},
+		lists: make(map[string]*lists.List, 0),
 		lock:  &sync.RWMutex{},
 	}
 }

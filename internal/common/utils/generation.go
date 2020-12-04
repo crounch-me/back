@@ -4,6 +4,10 @@ import "github.com/gofrs/uuid"
 
 type Generation struct{}
 
+func NewGeneration() GenerationLibrary {
+	return &Generation{}
+}
+
 func (g Generation) UUID() (string, error) {
 	id, err := uuid.NewV4()
 
@@ -15,5 +19,5 @@ func (g Generation) UUID() (string, error) {
 }
 
 func (g Generation) Token() (string, error) {
-	return g.Token()
+	return g.UUID()
 }
