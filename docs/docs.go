@@ -137,26 +137,6 @@ var doc = `{
                 }
             }
         },
-        "/health": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "Return health of application",
-                "operationId": "get-health",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/internal.Health"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
-                    }
-                }
-            }
-        },
         "/listing/lists": {
             "get": {
                 "security": [
@@ -247,6 +227,104 @@ var doc = `{
                 }
             }
         },
+        "/listing/lists/:listID/archive": {},
+        "/listing/lists/products": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "listing"
+                ],
+                "summary": "Add the product to the list",
+                "operationId": "add-product-to-list",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "List ID",
+                        "name": "listID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Product ID",
+                        "name": "productID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ports.AddProductToListRequest"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errors.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/errors.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.Error"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "listing"
+                ],
+                "summary": "Buys the product in the list",
+                "operationId": "buy-product-in-list",
+                "parameters": [
+                    {
+                        "description": "Product in list request",
+                        "name": "productInListRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ports.BuyProductInListRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {},
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/listing/lists/{listID}": {
             "get": {
                 "security": [
@@ -265,7 +343,7 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "List ID",
+                        "description": "List UUID",
                         "name": "listID",
                         "in": "path",
                         "required": true
@@ -291,88 +369,6 @@ var doc = `{
                         }
                     }
                 }
-            }
-        },
-        "/lists/{listID}": {
-            "delete": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "list"
-                ],
-                "summary": "Delete the entire list with its products",
-                "operationId": "delete-list",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "List ID",
-                        "name": "listID",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {},
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/errors.Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/lists/{listID}/products/{productID}": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "product-in-list"
-                ],
-                "summary": "Add the product to the list",
-                "operationId": "add-product-to-list",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "List ID",
-                        "name": "listID",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Product ID",
-                        "name": "productID",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/listing.ProductInListLink"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/errors.Error"
-                        }
-                    }
-                }
             },
             "delete": {
                 "security": [
@@ -384,9 +380,47 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "product-in-list"
+                    "listing"
                 ],
-                "summary": "Delete the product from the list",
+                "summary": "Delete the entire list with its products links and contributors",
+                "operationId": "delete-list",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "List UUID",
+                        "name": "listID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {},
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/errors.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/listing/lists/{listID}/products/{productID}": {
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "tags": [
+                    "listing"
+                ],
+                "summary": "Delete the product in the list",
                 "operationId": "delete-product-from-list",
                 "parameters": [
                     {
@@ -413,63 +447,6 @@ var doc = `{
                         }
                     }
                 }
-            },
-            "patch": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "product-in-list"
-                ],
-                "summary": "Update the product in the list partially",
-                "operationId": "update-product-in-list",
-                "parameters": [
-                    {
-                        "description": "Product in list",
-                        "name": "productInList",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/listing.UpdateProductInList"
-                        }
-                    },
-                    {
-                        "type": "string",
-                        "description": "Product in list",
-                        "name": "listID",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Product in list",
-                        "name": "productID",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/listing.ProductInListLink"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/errors.Error"
-                        }
-                    }
-                }
             }
         },
         "/products": {
@@ -479,13 +456,10 @@ var doc = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "produces": [
-                    "application/json"
-                ],
                 "tags": [
-                    "product"
+                    "products"
                 ],
-                "summary": "Create a new product",
+                "summary": "Create a new product, searchable by its creator",
                 "operationId": "create-product",
                 "parameters": [
                     {
@@ -494,15 +468,22 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.CreateProductRequest"
+                            "$ref": "#/definitions/ports.CreateProductRequest"
                         }
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
+                    "204": {},
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/products.Product"
+                            "$ref": "#/definitions/errors.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/errors.Error"
                         }
                     },
                     "500": {
@@ -525,7 +506,7 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "product"
+                    "products"
                 ],
                 "summary": "Search a product by its name in default products, it removes accentuated characters and is case insensitive",
                 "operationId": "search-default-products",
@@ -536,7 +517,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.ProductSearchRequest"
+                            "$ref": "#/definitions/ports.ProductSearchRequest"
                         }
                     }
                 ],
@@ -561,107 +542,6 @@ var doc = `{
         }
     },
     "definitions": {
-        "account.User": {
-            "type": "object",
-            "required": [
-                "email",
-                "password"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                }
-            }
-        },
-        "builders.CategoryInGetListResponse": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "products": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/builders.ProductInGetListResponse"
-                    }
-                }
-            }
-        },
-        "builders.GetListResponse": {
-            "type": "object",
-            "required": [
-                "name"
-            ],
-            "properties": {
-                "archivationDate": {
-                    "type": "string"
-                },
-                "categories": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/builders.CategoryInGetListResponse"
-                    }
-                },
-                "contributors": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/account.User"
-                    }
-                },
-                "creationDate": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "builders.ProductInGetListResponse": {
-            "type": "object",
-            "required": [
-                "name"
-            ],
-            "properties": {
-                "bought": {
-                    "type": "boolean"
-                },
-                "category": {
-                    "$ref": "#/definitions/categories.Category"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "owner": {
-                    "$ref": "#/definitions/account.User"
-                }
-            }
-        },
-        "categories.Category": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
         "errors.Error": {
             "type": "object",
             "properties": {
@@ -687,52 +567,33 @@ var doc = `{
                 }
             }
         },
-        "handler.CreateProductRequest": {
+        "ports.AddProductToListRequest": {
             "type": "object",
             "required": [
-                "name"
+                "listID",
+                "productID"
             ],
             "properties": {
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "handler.ProductSearchRequest": {
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "internal.Health": {
-            "type": "object",
-            "properties": {
-                "alive": {
-                    "type": "boolean"
-                }
-            }
-        },
-        "listing.ProductInListLink": {
-            "type": "object",
-            "properties": {
-                "bought": {
-                    "type": "boolean"
-                },
-                "listId": {
+                "listID": {
                     "type": "string"
                 },
-                "productId": {
+                "productID": {
                     "type": "string"
                 }
             }
         },
-        "listing.UpdateProductInList": {
+        "ports.BuyProductInListRequest": {
             "type": "object",
+            "required": [
+                "listID",
+                "productID"
+            ],
             "properties": {
-                "bought": {
-                    "type": "boolean"
+                "listID": {
+                    "type": "string"
+                },
+                "productID": {
+                    "type": "string"
                 }
             }
         },
@@ -745,6 +606,17 @@ var doc = `{
             }
         },
         "ports.CreateListRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "ports.CreateProductRequest": {
             "type": "object",
             "required": [
                 "name"
@@ -804,6 +676,14 @@ var doc = `{
                 }
             }
         },
+        "ports.ProductSearchRequest": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "ports.SignupRequest": {
             "type": "object",
             "required": [
@@ -828,24 +708,7 @@ var doc = `{
             }
         },
         "products.Product": {
-            "type": "object",
-            "required": [
-                "name"
-            ],
-            "properties": {
-                "category": {
-                    "$ref": "#/definitions/categories.Category"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "owner": {
-                    "$ref": "#/definitions/account.User"
-                }
-            }
+            "type": "object"
         }
     },
     "securityDefinitions": {

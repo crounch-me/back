@@ -1,9 +1,6 @@
 package router
 
 import (
-	"net/http"
-	"strings"
-
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -15,31 +12,17 @@ import (
 
 	// Import documentations for swagger endpoint
 	_ "github.com/crounch-me/back/docs"
-	"github.com/crounch-me/back/handler"
-	"github.com/crounch-me/back/internal/account"
 	accountAdapters "github.com/crounch-me/back/internal/account/adapters"
 	accountApp "github.com/crounch-me/back/internal/account/app"
 	accountPorts "github.com/crounch-me/back/internal/account/ports"
-	commonAdapters "github.com/crounch-me/back/internal/common/adapters"
-	"github.com/crounch-me/back/internal/common/errors"
+	"github.com/crounch-me/back/internal/common/server"
 	"github.com/crounch-me/back/internal/common/utils"
 	listingAdapters "github.com/crounch-me/back/internal/listing/adapters"
 	listingApp "github.com/crounch-me/back/internal/listing/app"
 	listingPorts "github.com/crounch-me/back/internal/listing/ports"
-	"github.com/crounch-me/back/util"
-)
-
-const (
-	healthPath = "/health"
-
-	listPath        = "/lists"
-	listWithIDPath  = "/lists/:listID"
-	archiveListPath = "/lists/:listID/archive"
-
-	listProductPath = "/lists/:listID/products/:productID"
-
-	productPath       = "/products"
-	productSearchPath = "/products/search"
+	productsAdapters "github.com/crounch-me/back/internal/products/adapters"
+	productsApp "github.com/crounch-me/back/internal/products/app"
+	productPorts "github.com/crounch-me/back/internal/products/ports"
 )
 
 // @title Crounch Me API
@@ -59,36 +42,31 @@ func Start(config *configuration.Config) {
 
 	r := gin.New()
 
-	hc := handler.NewContext(config)
 	corsConfig := cors.DefaultConfig()
 	corsConfig.AllowAllOrigins = true
 
-	validator := util.NewValidator()
-	listResponseBuilder := listingPorts.NewResponseBuilder()
+	validator := utils.NewValidator()
 	generationLibrary := utils.NewGeneration()
 	hashLibrary := utils.NewHash()
 
-	db := commonAdapters.GetDatabaseConnection(config.DBConnectionURI)
-
-	authorizationsRepository, err := accountAdapters.NewAuthorizationsPostgresRepository(db, config.DBSchema)
-	if err != nil {
-		log.Fatal(err)
-	}
-
+	authorizationsRepository := accountAdapters.NewAuthorizationsMemoryRepository()
 	listsRepository := listingAdapters.NewListsMemoryRepository()
 	usersRepository := accountAdapters.NewUsersMemoryRepository()
+	productsRepository := productsAdapters.NewProductsMemoryRepository()
 
-	listService, err := listingApp.NewListService(listsRepository)
+	listService, err := listingApp.NewListService(listsRepository, generationLibrary)
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	productService, err := productsApp.NewProductService(generationLibrary, productsRepository)
 
 	accountService, err := accountApp.NewAccountService(authorizationsRepository, generationLibrary, hashLibrary, usersRepository)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	listServer, err := listingPorts.NewGinServer(listService, accountService, validator, listResponseBuilder)
+	listServer, err := listingPorts.NewGinServer(listService, accountService, validator)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -98,12 +76,16 @@ func Start(config *configuration.Config) {
 		log.Fatal(err)
 	}
 
+	productServer, err := productPorts.NewGinServer(productService, accountService, validator)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	r.Use(accessControlAllowOriginHandler())
 
 	userServer.ConfigureRoutes(r)
 	listServer.ConfigureRoutes(r)
-
-	configureRoutes(r, hc)
+	productServer.ConfigureRoutes(r)
 
 	r.Use(cors.New(corsConfig))
 	r.Use(gin.Recovery())
@@ -120,74 +102,9 @@ func Start(config *configuration.Config) {
 	}
 }
 
-func emptyHandler(c *gin.Context) {}
-
-func configureRoutes(r *gin.Engine, hc *handler.Context) {
-	// Health routes
-	r.GET(healthPath, hc.Health)
-	r.OPTIONS(healthPath, optionsHandler([]string{http.MethodGet}))
-
-	// List routes
-	r.DELETE(listWithIDPath, checkAccess(hc.Storage), hc.DeleteList)
-	r.OPTIONS(listWithIDPath, optionsHandler([]string{http.MethodGet, http.MethodDelete}))
-
-	r.POST(archiveListPath, checkAccess(hc.Storage), hc.ArchiveList)
-	r.OPTIONS(archiveListPath, optionsHandler([]string{http.MethodPost}))
-
-	// Product routes
-	r.POST(productPath, checkAccess(hc.Storage), hc.CreateProduct)
-	r.OPTIONS(productPath, optionsHandler([]string{http.MethodPost}))
-
-	r.POST(productSearchPath, checkAccess(hc.Storage), hc.SearchDefaultProducts)
-	r.OPTIONS(productSearchPath, optionsHandler([]string{http.MethodPost}))
-
-	// List product routes
-	r.POST(listProductPath, checkAccess(hc.Storage), hc.AddProductToList)
-	r.DELETE(listProductPath, checkAccess(hc.Storage), hc.DeleteProductFromList)
-	r.PATCH(listProductPath, checkAccess(hc.Storage), hc.UpdateProductInList)
-	r.OPTIONS(listProductPath, optionsHandler([]string{http.MethodPost, http.MethodPatch, http.MethodDelete}))
-}
-
-func checkAccess(us account.Storage) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		token := c.GetHeader("Authorization")
-
-		if token == "" {
-			log.Info("Unauthorized - No token provided")
-			c.AbortWithStatus(http.StatusUnauthorized)
-			return
-		}
-
-		userID, err := us.GetUserIDByToken(token)
-
-		if err != nil {
-			if err.Code == account.UserNotFoundErrorCode {
-				c.AbortWithStatusJSON(http.StatusUnauthorized, errors.NewError(errors.UnauthorizedErrorCode))
-				return
-			}
-			log.WithError(err).Error("Unauthorized - Error while accessing database")
-			c.AbortWithStatus(http.StatusInternalServerError)
-			return
-		}
-
-		c.Set(handler.ContextUserID, *userID)
-	}
-}
-
-func optionsHandler(allowedMethods []string) gin.HandlerFunc {
-	allowedMethods = append(allowedMethods, http.MethodOptions)
-	allowedHeaders := []string{util.HeaderContentType, util.HeaderAuthorization, util.HeaderAccept}
-	return func(c *gin.Context) {
-		c.Writer.Header().Set(util.HeaderAccessControlAllowOrigin, "*")
-		c.Writer.Header().Set(util.HeaderAccessControlAllowMethods, strings.Join(allowedMethods, ","))
-		c.Writer.Header().Set(util.HeaderAccessControlAllowHeaders, strings.Join(allowedHeaders, ","))
-		c.AbortWithStatus(http.StatusOK)
-	}
-}
-
 func accessControlAllowOriginHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Writer.Header().Set(util.HeaderAccessControlAllowOrigin, "*")
+		c.Writer.Header().Set(server.HeaderAccessControlAllowOrigin, "*")
 		c.Next()
 	}
 }

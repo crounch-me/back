@@ -8,7 +8,7 @@ import (
 	"github.com/crounch-me/back/internal/account/app"
 	commonErrors "github.com/crounch-me/back/internal/common/errors"
 	"github.com/crounch-me/back/internal/common/server"
-	"github.com/crounch-me/back/util"
+	"github.com/crounch-me/back/internal/common/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -22,10 +22,10 @@ const (
 
 type GinServer struct {
 	accountService *app.AccountService
-	validator      *util.Validator
+	validator      *utils.Validator
 }
 
-func NewGinServer(accountService *app.AccountService, validator *util.Validator) (*GinServer, error) {
+func NewGinServer(accountService *app.AccountService, validator *utils.Validator) (*GinServer, error) {
 	if accountService == nil {
 		return nil, errors.New("account gin server accountService is nil")
 	}

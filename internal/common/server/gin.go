@@ -8,11 +8,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/crounch-me/back/handler"
 	"github.com/crounch-me/back/internal/account"
 	accountApp "github.com/crounch-me/back/internal/account/app"
 	"github.com/crounch-me/back/internal/common/errors"
-	"github.com/crounch-me/back/util"
 	"github.com/gin-gonic/gin"
 )
 
@@ -62,7 +60,7 @@ func CheckUserAuthorization(accountService *accountApp.AccountService) gin.Handl
 			return
 		}
 
-		c.Set(handler.ContextUserID, userUUID)
+		c.Set(ContextUserID, userUUID)
 	}
 }
 
@@ -82,12 +80,12 @@ func JSON(c *gin.Context, response interface{}) {
 
 func OptionsHandler(allowedMethods []string) gin.HandlerFunc {
 	allowedMethods = append(allowedMethods, http.MethodOptions)
-	allowedHeaders := []string{util.HeaderContentType, util.HeaderAuthorization, util.HeaderAccept}
+	allowedHeaders := []string{HeaderContentType, HeaderAuthorization, HeaderAccept}
 
 	return func(c *gin.Context) {
-		c.Writer.Header().Set(util.HeaderAccessControlAllowOrigin, "*")
-		c.Writer.Header().Set(util.HeaderAccessControlAllowMethods, strings.Join(allowedMethods, ","))
-		c.Writer.Header().Set(util.HeaderAccessControlAllowHeaders, strings.Join(allowedHeaders, ","))
+		c.Writer.Header().Set(HeaderAccessControlAllowOrigin, "*")
+		c.Writer.Header().Set(HeaderAccessControlAllowMethods, strings.Join(allowedMethods, ","))
+		c.Writer.Header().Set(HeaderAccessControlAllowHeaders, strings.Join(allowedHeaders, ","))
 		c.AbortWithStatus(http.StatusOK)
 	}
 }

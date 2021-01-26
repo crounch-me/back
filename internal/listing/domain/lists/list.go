@@ -53,6 +53,10 @@ func (l List) CreationDate() time.Time {
 	return l.creationDate
 }
 
+func (l *List) IsArchived() bool {
+	return l.archivationDate != nil && !l.archivationDate.IsZero()
+}
+
 func (l *List) Archive() {
 	now := time.Now()
 

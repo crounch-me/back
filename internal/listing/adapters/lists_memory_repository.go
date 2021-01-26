@@ -20,6 +20,19 @@ func NewListsMemoryRepository() app.Repository {
 	}
 }
 
+func (r *ListsMemoryRepository) DeleteList(uuid string) error {
+	r.lock.Lock()
+	defer r.lock.Unlock()
+
+	if _, ok := r.lists[uuid]; !ok {
+		return errors.New("list not found")
+	}
+
+	delete(r.lists, uuid)
+
+	return nil
+}
+
 func (r *ListsMemoryRepository) ReadByContributor(c *lists.Contributor) ([]*lists.List, error) {
 	r.lock.RLock()
 	defer r.lock.RUnlock()

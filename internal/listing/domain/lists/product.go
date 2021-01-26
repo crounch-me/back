@@ -28,9 +28,9 @@ func (p Product) UUID() string {
 	return p.uuid
 }
 
-func (l List) HasProduct(uuid string) bool {
+func (l List) HasProduct(product *Product) bool {
 	for _, p := range l.products {
-		if p.uuid == uuid {
+		if p.uuid == product.uuid {
 			return true
 		}
 	}
@@ -39,7 +39,7 @@ func (l List) HasProduct(uuid string) bool {
 }
 
 func (l *List) AddProduct(p *Product) error {
-	if l.HasProduct(p.uuid) {
+	if l.HasProduct(p) {
 		return ErrProductAlreadyInList
 	}
 
@@ -73,8 +73,23 @@ func (l List) FindProductIndex(uuid string) (int, error) {
 	return productIndex, nil
 }
 
-func (l *List) RemoveProduct(uuid string) error {
-	productIndex, err := l.FindProductIndex(uuid)
+func (p *Product) Buy() {
+	p.bought = true
+}
+
+func (l *List) Buy(p *Product) error {
+	for _, product := range l.products {
+		if product.UUID() == p.UUID() {
+			product.Buy()
+			return nil
+		}
+	}
+
+	return errors.New("product not found")
+}
+
+func (l *List) RemoveProduct(p *Product) error {
+	productIndex, err := l.FindProductIndex(p.UUID())
 	if err != nil {
 		return err
 	}
@@ -82,10 +97,6 @@ func (l *List) RemoveProduct(uuid string) error {
 	l.products = remove(l.products, productIndex)
 
 	return nil
-}
-
-func (p *Product) Buy() {
-	p.bought = true
 }
 
 func remove(products []*Product, i int) []*Product {

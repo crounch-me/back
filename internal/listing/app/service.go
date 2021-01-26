@@ -4,26 +4,32 @@ import (
 	"errors"
 	"time"
 
+	"github.com/crounch-me/back/internal/common/utils"
 	"github.com/crounch-me/back/internal/listing/domain/lists"
-	"github.com/crounch-me/back/util"
 )
 
 type ListService struct {
-	listsRepository Repository
+	listsRepository   Repository
+	generationLibrary utils.GenerationLibrary
 }
 
-func NewListService(listRepository Repository) (*ListService, error) {
+func NewListService(listRepository Repository, generationLibrary utils.GenerationLibrary) (*ListService, error) {
 	if listRepository == nil {
 		return nil, errors.New("listRepository is nil")
 	}
 
+	if generationLibrary == nil {
+		return nil, errors.New("generationService is nil")
+	}
+
 	return &ListService{
-		listsRepository: listRepository,
+		listsRepository:   listRepository,
+		generationLibrary: generationLibrary,
 	}, nil
 }
 
 func (s *ListService) CreateList(creatorUUID, name string) (string, error) {
-	listUUID, err := util.GenerateID()
+	listUUID, err := s.generationLibrary.UUID()
 	if err != nil {
 		return "", err
 	}
@@ -77,18 +83,125 @@ func (s *ListService) ReadList(userUUID, listUUID string) (*lists.List, error) {
 	return l, nil
 }
 
-func (s *ListService) ArchiveList(listUUID string) (*lists.List, error) {
+func (s *ListService) ArchiveList(contributorUUID, listUUID string) error {
 	l, err := s.listsRepository.ReadByID(listUUID)
 	if err != nil {
-		return nil, err
+		return err
+	}
+
+	c, err := lists.NewContributor(contributorUUID)
+	if err != nil {
+		return err
+	}
+
+	if !c.ContributeIn(l) {
+		return errors.New("user not contributor")
 	}
 
 	l.Archive()
 
 	err = s.listsRepository.UpdateList(l)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return l, nil
+	return nil
+}
+
+func (s *ListService) DeleteList(contributorUUID, listUUID string) error {
+	l, err := s.listsRepository.ReadByID(listUUID)
+	if err != nil {
+		return err
+	}
+
+	c, err := lists.NewContributor(contributorUUID)
+	if err != nil {
+		return err
+	}
+
+	if !c.ContributeIn(l) {
+		return errors.New("user not contributor")
+	}
+
+	err = s.listsRepository.DeleteList(l.UUID())
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *ListService) AddProductToList(contributorUUID, productUUID, listUUID string) error {
+	l, err := s.listsRepository.ReadByID(listUUID)
+	if err != nil {
+		return err
+	}
+
+	c, err := lists.NewContributor(contributorUUID)
+	if err != nil {
+		return err
+	}
+
+	if !c.ContributeIn(l) {
+		return errors.New("user not contributor")
+	}
+
+	p, err := lists.NewProduct(productUUID)
+	if err != nil {
+		return err
+	}
+
+	if l.HasProduct(p) {
+		return errors.New("product already in list")
+	}
+
+	l.AddProduct(p)
+
+	return s.listsRepository.UpdateList(l)
+}
+
+func (s *ListService) BuyProductInList(contributorUUID, productUUID, listUUID string) error {
+	l, err := s.listsRepository.ReadByID(listUUID)
+	if err != nil {
+		return err
+	}
+
+	c, err := lists.NewContributor(contributorUUID)
+	if err != nil {
+		return err
+	}
+
+	if !c.ContributeIn(l) {
+		return errors.New("user not contributor")
+	}
+
+	p, err := lists.NewProduct(productUUID)
+	if err != nil {
+		return err
+	}
+
+	return l.Buy(p)
+}
+
+func (s *ListService) DeleteProductInList(contributorUUID, productUUID, listUUID string) error {
+	l, err := s.listsRepository.ReadByID(listUUID)
+	if err != nil {
+		return err
+	}
+
+	c, err := lists.NewContributor(contributorUUID)
+	if err != nil {
+		return err
+	}
+
+	if !c.ContributeIn(l) {
+		return errors.New("user not contributor")
+	}
+
+	p, err := lists.NewProduct(productUUID)
+	if err != nil {
+		return err
+	}
+
+	return l.RemoveProduct(p)
 }
