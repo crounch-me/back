@@ -44,6 +44,8 @@ func NewGinServer(
 
 	return &GinServer{
 		accountService: accountService,
+		productService: productService,
+		validator:      validator,
 	}, nil
 }
 

@@ -1,6 +1,8 @@
 package lists
 
-import "errors"
+import (
+	"errors"
+)
 
 type Product struct {
 	uuid   string
@@ -8,9 +10,6 @@ type Product struct {
 }
 
 var (
-	ErrProductAlreadyInList = errors.New("product already in list")
-	ErrProductNotFound      = errors.New("product not found in list")
-
 	NotFoundIndex = -1
 )
 
@@ -67,7 +66,7 @@ func (l List) FindProductIndex(uuid string) (int, error) {
 	}
 
 	if productIndex == NotFoundIndex {
-		return 0, ErrProductNotFound
+		return 0, ErrProductNotFoundInList
 	}
 
 	return productIndex, nil
@@ -85,7 +84,7 @@ func (l *List) Buy(p *Product) error {
 		}
 	}
 
-	return errors.New("product not found")
+	return ErrProductNotFoundInList
 }
 
 func (l *List) RemoveProduct(p *Product) error {

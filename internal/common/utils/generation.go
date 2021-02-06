@@ -2,13 +2,13 @@ package utils
 
 import "github.com/gofrs/uuid"
 
-type Generation struct{}
+type generation struct{}
 
 func NewGeneration() GenerationLibrary {
-	return &Generation{}
+	return &generation{}
 }
 
-func (g Generation) UUID() (string, error) {
+func (g generation) UUID() (string, error) {
 	id, err := uuid.NewV4()
 
 	if err != nil {
@@ -18,6 +18,6 @@ func (g Generation) UUID() (string, error) {
 	return id.String(), nil
 }
 
-func (g Generation) Token() (string, error) {
+func (g generation) Token() (string, error) {
 	return g.UUID()
 }

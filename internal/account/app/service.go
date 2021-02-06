@@ -19,10 +19,6 @@ const (
 	NotFoundIndex = -1
 )
 
-var (
-	ErrUserNotFound = errors.New("user not found")
-)
-
 func NewAccountService(
 	authorizationsRepository authorizations.Repository,
 	generationLibrary utils.GenerationLibrary,
@@ -56,11 +52,11 @@ func NewAccountService(
 func (s *AccountService) Signup(email, password string) error {
 	_, err := s.usersRepository.FindByEmail(email)
 	if err != nil {
-		if err != ErrUserNotFound {
+		if err != users.ErrUserNotFound {
 			return err
 		}
 	} else {
-		return errors.New("user already registered")
+		return users.ErrDuplicateUser
 	}
 
 	uuid, err := s.generationLibrary.UUID()

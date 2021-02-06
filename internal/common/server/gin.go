@@ -2,15 +2,16 @@ package server
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"strings"
 
-	"github.com/crounch-me/back/internal/account"
 	accountApp "github.com/crounch-me/back/internal/account/app"
-	"github.com/crounch-me/back/internal/common/errors"
+	"github.com/crounch-me/back/internal/account/domain/users"
+	commonErrors "github.com/crounch-me/back/internal/common/errors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -33,7 +34,7 @@ func NewDataResponse(data interface{}) *DataResponse {
 func GetUserIDFromContext(c *gin.Context) (string, error) {
 	userID, exists := c.Get(ContextUserID)
 	if !exists {
-		return "", errors.NewError(errors.UnknownErrorCode).WithCall("utils", "GetUserIDFromContext")
+		return "", commonErrors.NewError(commonErrors.UnknownErrorCode).WithCall("utils", "GetUserIDFromContext")
 	}
 
 	return userID.(string), nil
@@ -51,8 +52,8 @@ func CheckUserAuthorization(accountService *accountApp.AccountService) gin.Handl
 
 		userUUID, err := accountService.GetUserUUIDByToken(token)
 		if err != nil {
-			if err.Error() == account.UserNotFoundErrorCode {
-				c.AbortWithStatusJSON(http.StatusUnauthorized, errors.NewError(errors.UnauthorizedErrorCode))
+			if errors.Is(err, users.ErrUserNotFound) {
+				c.AbortWithStatusJSON(http.StatusUnauthorized, commonErrors.NewError(commonErrors.UnauthorizedErrorCode))
 				return
 			}
 

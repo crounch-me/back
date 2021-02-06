@@ -21,7 +21,10 @@ func NewProductService(generationLibrary utils.GenerationLibrary, productsReposi
 		return nil, errors.New("productsRepository is nil")
 	}
 
-	return &ProductService{}, nil
+	return &ProductService{
+		generationLibrary:  generationLibrary,
+		productsRepository: productsRepository,
+	}, nil
 }
 
 func (s *ProductService) CreateProduct(name string) (string, error) {

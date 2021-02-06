@@ -2,14 +2,15 @@ package ports
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/crounch-me/back/internal/account/app"
+	"github.com/crounch-me/back/internal/account/domain/users"
 	commonErrors "github.com/crounch-me/back/internal/common/errors"
 	"github.com/crounch-me/back/internal/common/server"
 	"github.com/crounch-me/back/internal/common/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -18,6 +19,8 @@ const (
 	userPath   = "/users"
 	mePath     = "/me"
 	logoutPath = "/account/logout"
+
+	duplicatedUserErrorCode = "duplicate-user-error"
 )
 
 type GinServer struct {
@@ -66,21 +69,25 @@ func (s *GinServer) Signup(c *gin.Context) {
 
 	err := server.UnmarshalPayload(c.Request.Body, signupRequest)
 	if err != nil {
-		fmt.Println(err)
+		logrus.Debug(err)
 		c.AbortWithStatusJSON(http.StatusBadRequest, commonErrors.NewError(commonErrors.UnmarshalErrorCode))
 		return
 	}
 
 	err = s.validator.Struct(signupRequest)
 	if err != nil {
-		fmt.Println(err)
+		logrus.Debug(err)
 		c.AbortWithStatusJSON(http.StatusBadRequest, commonErrors.NewError(commonErrors.InvalidErrorCode))
 		return
 	}
 
 	err = s.accountService.Signup(signupRequest.Email, signupRequest.Password)
 	if err != nil {
-		fmt.Println(err)
+		logrus.Debug(err)
+		if errors.Is(err, users.ErrDuplicateUser) {
+			c.AbortWithStatusJSON(http.StatusConflict, commonErrors.NewError(duplicatedUserErrorCode))
+			return
+		}
 		c.AbortWithStatusJSON(http.StatusInternalServerError, commonErrors.NewError(commonErrors.UnknownErrorCode))
 		return
 	}
@@ -116,6 +123,12 @@ func (s *GinServer) Login(c *gin.Context) {
 
 	token, err := s.accountService.Login(loginRequest.Email, loginRequest.Password)
 	if err != nil {
+		logrus.Debug(err)
+		if errors.Is(err, users.ErrUserNotFound) {
+			c.AbortWithStatusJSON(http.StatusNotFound, commonErrors.NewError(commonErrors.UnknownErrorCode))
+			return
+		}
+
 		c.AbortWithStatusJSON(http.StatusInternalServerError, commonErrors.NewError(commonErrors.UnknownErrorCode))
 		return
 	}

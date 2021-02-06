@@ -10,17 +10,25 @@ import (
 	"github.com/crounch-me/back/internal/common/server"
 	"github.com/crounch-me/back/internal/common/utils"
 	listApp "github.com/crounch-me/back/internal/listing/app"
+	"github.com/crounch-me/back/internal/listing/domain/lists"
+	"github.com/crounch-me/back/internal/products/domain/products"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"gopkg.in/go-playground/validator.v9"
 )
 
 const (
-	listUUIDPathParam              = "listID"
+	listUUIDPathParam = "listID"
+
 	listPath                       = "/listing/lists"
 	listWithIDPath                 = "/listing/lists/:listID"
 	archiveListPath                = "/listing/lists/:listID/archive"
 	listWithIDAndProductWithIDPath = "/listing/lists/:listID/products/:productID"
 	buyProductPath                 = "/listing/lists/:listID/products/:productID/buy"
+
+	productAlreadyInListErrorCode = "product-already-in-list-error"
+	listNotFoundErrorCode         = "list-not-found-error"
+	productNotFoundErrorCode      = "product-not-found-error"
 )
 
 type GinServer struct {
@@ -58,7 +66,7 @@ func (s *GinServer) ConfigureRoutes(r *gin.Engine) {
 	r.GET(listPath, server.CheckUserAuthorization(s.accountService), s.GetContributorsLists)
 	r.OPTIONS(listPath, server.OptionsHandler([]string{http.MethodGet, http.MethodPost}))
 
-	r.GET(listWithIDPath, server.CheckUserAuthorization(s.accountService), s.GetContributorsLists)
+	r.GET(listWithIDPath, server.CheckUserAuthorization(s.accountService), s.GetList)
 	r.DELETE(listWithIDPath, server.CheckUserAuthorization(s.accountService), s.DeleteList)
 	r.OPTIONS(listWithIDPath, server.OptionsHandler([]string{http.MethodGet}))
 
@@ -116,13 +124,13 @@ func (s *GinServer) CreateList(c *gin.Context) {
 		return
 	}
 
-	listUUID, err := s.listService.CreateList(userUUID, list.Name)
+	listID, err := s.listService.CreateList(userUUID, list.Name)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, commonErrors.NewError(commonErrors.UnknownErrorCode))
 		return
 	}
 
-	c.Header(server.HeaderContentLocation, "/lists/"+listUUID)
+	c.Header(server.HeaderContentLocation, "/lists/"+listID)
 	c.Status(http.StatusCreated)
 }
 
@@ -181,9 +189,25 @@ func (s *GinServer) GetList(c *gin.Context) {
 		return
 	}
 
-	listUUID := c.Param(listUUIDPathParam)
-	list, err := s.listService.ReadList(userUUID, listUUID)
+	listID := c.Param(listUUIDPathParam)
+	commonErr := s.validator.Var(listUUIDPathParam, listID, "uuid")
+	if commonErr != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, commonErrors.NewError(commonErrors.InvalidErrorCode))
+		return
+	}
+
+	list, err := s.listService.ReadList(userUUID, listID)
 	if err != nil {
+		logrus.Debug(err)
+		if errors.Is(err, lists.ErrUserNotContributor) {
+			c.AbortWithStatusJSON(http.StatusForbidden, commonErrors.NewError(commonErrors.ForbiddenErrorCode))
+			return
+		}
+
+		if errors.Is(err, lists.ErrListNotFound) {
+			c.AbortWithStatusJSON(http.StatusNotFound, commonErrors.NewError(listNotFoundErrorCode))
+			return
+		}
 		c.AbortWithStatusJSON(http.StatusInternalServerError, commonErrors.NewError(commonErrors.UnknownErrorCode))
 		return
 	}
@@ -212,9 +236,19 @@ func (s *GinServer) ArchiveList(c *gin.Context) {
 		return
 	}
 
-	listUUID := c.Param(listUUIDPathParam)
-	err = s.listService.ArchiveList(userUUID, listUUID)
+	listID := c.Param(listUUIDPathParam)
+	commonErr := s.validator.Var(listUUIDPathParam, listID, "uuid")
+	if commonErr != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, commonErrors.NewError(commonErrors.InvalidErrorCode))
+		return
+	}
+
+	err = s.listService.ArchiveList(userUUID, listID)
 	if err != nil {
+		if errors.Is(err, lists.ErrListNotFound) {
+			c.AbortWithStatusJSON(http.StatusNotFound, commonErrors.NewError(listNotFoundErrorCode))
+			return
+		}
 		c.AbortWithStatusJSON(http.StatusInternalServerError, commonErrors.NewError(commonErrors.UnknownErrorCode))
 		return
 	}
@@ -240,9 +274,21 @@ func (s *GinServer) DeleteList(c *gin.Context) {
 		return
 	}
 
-	listUUID := c.Param(listUUIDPathParam)
-	err = s.listService.DeleteList(userUUID, listUUID)
+	listID := c.Param(listUUIDPathParam)
+	commonErr := s.validator.Var(listUUIDPathParam, listID, "uuid")
+	if commonErr != nil {
+		logrus.WithError(err).WithField("test", err).Debug("error while deleting list")
+		c.AbortWithStatusJSON(http.StatusBadRequest, commonErrors.NewError(commonErrors.InvalidErrorCode))
+		return
+	}
+
+	err = s.listService.DeleteList(userUUID, listID)
 	if err != nil {
+		logrus.Debug(err)
+		if errors.Is(err, lists.ErrListNotFound) {
+			c.AbortWithStatusJSON(http.StatusNotFound, commonErrors.NewError(listNotFoundErrorCode))
+			return
+		}
 		c.AbortWithStatusJSON(http.StatusInternalServerError, commonErrors.NewError(commonErrors.UnknownErrorCode))
 		return
 	}
@@ -271,6 +317,12 @@ func (s *GinServer) AddProductToList(c *gin.Context) {
 	}
 
 	request := &AddProductToListRequest{}
+	err = server.UnmarshalPayload(c.Request.Body, request)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, commonErrors.NewError(commonErrors.UnmarshalErrorCode))
+		return
+	}
+
 	err = s.validator.Struct(request)
 	if err != nil {
 		fields := make([]*commonErrors.FieldError, 0)
@@ -288,11 +340,31 @@ func (s *GinServer) AddProductToList(c *gin.Context) {
 
 	err = s.listService.AddProductToList(userUUID, request.ProductUUID, request.ListUUID)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusForbidden, commonErrors.NewError(commonErrors.UnknownErrorCode))
+		if errors.Is(err, lists.ErrUserNotContributor) {
+			c.AbortWithStatusJSON(http.StatusForbidden, commonErrors.NewError(commonErrors.ForbiddenErrorCode))
+			return
+		}
+
+		if errors.Is(err, lists.ErrProductAlreadyInList) {
+			c.AbortWithStatusJSON(http.StatusConflict, commonErrors.NewError(productAlreadyInListErrorCode))
+			return
+		}
+
+		if errors.Is(err, lists.ErrListNotFound) {
+			c.AbortWithStatusJSON(http.StatusNotFound, commonErrors.NewError(listNotFoundErrorCode))
+			return
+		}
+
+		if errors.Is(err, products.ErrProductNotFound) {
+			c.AbortWithStatusJSON(http.StatusNotFound, commonErrors.NewError(productNotFoundErrorCode))
+			return
+		}
+
+		c.AbortWithStatusJSON(http.StatusInternalServerError, commonErrors.NewError(commonErrors.UnknownErrorCode))
 		return
 	}
 
-	c.Status(http.StatusNoContent)
+	c.Status(http.StatusCreated)
 }
 
 // BuyProduct buys the product in the list
@@ -314,8 +386,15 @@ func (s *GinServer) BuyProduct(c *gin.Context) {
 	}
 
 	request := &BuyProductInListRequest{}
+	err = server.UnmarshalPayload(c.Request.Body, request)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, commonErrors.NewError(commonErrors.UnmarshalErrorCode))
+		return
+	}
+
 	err = s.validator.Struct(request)
 	if err != nil {
+
 		fields := make([]*commonErrors.FieldError, 0)
 		for _, e := range err.(validator.ValidationErrors) {
 			field := &commonErrors.FieldError{
@@ -331,7 +410,7 @@ func (s *GinServer) BuyProduct(c *gin.Context) {
 
 	err = s.listService.BuyProductInList(userUUID, request.ProductUUID, request.ListUUID)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusForbidden, commonErrors.NewError(commonErrors.UnknownErrorCode))
+		c.AbortWithStatusJSON(http.StatusInternalServerError, commonErrors.NewError(commonErrors.UnknownErrorCode))
 		return
 	}
 
@@ -355,12 +434,28 @@ func (s *GinServer) DeleteProductInList(c *gin.Context) {
 		return
 	}
 
-	productUUID := c.Param("productUUID")
-	listUUID := c.Param("listUUID")
-
-	err = s.listService.DeleteProductInList(userUUID, productUUID, listUUID)
+	listID := c.Param(listUUIDPathParam)
+	err = s.validator.Var(listUUIDPathParam, listID, "uuid")
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusForbidden, commonErrors.NewError(commonErrors.UnknownErrorCode))
+		c.AbortWithStatusJSON(http.StatusBadRequest, commonErrors.NewError(commonErrors.InvalidErrorCode))
+		return
+	}
+	productUUID := c.Param("productID")
+
+	err = s.listService.DeleteProductInList(userUUID, productUUID, listID)
+	if err != nil {
+		logrus.Debug(err)
+		if errors.Is(err, lists.ErrListNotFound) {
+			c.AbortWithStatusJSON(http.StatusNotFound, commonErrors.NewError(listNotFoundErrorCode))
+			return
+		}
+
+		if errors.Is(err, lists.ErrUserNotContributor) {
+			c.AbortWithStatusJSON(http.StatusForbidden, commonErrors.NewError(commonErrors.ForbiddenErrorCode))
+			return
+		}
+
+		c.AbortWithStatusJSON(http.StatusInternalServerError, commonErrors.NewError(commonErrors.UnknownErrorCode))
 		return
 	}
 

@@ -67,7 +67,7 @@ func (r *ListsMemoryRepository) ReadByID(uuid string) (*lists.List, error) {
 
 	l, ok := r.lists[uuid]
 	if !ok {
-		return nil, errors.New("list not found")
+		return nil, lists.ErrListNotFound
 	}
 
 	return l, nil

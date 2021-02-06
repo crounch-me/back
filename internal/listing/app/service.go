@@ -6,16 +6,26 @@ import (
 
 	"github.com/crounch-me/back/internal/common/utils"
 	"github.com/crounch-me/back/internal/listing/domain/lists"
+	productsApp "github.com/crounch-me/back/internal/products/app"
 )
 
 type ListService struct {
 	listsRepository   Repository
+	productRepository productsApp.Repository
 	generationLibrary utils.GenerationLibrary
 }
 
-func NewListService(listRepository Repository, generationLibrary utils.GenerationLibrary) (*ListService, error) {
+func NewListService(
+	listRepository Repository,
+	productRepository productsApp.Repository,
+	generationLibrary utils.GenerationLibrary,
+) (*ListService, error) {
 	if listRepository == nil {
 		return nil, errors.New("listRepository is nil")
+	}
+
+	if productRepository == nil {
+		return nil, errors.New("productRepositoru is nil")
 	}
 
 	if generationLibrary == nil {
@@ -24,6 +34,7 @@ func NewListService(listRepository Repository, generationLibrary utils.Generatio
 
 	return &ListService{
 		listsRepository:   listRepository,
+		productRepository: productRepository,
 		generationLibrary: generationLibrary,
 	}, nil
 }
@@ -77,7 +88,7 @@ func (s *ListService) ReadList(userUUID, listUUID string) (*lists.List, error) {
 	}
 
 	if !c.ContributeIn(l) {
-		return nil, errors.New("user not contributor")
+		return nil, lists.ErrUserNotContributor
 	}
 
 	return l, nil
@@ -95,7 +106,7 @@ func (s *ListService) ArchiveList(contributorUUID, listUUID string) error {
 	}
 
 	if !c.ContributeIn(l) {
-		return errors.New("user not contributor")
+		return lists.ErrUserNotContributor
 	}
 
 	l.Archive()
@@ -120,7 +131,7 @@ func (s *ListService) DeleteList(contributorUUID, listUUID string) error {
 	}
 
 	if !c.ContributeIn(l) {
-		return errors.New("user not contributor")
+		return lists.ErrUserNotContributor
 	}
 
 	err = s.listsRepository.DeleteList(l.UUID())
@@ -137,13 +148,18 @@ func (s *ListService) AddProductToList(contributorUUID, productUUID, listUUID st
 		return err
 	}
 
+	_, err = s.productRepository.ReadByID(productUUID)
+	if err != nil {
+		return err
+	}
+
 	c, err := lists.NewContributor(contributorUUID)
 	if err != nil {
 		return err
 	}
 
 	if !c.ContributeIn(l) {
-		return errors.New("user not contributor")
+		return lists.ErrUserNotContributor
 	}
 
 	p, err := lists.NewProduct(productUUID)
@@ -151,11 +167,10 @@ func (s *ListService) AddProductToList(contributorUUID, productUUID, listUUID st
 		return err
 	}
 
-	if l.HasProduct(p) {
-		return errors.New("product already in list")
+	err = l.AddProduct(p)
+	if err != nil {
+		return err
 	}
-
-	l.AddProduct(p)
 
 	return s.listsRepository.UpdateList(l)
 }
@@ -172,7 +187,7 @@ func (s *ListService) BuyProductInList(contributorUUID, productUUID, listUUID st
 	}
 
 	if !c.ContributeIn(l) {
-		return errors.New("user not contributor")
+		return lists.ErrUserNotContributor
 	}
 
 	p, err := lists.NewProduct(productUUID)
@@ -195,7 +210,7 @@ func (s *ListService) DeleteProductInList(contributorUUID, productUUID, listUUID
 	}
 
 	if !c.ContributeIn(l) {
-		return errors.New("user not contributor")
+		return lists.ErrUserNotContributor
 	}
 
 	p, err := lists.NewProduct(productUUID)

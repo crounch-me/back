@@ -17,10 +17,6 @@ func NewProduct(uuid, name string, category *Category) (*Product, error) {
 		return nil, errors.New("product name is empty")
 	}
 
-	if category == nil {
-		return nil, errors.New("product category is empty")
-	}
-
 	return &Product{
 		uuid:     uuid,
 		name:     name,

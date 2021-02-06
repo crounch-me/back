@@ -33,6 +33,17 @@ func (r *ProductsMemoryRepository) SaveProduct(p *products.Product) error {
 	return nil
 }
 
+func (r *ProductsMemoryRepository) ReadByID(uuid string) (*products.Product, error) {
+	r.lock.Lock()
+	defer r.lock.Unlock()
+
+	if p, ok := r.products[uuid]; ok {
+		return p, nil
+	}
+
+	return nil, products.ErrProductNotFound
+}
+
 func (r *ProductsMemoryRepository) SearchDefaults(name string) ([]*products.Product, error) {
 	return []*products.Product{}, nil
 }

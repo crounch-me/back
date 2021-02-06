@@ -1,9 +1,9 @@
 package adapters
 
 import (
+	"strings"
 	"sync"
 
-	"github.com/crounch-me/back/internal/account/app"
 	"github.com/crounch-me/back/internal/account/domain/users"
 )
 
@@ -31,11 +31,12 @@ func (r *UsersMemoryRepository) FindByEmail(email string) (*users.User, error) {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
 
+	upperEmail := strings.ToUpper(email)
 	for _, u := range r.users {
-		if u.Email() == email {
+		if strings.ToUpper(u.Email()) == upperEmail {
 			return u, nil
 		}
 	}
 
-	return nil, app.ErrUserNotFound
+	return nil, users.ErrUserNotFound
 }
