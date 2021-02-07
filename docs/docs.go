@@ -678,6 +678,9 @@ var doc = `{
         },
         "ports.ProductSearchRequest": {
             "type": "object",
+            "required": [
+                "name"
+            ],
             "properties": {
                 "name": {
                     "type": "string"

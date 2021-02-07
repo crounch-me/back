@@ -103,7 +103,7 @@ func (s *GinServer) CreateProduct(c *gin.Context) {
 }
 
 type ProductSearchRequest struct {
-	Name string `json:"name" validate:"gt=2,lt=16"`
+	Name string `json:"name" validate:"required,gt=2,lt=16"`
 }
 
 // SearchDefaultProducts search and return default products
@@ -125,11 +125,26 @@ func (s *GinServer) SearchDefaultProducts(c *gin.Context) {
 		return
 	}
 
+	err = s.validator.Struct(productSearchRequest)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, commonErrors.NewError(commonErrors.InvalidErrorCode))
+		return
+	}
+
 	products, err := s.productService.SearchDefaults(productSearchRequest.Name)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, commonErrors.NewError(commonErrors.UnknownErrorCode))
 		return
 	}
 
-	c.JSON(http.StatusOK, products)
+	productResponses := make([]*ProductResponse, 0)
+	responseBuilder := NewResponseBuilder()
+	for _, product := range products {
+		listResponse := responseBuilder.FromDomain(product).Build()
+		responseBuilder.Reset()
+
+		productResponses = append(productResponses, listResponse)
+	}
+
+	server.JSON(c, productResponses)
 }

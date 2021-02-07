@@ -21,3 +21,23 @@ func NewCategory(uuid, name string) (*Category, error) {
 		name: name,
 	}, nil
 }
+
+func (c *Category) UUID() string {
+	return c.uuid
+}
+
+func (c *Category) Name() string {
+	return c.name
+}
+
+func (p *Product) HasCategory() bool {
+	return p.category != nil
+}
+
+func (p *Product) CategoryName() string {
+	return p.category.Name()
+}
+
+func (p *Product) CategoryUUID() string {
+	return p.category.UUID()
+}

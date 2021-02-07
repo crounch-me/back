@@ -22,7 +22,7 @@ require (
 	github.com/swaggo/swag v1.6.9
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	golang.org/x/net v0.0.0-20201031054903-ff519b6c9102 // indirect
-	golang.org/x/text v0.3.4 // indirect
+	golang.org/x/text v0.3.4
 	golang.org/x/tools v0.0.0-20201031021630-582c62ec74d0 // indirect
 	gopkg.in/go-playground/validator.v9 v9.31.0
 	gotest.tools v2.2.0+incompatible
