@@ -39,32 +39,32 @@ func NewListService(
 	}, nil
 }
 
-func (s *ListService) CreateList(creatorUUID, name string) (string, error) {
+func (s *ListService) CreateList(creatorUUID, name string) (*lists.List, error) {
 	listUUID, err := s.generationLibrary.UUID()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	creationDate := time.Now()
 
 	l, err := lists.NewList(listUUID, name, creationDate, nil)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	c, err := lists.NewContributor(creatorUUID)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	l.AddContributor(c)
 
 	err = s.listsRepository.SaveList(l)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return listUUID, nil
+	return l, nil
 }
 
 func (s *ListService) GetContributorLists(contributorUUID string) ([]*lists.List, error) {

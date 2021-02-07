@@ -6,4 +6,5 @@ type Repository interface {
 	SaveProduct(p *products.Product) error
 	ReadByID(uuid string) (*products.Product, error)
 	SearchDefaults(name string) ([]*products.Product, error)
+	InsertDefaultValues() error
 }

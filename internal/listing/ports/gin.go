@@ -2,7 +2,6 @@ package ports
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 
 	accountApp "github.com/crounch-me/back/internal/account/app"
@@ -124,14 +123,17 @@ func (s *GinServer) CreateList(c *gin.Context) {
 		return
 	}
 
-	listID, err := s.listService.CreateList(userUUID, list.Name)
+	createdList, err := s.listService.CreateList(userUUID, list.Name)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, commonErrors.NewError(commonErrors.UnknownErrorCode))
 		return
 	}
 
-	c.Header(server.HeaderContentLocation, "/lists/"+listID)
-	c.Status(http.StatusCreated)
+	listResponse := NewResponseBuilder().
+		FromDomain(createdList).
+		Build()
+
+	server.JSON(c, listResponse)
 }
 
 // GetContributorsLists get the authenticated contributor accessible lists
@@ -147,14 +149,14 @@ func (s *GinServer) CreateList(c *gin.Context) {
 func (s *GinServer) GetContributorsLists(c *gin.Context) {
 	userUUID, err := server.GetUserIDFromContext(c)
 	if err != nil {
-		fmt.Println(err)
+		logrus.Debug(err)
 		c.AbortWithStatus(http.StatusForbidden)
 		return
 	}
 
 	lists, err := s.listService.GetContributorLists(userUUID)
 	if err != nil {
-		fmt.Println(err)
+		logrus.Debug(err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -208,6 +210,7 @@ func (s *GinServer) GetList(c *gin.Context) {
 			c.AbortWithStatusJSON(http.StatusNotFound, commonErrors.NewError(listNotFoundErrorCode))
 			return
 		}
+
 		c.AbortWithStatusJSON(http.StatusInternalServerError, commonErrors.NewError(commonErrors.UnknownErrorCode))
 		return
 	}

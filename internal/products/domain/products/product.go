@@ -27,3 +27,7 @@ func NewProduct(uuid, name string, category *Category) (*Product, error) {
 func (p *Product) UUID() string {
 	return p.uuid
 }
+
+func (p *Product) Name() string {
+	return p.name
+}

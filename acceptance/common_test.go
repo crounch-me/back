@@ -196,7 +196,7 @@ func (te *TestExecutor) iCreateTheseUsers(userDataTable *messages.PickleStepArgu
 				return err
 			}
 
-			err = te.theStatusCodeIs(http.StatusCreated)
+			err = te.theStatusCodeIs(http.StatusNoContent)
 			if err != nil {
 				return err
 			}
@@ -230,7 +230,7 @@ func (te *TestExecutor) iCreateARandomUser() error {
 		return err
 	}
 
-	err = te.theStatusCodeIs(http.StatusCreated)
+	err = te.theStatusCodeIs(http.StatusNoContent)
 	if err != nil {
 		return err
 	}

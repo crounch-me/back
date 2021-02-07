@@ -52,7 +52,15 @@ func Start(config *configuration.Config) {
 	authorizationsRepository := accountAdapters.NewAuthorizationsMemoryRepository()
 	listsRepository := listingAdapters.NewListsMemoryRepository()
 	usersRepository := accountAdapters.NewUsersMemoryRepository()
-	productsRepository := productsAdapters.NewProductsMemoryRepository()
+	productsRepository, err := productsAdapters.NewProductsMemoryRepository(generationLibrary)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = productsRepository.InsertDefaultValues()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	listService, err := listingApp.NewListService(listsRepository, productsRepository, generationLibrary)
 	if err != nil {

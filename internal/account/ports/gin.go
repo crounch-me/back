@@ -92,7 +92,7 @@ func (s *GinServer) Signup(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusCreated)
+	c.Status(http.StatusNoContent)
 }
 
 // Login creates a new user authorization when email is found and password is valid
@@ -159,7 +159,7 @@ func (s *GinServer) Logout(c *gin.Context) {
 
 	userUUID, err := s.accountService.GetUserUUIDByToken(token)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusForbidden, commonErrors.NewError(commonErrors.ForbiddenErrorCode))
+		c.AbortWithStatusJSON(http.StatusNotFound, commonErrors.NewError(commonErrors.ForbiddenErrorCode))
 		return
 	}
 

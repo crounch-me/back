@@ -13,6 +13,7 @@ import (
 	"github.com/crounch-me/back/internal/account/domain/users"
 	commonErrors "github.com/crounch-me/back/internal/common/errors"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -52,12 +53,13 @@ func CheckUserAuthorization(accountService *accountApp.AccountService) gin.Handl
 
 		userUUID, err := accountService.GetUserUUIDByToken(token)
 		if err != nil {
+			logrus.Debug(err)
 			if errors.Is(err, users.ErrUserNotFound) {
 				c.AbortWithStatusJSON(http.StatusUnauthorized, commonErrors.NewError(commonErrors.UnauthorizedErrorCode))
 				return
 			}
 
-			c.AbortWithStatus(http.StatusInternalServerError)
+			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
 
