@@ -227,104 +227,6 @@ var doc = `{
                 }
             }
         },
-        "/listing/lists/:listID/archive": {},
-        "/listing/lists/products": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "listing"
-                ],
-                "summary": "Add the product to the list",
-                "operationId": "add-product-to-list",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "List ID",
-                        "name": "listID",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Product ID",
-                        "name": "productID",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/ports.AddProductToListRequest"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/errors.Error"
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "$ref": "#/definitions/errors.Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/errors.Error"
-                        }
-                    }
-                }
-            },
-            "patch": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "listing"
-                ],
-                "summary": "Buys the product in the list",
-                "operationId": "buy-product-in-list",
-                "parameters": [
-                    {
-                        "description": "Product in list request",
-                        "name": "productInListRequest",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/ports.BuyProductInListRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "204": {},
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/errors.Error"
-                        }
-                    }
-                }
-            }
-        },
         "/listing/lists/{listID}": {
             "get": {
                 "security": [
@@ -401,6 +303,59 @@ var doc = `{
                             "$ref": "#/definitions/errors.Error"
                         }
                     },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/listing/lists/{listID}/archive": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "listing"
+                ],
+                "summary": "Archives a list and mark it as readonly",
+                "operationId": "archive-list",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "List UUID",
+                        "name": "listID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {},
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/errors.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.Error"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -411,6 +366,63 @@ var doc = `{
             }
         },
         "/listing/lists/{listID}/products/{productID}": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "listing"
+                ],
+                "summary": "Add the product to the list",
+                "operationId": "add-product-to-list",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "List ID",
+                        "name": "listID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Product ID",
+                        "name": "productID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ports.ProductInListPathRequest"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errors.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/errors.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.Error"
+                        }
+                    }
+                }
+            },
             "delete": {
                 "security": [
                     {
@@ -440,6 +452,60 @@ var doc = `{
                 ],
                 "responses": {
                     "204": {},
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/listing/lists/{listID}/products/{productID}/buy": {
+            "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "listing"
+                ],
+                "summary": "Buys the product in the list",
+                "operationId": "buy-product-in-list",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "List ID",
+                        "name": "listID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Product ID",
+                        "name": "productID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {},
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errors.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/errors.Error"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -567,36 +633,6 @@ var doc = `{
                 }
             }
         },
-        "ports.AddProductToListRequest": {
-            "type": "object",
-            "required": [
-                "listID",
-                "productID"
-            ],
-            "properties": {
-                "listID": {
-                    "type": "string"
-                },
-                "productID": {
-                    "type": "string"
-                }
-            }
-        },
-        "ports.BuyProductInListRequest": {
-            "type": "object",
-            "required": [
-                "listID",
-                "productID"
-            ],
-            "properties": {
-                "listID": {
-                    "type": "string"
-                },
-                "productID": {
-                    "type": "string"
-                }
-            }
-        },
         "ports.ContributorResponse": {
             "type": "object",
             "properties": {
@@ -664,6 +700,21 @@ var doc = `{
                     "type": "string"
                 },
                 "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "ports.ProductInListPathRequest": {
+            "type": "object",
+            "required": [
+                "listID",
+                "productID"
+            ],
+            "properties": {
+                "listID": {
+                    "type": "string"
+                },
+                "productID": {
                     "type": "string"
                 }
             }

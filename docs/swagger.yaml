@@ -16,26 +16,6 @@ definitions:
       name:
         type: string
     type: object
-  ports.AddProductToListRequest:
-    properties:
-      listID:
-        type: string
-      productID:
-        type: string
-    required:
-    - listID
-    - productID
-    type: object
-  ports.BuyProductInListRequest:
-    properties:
-      listID:
-        type: string
-      productID:
-        type: string
-    required:
-    - listID
-    - productID
-    type: object
   ports.ContributorResponse:
     properties:
       id:
@@ -81,6 +61,16 @@ definitions:
     required:
     - email
     - password
+    type: object
+  ports.ProductInListPathRequest:
+    properties:
+      listID:
+        type: string
+      productID:
+        type: string
+    required:
+    - listID
+    - productID
     type: object
   ports.ProductResponse:
     properties:
@@ -248,7 +238,6 @@ paths:
       summary: Create a list
       tags:
       - listing
-  /listing/lists/:listID/archive: {}
   /listing/lists/{listID}:
     delete:
       operationId: delete-list
@@ -264,6 +253,10 @@ paths:
         "204": {}
         "403":
           description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.Error'
+        "404":
+          description: Not Found
           schema:
             $ref: '#/definitions/errors.Error'
         "500":
@@ -303,6 +296,36 @@ paths:
       summary: Reads a list with its product and contributor ids
       tags:
       - listing
+  /listing/lists/{listID}/archive:
+    post:
+      operationId: archive-list
+      parameters:
+      - description: List UUID
+        in: path
+        name: listID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204": {}
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Archives a list and mark it as readonly
+      tags:
+      - listing
   /listing/lists/{listID}/products/{productID}:
     delete:
       operationId: delete-product-from-list
@@ -328,31 +351,6 @@ paths:
       summary: Delete the product in the list
       tags:
       - listing
-  /listing/lists/products:
-    patch:
-      consumes:
-      - application/json
-      operationId: buy-product-in-list
-      parameters:
-      - description: Product in list request
-        in: body
-        name: productInListRequest
-        required: true
-        schema:
-          $ref: '#/definitions/ports.BuyProductInListRequest'
-      produces:
-      - application/json
-      responses:
-        "204": {}
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errors.Error'
-      security:
-      - ApiKeyAuth: []
-      summary: Buys the product in the list
-      tags:
-      - listing
     post:
       operationId: add-product-to-list
       parameters:
@@ -372,7 +370,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/ports.AddProductToListRequest'
+            $ref: '#/definitions/ports.ProductInListPathRequest'
         "400":
           description: Bad Request
           schema:
@@ -388,6 +386,41 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Add the product to the list
+      tags:
+      - listing
+  /listing/lists/{listID}/products/{productID}/buy:
+    patch:
+      operationId: buy-product-in-list
+      parameters:
+      - description: List ID
+        in: path
+        name: listID
+        required: true
+        type: string
+      - description: Product ID
+        in: path
+        name: productID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204": {}
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.Error'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Buys the product in the list
       tags:
       - listing
   /products:
