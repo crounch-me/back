@@ -9,13 +9,6 @@ Feature: Add a product to a list
     And I create these products
       | name                |
       | Mon premier produit |
-    And I use this body
-      """
-        {
-          "productID": "{{ .ProductID }}",
-          "listID": "{{ .ListID }}"
-        }
-      """
     And I send a "POST" request on "/listing/lists/{{ .ListID }}/products/{{ .ProductID }}"
     When I send a "DELETE" request on "/listing/lists/{{ .ListID }}/products/{{ .ProductID }}"
     Then the status code is 204
@@ -31,13 +24,6 @@ Feature: Add a product to a list
     And I create these products
       | name                |
       | Mon premier produit |
-    And I use this body
-      """
-        {
-          "productID": "{{ .ProductID }}",
-          "listID": "{{ .ListID }}"
-        }
-      """
     And I send a "POST" request on "/listing/lists/{{ .ListID }}/products/{{ .ProductID }}"
     And I authenticate with a random user
     When I send a "DELETE" request on "/listing/lists/{{ .ListID }}/products/{{ .ProductID }}"

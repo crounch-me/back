@@ -95,7 +95,6 @@ Feature: Add a product to a list
     Then the status code is 404
     And "$.error" has string value "list-not-found-error"
 
-  @val
   Scenario: KO - Product not found
     Given I authenticate with a random user
     And I create these lists
