@@ -57,7 +57,6 @@ Feature: Search Default Products by Name
     # And "$.fields[0].name" has string value "name"
     # And "$.fields[0].error" has string value "gt"
 
-  @val
   Scenario: KO - Too short name
     Given I authenticate with a random user
     And I use this body

@@ -17,7 +17,8 @@ import (
 )
 
 const (
-	listUUIDPathParam = "listID"
+	listUUIDPathParam    = "listID"
+	productUUIDPathParam = "productID"
 
 	listPath                       = "/listing/lists"
 	listWithIDPath                 = "/listing/lists/:listID"
@@ -28,6 +29,7 @@ const (
 	productAlreadyInListErrorCode = "product-already-in-list-error"
 	listNotFoundErrorCode         = "list-not-found-error"
 	productNotFoundErrorCode      = "product-not-found-error"
+	productNotInListErrorCode     = "product-not-in-list-error"
 )
 
 type GinServer struct {
@@ -67,14 +69,14 @@ func (s *GinServer) ConfigureRoutes(r *gin.Engine) {
 
 	r.GET(listWithIDPath, server.CheckUserAuthorization(s.accountService), s.GetList)
 	r.DELETE(listWithIDPath, server.CheckUserAuthorization(s.accountService), s.DeleteList)
-	r.OPTIONS(listWithIDPath, server.OptionsHandler([]string{http.MethodGet}))
+	r.OPTIONS(listWithIDPath, server.OptionsHandler([]string{http.MethodGet, http.MethodDelete}))
 
 	r.POST(archiveListPath, server.CheckUserAuthorization(s.accountService), s.ArchiveList)
 	r.OPTIONS(archiveListPath, server.OptionsHandler([]string{http.MethodPost}))
 
 	r.POST(listWithIDAndProductWithIDPath, server.CheckUserAuthorization(s.accountService), s.AddProductToList)
 	r.DELETE(listWithIDAndProductWithIDPath, server.CheckUserAuthorization(s.accountService), s.DeleteProductInList)
-	r.OPTIONS(listWithIDAndProductWithIDPath, server.OptionsHandler([]string{http.MethodPost}))
+	r.OPTIONS(listWithIDAndProductWithIDPath, server.OptionsHandler([]string{http.MethodPost, http.MethodDelete}))
 
 	r.PATCH(buyProductPath, server.CheckUserAuthorization(s.accountService), s.BuyProduct)
 	r.OPTIONS(buyProductPath, server.OptionsHandler([]string{http.MethodPatch}))
@@ -129,11 +131,8 @@ func (s *GinServer) CreateList(c *gin.Context) {
 		return
 	}
 
-	listResponse := NewResponseBuilder().
-		FromDomain(createdList).
-		Build()
-
-	server.JSON(c, listResponse)
+	c.Header(server.HeaderContentLocation, "/listing/lists/"+createdList.UUID())
+	c.Status(http.StatusCreated)
 }
 
 // GetContributorsLists get the authenticated contributor accessible lists
@@ -225,13 +224,15 @@ func (s *GinServer) GetList(c *gin.Context) {
 // ArchiveList and mark it as readonly
 // @Summary Archives a list and mark it as readonly
 // @ID archive-list
-// @Tag listing
+// @Tags listing
 // @Produce json
 // @Param listID path string true "List UUID"
 // @Success 204
 // @Failure 403 {object} errors.Error
+// @Failure 404 {object} errors.Error
 // @Failure 500 {object} errors.Error
-// @Router /listing/lists/:listID/archive [archive]
+// @Security ApiKeyAuth
+// @Router /listing/lists/{listID}/archive [post]
 func (s *GinServer) ArchiveList(c *gin.Context) {
 	userUUID, err := server.GetUserIDFromContext(c)
 	if err != nil {
@@ -267,6 +268,7 @@ func (s *GinServer) ArchiveList(c *gin.Context) {
 // @Param listID path string true "List UUID"
 // @Success 204
 // @Failure 403 {object} errors.Error
+// @Failure 404 {object} errors.Error
 // @Failure 500 {object} errors.Error
 // @Security ApiKeyAuth
 // @Router /listing/lists/{listID} [delete]
@@ -306,12 +308,12 @@ func (s *GinServer) DeleteList(c *gin.Context) {
 // @Produce json
 // @Param listID path string true "List ID"
 // @Param productID path string true "Product ID"
-// @Success 200 {object} AddProductToListRequest
+// @Success 200 {object} ProductInListPathRequest
 // @Failure 400 {object} errors.Error
 // @Failure 403 {object} errors.Error
 // @Failure 500 {object} errors.Error
 // @Security ApiKeyAuth
-// @Router /listing/lists/products [post]
+// @Router /listing/lists/{listID}/products/{productID} [post]
 func (s *GinServer) AddProductToList(c *gin.Context) {
 	userUUID, err := server.GetUserIDFromContext(c)
 	if err != nil {
@@ -319,11 +321,11 @@ func (s *GinServer) AddProductToList(c *gin.Context) {
 		return
 	}
 
-	request := &AddProductToListRequest{}
-	err = server.UnmarshalPayload(c.Request.Body, request)
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, commonErrors.NewError(commonErrors.UnmarshalErrorCode))
-		return
+	listUUID := c.Param("listID")
+	productUUID := c.Param("productID")
+	request := &ProductInListPathRequest{
+		ListUUID:    listUUID,
+		ProductUUID: productUUID,
 	}
 
 	err = s.validator.Struct(request)
@@ -335,6 +337,8 @@ func (s *GinServer) AddProductToList(c *gin.Context) {
 				Name:  e.Field(),
 			}
 			fields = append(fields, field)
+
+			logrus.WithField(e.Field(), e.Tag()).Debug(commonErrors.InvalidErrorCode)
 		}
 
 		c.AbortWithStatusJSON(http.StatusBadRequest, commonErrors.NewError(commonErrors.InvalidErrorCode).WithFields(fields))
@@ -343,6 +347,7 @@ func (s *GinServer) AddProductToList(c *gin.Context) {
 
 	err = s.listService.AddProductToList(userUUID, request.ProductUUID, request.ListUUID)
 	if err != nil {
+		logrus.Debug(err)
 		if errors.Is(err, lists.ErrUserNotContributor) {
 			c.AbortWithStatusJSON(http.StatusForbidden, commonErrors.NewError(commonErrors.ForbiddenErrorCode))
 			return
@@ -374,13 +379,15 @@ func (s *GinServer) AddProductToList(c *gin.Context) {
 // @Summary Buys the product in the list
 // @ID buy-product-in-list
 // @Tags listing
-// @Accept json
 // @Produce json
-// @Param productInListRequest body BuyProductInListRequest true "Product in list request"
+// @Param listID path string true "List ID"
+// @Param productID path string true "Product ID"
 // @Success 204
+// @Failure 400 {object} errors.Error
+// @Failure 403 {object} errors.Error
 // @Failure 500 {object} errors.Error
 // @Security ApiKeyAuth
-// @Router /listing/lists/products [patch]
+// @Router /listing/lists/{listID}/products/{productID}/buy [patch]
 func (s *GinServer) BuyProduct(c *gin.Context) {
 	userUUID, err := server.GetUserIDFromContext(c)
 	if err != nil {
@@ -388,16 +395,15 @@ func (s *GinServer) BuyProduct(c *gin.Context) {
 		return
 	}
 
-	request := &BuyProductInListRequest{}
-	err = server.UnmarshalPayload(c.Request.Body, request)
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, commonErrors.NewError(commonErrors.UnmarshalErrorCode))
-		return
+	listUUID := c.Param("listID")
+	productUUID := c.Param("productID")
+	request := &ProductInListPathRequest{
+		ListUUID:    listUUID,
+		ProductUUID: productUUID,
 	}
 
 	err = s.validator.Struct(request)
 	if err != nil {
-
 		fields := make([]*commonErrors.FieldError, 0)
 		for _, e := range err.(validator.ValidationErrors) {
 			field := &commonErrors.FieldError{
@@ -413,6 +419,17 @@ func (s *GinServer) BuyProduct(c *gin.Context) {
 
 	err = s.listService.BuyProductInList(userUUID, request.ProductUUID, request.ListUUID)
 	if err != nil {
+		logrus.WithError(err).Debug("error while buying article")
+		if errors.Is(err, lists.ErrProductNotFoundInList) {
+			c.AbortWithStatusJSON(http.StatusNotFound, commonErrors.NewError(productNotInListErrorCode))
+			return
+		}
+
+		if errors.Is(err, lists.ErrUserNotContributor) {
+			c.AbortWithStatusJSON(http.StatusForbidden, commonErrors.NewError(commonErrors.ForbiddenErrorCode))
+			return
+		}
+
 		c.AbortWithStatusJSON(http.StatusInternalServerError, commonErrors.NewError(commonErrors.UnknownErrorCode))
 		return
 	}
@@ -438,14 +455,20 @@ func (s *GinServer) DeleteProductInList(c *gin.Context) {
 	}
 
 	listID := c.Param(listUUIDPathParam)
-	err = s.validator.Var(listUUIDPathParam, listID, "uuid")
+	productID := c.Param(productUUIDPathParam)
+	productInListPathRequest := ProductInListPathRequest{
+		ListUUID:    listID,
+		ProductUUID: productID,
+	}
+
+	err = s.validator.Struct(productInListPathRequest)
 	if err != nil {
+		logrus.Debug(err)
 		c.AbortWithStatusJSON(http.StatusBadRequest, commonErrors.NewError(commonErrors.InvalidErrorCode))
 		return
 	}
-	productUUID := c.Param("productID")
 
-	err = s.listService.DeleteProductInList(userUUID, productUUID, listID)
+	err = s.listService.DeleteProductInList(userUUID, productID, listID)
 	if err != nil {
 		logrus.Debug(err)
 		if errors.Is(err, lists.ErrListNotFound) {

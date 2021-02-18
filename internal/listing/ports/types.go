@@ -6,6 +6,11 @@ type CreateListRequest struct {
 	Name string `json:"name" validate:"required"`
 }
 
+type ProductInListPathRequest struct {
+	ListUUID    string `json:"listID" validate:"required,uuid"`
+	ProductUUID string `json:"productID" validate:"required,uuid"`
+}
+
 type AddProductToListRequest struct {
 	ListUUID    string `json:"listID" validate:"required,uuid"`
 	ProductUUID string `json:"productID" validate:"required,uuid"`

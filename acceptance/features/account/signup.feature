@@ -10,7 +10,7 @@ Feature: Sign up
         }
       """
     When I send a "POST" request on "/account/signup"
-    Then the status code is 201
+    Then the status code is 204
 
   Scenario: KO - Invalid body
     Given I use an invalid body
