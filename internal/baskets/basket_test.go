@@ -2,6 +2,7 @@ package baskets_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/crounch-me/back/internal/baskets"
 	"github.com/crounch-me/back/internal/common"
@@ -72,4 +73,11 @@ func TestGetArticleOK(t *testing.T) {
 	article_2, err := baskets.GetArticle(basket_with_two_articles, 1)
 	assert.Nil(t, err)
 	assert.Equal(t, valid_product_name_2, article_2.Name())
+}
+
+func TestFinishOK(t *testing.T) {
+	finish_time := time.Now()
+	new_basket, err := baskets.Finish(test_basket, finish_time)
+	assert.Nil(t, err)
+	assert.Equal(t, finish_time, new_basket.IsFinishedAt())
 }
