@@ -7,6 +7,6 @@ const (
 	// products
 	ERR_EMPTY_PRODUCT_NAME = "empty-product-name"
 
-	// lists
-	ERR_EMPTY_LIST_NAME = "empty-list-name"
+	// baskets
+	ERR_EMPTY_BASKET_NAME = "empty-basket-name"
 )

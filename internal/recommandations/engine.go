@@ -1,9 +1,7 @@
 package recommandations
 
-import (
-	"github.com/crounch-me/back/internal/lists"
-)
+import "github.com/crounch-me/back/internal/baskets"
 
-func Run(lists []lists.List) string {
+func Run(baskets []baskets.Basket) string {
 	return "Hello"
 }
