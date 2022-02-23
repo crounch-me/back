@@ -6,7 +6,7 @@ import (
 	"github.com/crounch-me/back/internal/baskets"
 )
 
-func IndexBoughtAtByProductID(all_baskets []baskets.Basket) map[string][]time.Time {
+func IndexBoughtAtByArticle(all_baskets []baskets.Basket) map[string][]time.Time {
 	bought_at_indexed_by_product_id := make(map[string][]time.Time)
 
 	for _, basket := range all_baskets {
@@ -35,7 +35,14 @@ func ComputeAverageBoughtDuration(boughts_at []time.Time) time.Duration {
 	return time.Duration(durations_sum / duration_count)
 }
 
-func RecommendArticles(all_baskets []baskets.Basket) map[string]time.Time {
-	// boughts_at_indexed_by_article_id := IndexBoughtAtByProductID(all_baskets)
-	return map[string]time.Time{}
+func ComputeRecommendationDateByArticle(all_baskets []baskets.Basket) map[string]time.Time {
+	boughts_at_indexed_by_article_id := IndexBoughtAtByArticle(all_baskets)
+	recommendation_dates := make(map[string]time.Time, len(boughts_at_indexed_by_article_id))
+
+	for article_id, boughts_at := range boughts_at_indexed_by_article_id {
+		average_duration := ComputeAverageBoughtDuration(boughts_at)
+		recommendation_dates[article_id] = boughts_at[len(boughts_at)-1].Add(average_duration)
+	}
+
+	return recommendation_dates
 }

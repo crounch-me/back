@@ -41,7 +41,7 @@ func TestIndexBoughtAtByProductIDOneArticleTwoDatesOK(t *testing.T) {
 
 	// action
 	all_baskets := []baskets.Basket{basket_1, basket_2}
-	actual_bought_at := recommendations.IndexBoughtAtByProductID(all_baskets)
+	actual_bought_at := recommendations.IndexBoughtAtByArticle(all_baskets)
 
 	// assert
 	expected_bought_at := map[string][]time.Time{}
@@ -60,7 +60,7 @@ func TestComputeAverageBoughtDurationOneWeekBetweenTwoArticlesOK(t *testing.T) {
 	assert.Equal(t, common.ONE_WEEK, average_bought_duration)
 }
 
-func TestRecommandArticlesOneArticleOK(t *testing.T) {
+func TestComputeRecommendationDateByArticleOK(t *testing.T) {
 	now := time.Now()
 
 	// create article
@@ -85,11 +85,11 @@ func TestRecommandArticlesOneArticleOK(t *testing.T) {
 
 	// action
 	all_baskets := []baskets.Basket{basket_1, basket_2}
-	articles_to_buy := recommendations.RecommendArticles(all_baskets)
+	articles_to_buy := recommendations.ComputeRecommendationDateByArticle(all_baskets)
 
 	// assert
 	expected_articles := make(map[string]time.Time, 0)
-	// expected_articles[product_id] = now.Add(common.ONE_WEEK)
+	expected_articles[article_id] = now.Add(common.ONE_WEEK)
 
 	assert.Equal(t, expected_articles, articles_to_buy)
 }
