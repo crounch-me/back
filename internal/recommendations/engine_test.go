@@ -1,4 +1,4 @@
-package recommandations_test
+package recommendations_test
 
 import (
 	"testing"
@@ -6,7 +6,8 @@ import (
 
 	"github.com/crounch-me/back/internal/baskets"
 	"github.com/crounch-me/back/internal/common"
-	"github.com/crounch-me/back/internal/recommandations"
+	"github.com/crounch-me/back/internal/recommendations"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -40,7 +41,7 @@ func TestIndexBoughtAtByProductIDOneArticleTwoDatesOK(t *testing.T) {
 
 	// action
 	all_baskets := []baskets.Basket{basket_1, basket_2}
-	actual_bought_at := recommandations.IndexBoughtAtByProductID(all_baskets)
+	actual_bought_at := recommendations.IndexBoughtAtByProductID(all_baskets)
 
 	// assert
 	expected_bought_at := map[string][]time.Time{}
@@ -54,7 +55,7 @@ func TestComputeAverageBoughtDurationOneWeekBetweenTwoArticlesOK(t *testing.T) {
 
 	boughts_at := []time.Time{now, now.Add(common.ONE_WEEK)}
 
-	average_bought_duration := recommandations.ComputeAverageBoughtDuration(boughts_at)
+	average_bought_duration := recommendations.ComputeAverageBoughtDuration(boughts_at)
 
 	assert.Equal(t, common.ONE_WEEK, average_bought_duration)
 }
@@ -84,7 +85,7 @@ func TestRecommandArticlesOneArticleOK(t *testing.T) {
 
 	// action
 	all_baskets := []baskets.Basket{basket_1, basket_2}
-	articles_to_buy := recommandations.RecommandArticles(all_baskets)
+	articles_to_buy := recommendations.RecommendArticles(all_baskets)
 
 	// assert
 	expected_articles := make(map[string]time.Time, 0)

@@ -1,4 +1,4 @@
-package recommandations
+package recommendations
 
 import (
 	"time"
@@ -35,7 +35,7 @@ func ComputeAverageBoughtDuration(boughts_at []time.Time) time.Duration {
 	return time.Duration(durations_sum / duration_count)
 }
 
-func RecommandArticles(all_baskets []baskets.Basket) map[string]time.Time {
+func RecommendArticles(all_baskets []baskets.Basket) map[string]time.Time {
 	// boughts_at_indexed_by_article_id := IndexBoughtAtByProductID(all_baskets)
 	return map[string]time.Time{}
 }
