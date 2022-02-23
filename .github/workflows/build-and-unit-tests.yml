@@ -12,7 +12,7 @@ jobs:
 
     steps:
       - name: Setup project
-        uses: actions/setup-api-action
+        uses: crounch-me/setup-api-action
 
       - name: Build
         run: go build -v .
