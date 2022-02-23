@@ -76,11 +76,12 @@ func TestFilterRecommendedArticlesOK(t *testing.T) {
 	start := now.Add(-time.Hour)
 	end := now.Add(time.Hour)
 
-	expected_article_ids := []string{article_id, article_id_3, article_id_4}
 	filtered_articles_ids := recommendations.FilterRecommendedArticles(recommended_articles, start, end)
 
 	assert.Equal(t, 3, len(filtered_articles_ids))
-	assert.Equal(t, expected_article_ids, filtered_articles_ids)
+	assert.Contains(t, filtered_articles_ids, article_id)
+	assert.Contains(t, filtered_articles_ids, article_id_3)
+	assert.Contains(t, filtered_articles_ids, article_id_4)
 }
 
 func TestComputeRecommendationDateByArticleOK(t *testing.T) {
