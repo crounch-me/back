@@ -36,11 +36,10 @@ func ComputeAverageBoughtDuration(boughts_at []time.Time) time.Duration {
 	return time.Duration(durations_sum / duration_count)
 }
 
-func ComputeRecommendationDateByArticle(all_baskets []baskets.Basket) map[string]time.Time {
-	boughts_at_indexed_by_article_id := IndexBoughtAtByArticle(all_baskets)
-	recommendation_dates := make(map[string]time.Time, len(boughts_at_indexed_by_article_id))
+func ComputeRecommendationDateByArticle(buy_dates_by_article map[string][]time.Time) map[string]time.Time {
+	recommendation_dates := make(map[string]time.Time, len(buy_dates_by_article))
 
-	for article_id, boughts_at := range boughts_at_indexed_by_article_id {
+	for article_id, boughts_at := range buy_dates_by_article {
 		average_duration := ComputeAverageBoughtDuration(boughts_at)
 		recommendation_dates[article_id] = boughts_at[len(boughts_at)-1].Add(average_duration)
 	}
@@ -48,10 +47,16 @@ func ComputeRecommendationDateByArticle(all_baskets []baskets.Basket) map[string
 	return recommendation_dates
 }
 
-func FilterRecommendedArticles(recommended_articles map[string]time.Time, start, end time.Time) []string {
+func RecommendArticlesForPeriod(all_baskets []baskets.Basket, start, end time.Time) []string {
+	buy_dates_by_article := IndexBoughtAtByArticle(all_baskets)
+	recommendation_date_by_article := ComputeRecommendationDateByArticle(buy_dates_by_article)
+	return FilterRecommendedArticles(recommendation_date_by_article, start, end)
+}
+
+func FilterRecommendedArticles(recommendation_date_by_article map[string]time.Time, start, end time.Time) []string {
 	filtered_articles := []string{}
 
-	for article_id, recommendation_date := range recommended_articles {
+	for article_id, recommendation_date := range recommendation_date_by_article {
 		if common.IsInRange(recommendation_date, start, end) {
 			filtered_articles = append(filtered_articles, article_id)
 		}

@@ -87,6 +87,23 @@ func TestFilterRecommendedArticlesOK(t *testing.T) {
 func TestComputeRecommendationDateByArticleOK(t *testing.T) {
 	now := time.Now()
 
+	basket_1_finished_at := now.Add(-common.ONE_WEEK)
+	basket_2_finished_at := now
+
+	buy_dates_by_article := make(map[string][]time.Time, 0)
+	buy_dates_by_article[article_id] = []time.Time{basket_1_finished_at, basket_2_finished_at}
+
+	articles_to_buy := recommendations.ComputeRecommendationDateByArticle(buy_dates_by_article)
+
+	expected_articles := make(map[string]time.Time, 0)
+	expected_articles[article_id] = now.Add(common.ONE_WEEK)
+
+	assert.Equal(t, expected_articles, articles_to_buy)
+}
+
+func TestRecommendArticlesForPeriodForPeriodOK(t *testing.T) {
+	now := time.Now()
+
 	// create article
 	article, err := baskets.CreateArticle(article_id, product_id)
 	assert.Nil(t, err)
@@ -109,11 +126,9 @@ func TestComputeRecommendationDateByArticleOK(t *testing.T) {
 
 	// action
 	all_baskets := []baskets.Basket{basket_1, basket_2}
-	articles_to_buy := recommendations.ComputeRecommendationDateByArticle(all_baskets)
+	articles_to_buy := recommendations.RecommendArticlesForPeriod(all_baskets, now, now.Add(2*common.ONE_WEEK))
 
 	// assert
-	expected_articles := make(map[string]time.Time, 0)
-	expected_articles[article_id] = now.Add(common.ONE_WEEK)
-
-	assert.Equal(t, expected_articles, articles_to_buy)
+	assert.Equal(t, 1, len(articles_to_buy))
+	assert.Equal(t, article_id, articles_to_buy[0])
 }
