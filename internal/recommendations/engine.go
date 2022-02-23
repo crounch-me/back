@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/crounch-me/back/internal/baskets"
+	"github.com/crounch-me/back/internal/common"
 )
 
 func IndexBoughtAtByArticle(all_baskets []baskets.Basket) map[string][]time.Time {
@@ -45,4 +46,16 @@ func ComputeRecommendationDateByArticle(all_baskets []baskets.Basket) map[string
 	}
 
 	return recommendation_dates
+}
+
+func FilterRecommendedArticles(recommended_articles map[string]time.Time, start, end time.Time) []string {
+	filtered_articles := []string{}
+
+	for article_id, recommendation_date := range recommended_articles {
+		if common.IsInRange(recommendation_date, start, end) {
+			filtered_articles = append(filtered_articles, article_id)
+		}
+	}
+
+	return filtered_articles
 }

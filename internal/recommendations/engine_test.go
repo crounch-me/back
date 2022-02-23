@@ -60,6 +60,30 @@ func TestComputeAverageBoughtDurationOneWeekBetweenTwoArticlesOK(t *testing.T) {
 	assert.Equal(t, common.ONE_WEEK, average_bought_duration)
 }
 
+func TestFilterRecommendedArticlesOK(t *testing.T) {
+	now := time.Now()
+
+	article_id_2 := "article_id_2"
+	article_id_3 := "article_id_3"
+	article_id_4 := "article_id_4"
+
+	recommended_articles := make(map[string]time.Time)
+	recommended_articles[article_id] = now
+	recommended_articles[article_id_2] = now.Add(common.ONE_WEEK)
+	recommended_articles[article_id_3] = now.Add(time.Hour)
+	recommended_articles[article_id_4] = now.Add(-time.Hour)
+
+	start := now.Add(-time.Hour)
+	end := now.Add(time.Hour)
+
+	filtered_articles := recommendations.FilterRecommendedArticles(recommended_articles, start, end)
+
+	assert.Equal(t, 3, len(filtered_articles))
+	assert.Equal(t, article_id, filtered_articles[0])
+	assert.Equal(t, article_id_3, filtered_articles[1])
+	assert.Equal(t, article_id_4, filtered_articles[2])
+}
+
 func TestComputeRecommendationDateByArticleOK(t *testing.T) {
 	now := time.Now()
 
