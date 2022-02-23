@@ -5,6 +5,8 @@ on:
     branches: [master]
   push:
     branches: [master]
+    tags:
+      - "!*" # Do not execute on tags
 
 jobs:
   build:
@@ -19,3 +21,39 @@ jobs:
 
       - name: Unit tests
         run: go test -v ./...
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup project
+        uses: crounch-me/setup-api-action@v1
+
+      - name: Unit tests
+        run: go test -v ./...
+
+  cover:
+    needs: [build]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup project
+        uses: crounch-me/setup-api-action@v1
+
+      - name: Build
+        run: go build .
+
+      - name: Generate coverage report
+        run: |
+          go test -coverprofile=coverage.out ./...
+          sed 's/github\.com\/crounch-me\/back\///' coverage.out > c.out
+          rm coverage.out
+
+      - name: Build and send coverage report
+        uses: paambaati/codeclimate-action@v3.0.0
+        env:
+          CC_TEST_REPORTER_ID: "${{secrets.CC_TEST_REPORTER_ID}}"
+        with:
+          debug: true
+          coverageLocations: |
+            ${{github.workspace}}/*.out:gocov
