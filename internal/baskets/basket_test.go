@@ -42,9 +42,9 @@ func TestAddArticle(t *testing.T) {
 	basket, err := baskets.CreateBasket(valid_basket_name)
 	assert.Nil(t, err)
 
-	new_basket, err := basket.AddArticle(article)
+	basket = basket.AddArticle(article)
 	assert.Nil(t, err)
-	assert.Equal(t, 1, new_basket.CountArticles())
+	assert.Equal(t, 1, basket.CountArticles())
 }
 
 func TestFinishOK(t *testing.T) {

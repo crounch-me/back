@@ -34,11 +34,11 @@ func (a Article) ProductID() string {
 	return a.product_id
 }
 
-func (b Basket) AddArticle(article Article) (Basket, error) {
+func (b Basket) AddArticle(article Article) Basket {
 	new_articles := append(b.articles, article)
 
 	b.articles = new_articles
-	return b, nil
+	return b
 }
 
 func (b Basket) ForEachArticle(callback func(article Article) error) error {

@@ -25,7 +25,7 @@ func TestIndexBoughtAtByProductIDOneArticleTwoDatesOK(t *testing.T) {
 	// create first basket
 	basket_1, err := baskets.CreateBasket("basket_name_1")
 	assert.Nil(t, err)
-	basket_1, err = basket_1.AddArticle(article)
+	basket_1 = basket_1.AddArticle(article)
 	assert.Nil(t, err)
 	basket_1_finished_at := now.Add(-common.ONE_WEEK)
 	basket_1 = basket_1.Finish(basket_1_finished_at)
@@ -33,7 +33,7 @@ func TestIndexBoughtAtByProductIDOneArticleTwoDatesOK(t *testing.T) {
 	// create second basket
 	basket_2, err := baskets.CreateBasket("basket_name_2")
 	assert.Nil(t, err)
-	basket_2, err = basket_2.AddArticle(article)
+	basket_2 = basket_2.AddArticle(article)
 	assert.Nil(t, err)
 	basket_2_finished_at := now
 	basket_2 = basket_2.Finish(basket_2_finished_at)
@@ -60,7 +60,7 @@ func TestRecommandArticlesOneArticleOK(t *testing.T) {
 	basket_name_1 := "basket_name_1"
 	basket_1, err := baskets.CreateBasket(basket_name_1)
 	assert.Nil(t, err)
-	basket_1, err = basket_1.AddArticle(article)
+	basket_1 = basket_1.AddArticle(article)
 	assert.Nil(t, err)
 	basket_1_finished_at := now.Add(-common.ONE_WEEK)
 	basket_1 = basket_1.Finish(basket_1_finished_at)
@@ -69,8 +69,7 @@ func TestRecommandArticlesOneArticleOK(t *testing.T) {
 	basket_name_2 := "basket_name_2"
 	basket_2, err := baskets.CreateBasket(basket_name_2)
 	assert.Nil(t, err)
-	basket_2, err = basket_2.AddArticle(article)
-	assert.Nil(t, err)
+	basket_2 = basket_2.AddArticle(article)
 	basket_2_finished_at := now
 	basket_2 = basket_2.Finish(basket_2_finished_at)
 
